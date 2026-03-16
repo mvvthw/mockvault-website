@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MockVault — Interactive Demo</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #0a0a0a;
+      --bg-surface:    #111111;
+      --bg-elevated:   #1a1a1a;
+      --bg-hover:      #212121;
+      --bg-active:     #2a2a2a;
+      --border:        #1f1f1f;
+      --border-strong: #2e2e2e;
+      --text-primary:  #f0f0f0;
+      --text-secondary:#888888;
+      --text-muted:    #555555;
+      --accent:        #71dc29;
+      --accent-glow:   rgba(113, 220, 41, 0.22);
+      --accent-gradient: linear-gradient(to bottom, #71dc29 0%, #4a9a1a 100%);
+      --success:       #34d399;
+      --error:         #f87171;
+      --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+      --transition: 0.15s ease;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      line-height: 1.4;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app { display: flex; flex-direction: column; height: 100%; overflow: hidden; position: relative; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ── Demo Banner ──────────────────────────────────────── */
+    .demo-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 12px;
+      background: rgba(113, 220, 41, 0.07);
+      border-bottom: 1px solid rgba(113, 220, 41, 0.18);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+      flex-shrink: 0;
+    }
+
+    .demo-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: demo-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes demo-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── Header ───────────────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 12px 14px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .header-logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .logo-img { height: 40px; width: auto; display: block; }
+
+    .header-actions { display: flex; align-items: center; gap: 4px; }
+
+    .icon-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: 16px; line-height: 1;
+    }
+
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(113,220,41,0.08); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .icon-btn.spinning { animation: spin 0.7s linear infinite; }
+
+    /* ── Search ───────────────────────────────────────────── */
+    .search-bar {
+      position: relative;
+      margin: 8px 14px 6px;
+      flex-shrink: 0;
+    }
+
+    .search-icon-wrap {
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 34px; display: flex; justify-content: center; pointer-events: none;
+    }
+
+    .search-icon { width: 14px; height: 14px; color: var(--text-secondary); }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 9px 28px 9px 34px;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(113,220,41,0.18); }
+
+    .clear-search {
+      position: absolute; right: 6px; top: 0; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; background: transparent; border: none;
+      color: var(--text-muted); cursor: pointer; font-size: 10px;
+      transition: color var(--transition);
+    }
+
+    .clear-search:hover { color: var(--text-primary); }
+
+    /* ── Categories ───────────────────────────────────────── */
+    .categories-wrapper {
+      padding: 0 14px; flex-shrink: 0; overflow: hidden; position: relative;
+    }
+
+    .categories-wrapper::before, .categories-wrapper::after {
+      content: ''; position: absolute; top: 0; bottom: 6px; width: 24px;
+      pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1;
+    }
+
+    .categories-wrapper::before { left: 14px; background: linear-gradient(to right, var(--bg-base), transparent); }
+    .categories-wrapper::after  { right: 14px; background: linear-gradient(to left, var(--bg-base), transparent); }
+    .categories-wrapper.scroll-left::before  { opacity: 1; }
+    .categories-wrapper.scroll-right::after  { opacity: 1; }
+
+    .categories {
+      display: flex; gap: 6px; overflow-x: auto;
+      padding-bottom: 6px; scrollbar-width: none;
+    }
+
+    .categories::-webkit-scrollbar { display: none; }
+
+    .category-btn {
+      flex-shrink: 0;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px; font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .category-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+
+    .category-btn.active {
+      background: var(--accent-gradient);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(113,220,41,0.3);
+    }
+
+    /* ── Stats Bar ────────────────────────────────────────── */
+    .stats-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 14px 4px; flex-shrink: 0;
+    }
+
+    .stats-left { display: flex; align-items: center; }
+
+    .count-label { font-size: 10.5px; color: var(--text-muted); font-weight: 500; }
+
+    .clear-filters-btn {
+      margin-left: 8px; padding: 2px 7px; font-size: 10px; font-weight: 600;
+      font-family: inherit; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong); background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all var(--transition);
+    }
+
+    .clear-filters-btn:hover { border-color: var(--error); color: var(--error); }
+
+    .stats-right { display: flex; align-items: center; }
+
+    /* Filter Popout */
+    .filter-popout-wrap {
+      position: relative; display: flex;
+      background: var(--bg-elevated); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); margin-right: 6px;
+    }
+
+    .filter-toggle-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 26px; border: none; border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition); font-size: 15px;
+    }
+
+    .filter-toggle-btn:hover { color: var(--text-primary); }
+    .filter-toggle-btn.has-filter { color: var(--accent); background: var(--bg-active); }
+
+    .filter-popout {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--bg-elevated); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md); padding: 6px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      display: flex; flex-direction: column; min-width: 120px;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.15s, transform 0.15s; z-index: 50;
+    }
+
+    .filter-popout.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+    .color-filter-btn {
+      height: 26px; padding: 0; border-radius: var(--radius-sm); border: none;
+      background: transparent; color: var(--text-secondary); font-family: inherit;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all var(--transition); letter-spacing: 0.3px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .color-filter-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .color-filter-btn.active { background: var(--accent-gradient); color: #fff; }
+
+    .view-toggle {
+      display: flex; background: var(--bg-elevated);
+      border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    }
+
+    .view-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 26px; border: none; border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition); font-size: 16px;
+    }
+
+    .view-btn:hover { color: var(--text-primary); }
+    .view-btn.active { background: var(--bg-active); color: var(--text-primary); }
+
+    /* ── Mockup Container ─────────────────────────────────── */
+    .mockup-container {
+      flex: 1; min-height: 0; overflow-y: auto;
+      padding: 8px 12px 14px; position: relative;
+    }
+
+    .mockup-grid { display: flex; flex-wrap: wrap; align-content: flex-start; }
+
+    .mockup-grid .mockup-card {
+      flex: none;
+      width: calc((100% - 20px) / 3);
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .mockup-grid .mockup-card:nth-child(3n) { margin-right: 0; }
+
+    .mockup-grid.list-mode { display: flex; flex-direction: column; }
+    .mockup-grid.list-mode .mockup-card { width: 100%; margin-right: 0; margin-bottom: 8px; }
+
+    /* ── Cards ────────────────────────────────────────────── */
+    .mockup-card {
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    }
+
+    .mockup-card:hover {
+      border-color: rgba(113,220,41,0.6);
+      box-shadow: 0 0 0 1px rgba(113,220,41,0.35), 0 4px 20px rgba(113,220,41,0.12);
+      transform: translateY(-2px) scale(1.015);
+    }
+
+    .list-mode .mockup-card:hover { transform: translateY(-1px); }
+
+    .mockup-card.placed-flash { animation: placed-flash 0.8s ease forwards; }
+
+    @keyframes placed-flash {
+      0%   { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(113,220,41,0.6), 0 0 30px rgba(113,220,41,0.3); }
+      100% { border-color: var(--border-strong); box-shadow: none; }
+    }
+
+    /* Thumbnail */
+    .card-thumb-wrap { position: relative; width: 100%; isolation: isolate; }
+
+    .card-thumb {
+      width: 100%; height: 130px;
+      object-fit: contain; display: block;
+      background: var(--bg-elevated); padding: 8px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+
+    .card-thumb.loaded { opacity: 1; }
+
+    /* Live color tint for colorable mockups */
+    .card-color-tint {
+      position: absolute; inset: 0;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease, background 0.15s ease;
+    }
+
+    .card-color-tint.active { opacity: 1; }
+
+    /* Colorable Badge */
+    .colorable-badge {
+      display: flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: rgba(113,220,41,0.2); color: var(--accent);
+      border: 1px solid rgba(113,220,41,0.4); flex-shrink: 0;
+    }
+
+    .colorable-badge svg { width: 12px; height: 12px; }
+
+    .card-name-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 24px 7px 7px;
+      background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%);
+      pointer-events: none;
+      display: flex; align-items: flex-end;
+    }
+
+    .card-name {
+      font-size: 9.5px; font-weight: 700; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      flex: 1; min-width: 0; margin-right: 4px;
+    }
+
+    /* Fav button */
+    .fav-btn {
+      position: absolute; top: 5px; right: 5px;
+      width: 22px; height: 22px; border: none; border-radius: 4px;
+      background: rgba(0,0,0,0.55); color: var(--text-secondary);
+      font-size: 13px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 4; opacity: 0;
+      transition: opacity 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .mockup-card:hover .fav-btn { opacity: 1; }
+    .fav-btn.active { color: #fbbf24; opacity: 1; }
+    .fav-btn:hover { background: rgba(0,0,0,0.8); color: #fbbf24; }
+
+    /* List mode fav */
+    .list-mode .fav-btn {
+      position: static; width: 28px; height: 28px;
+      padding: 0; margin: 0; margin-right: 6px; align-self: center;
+      background: transparent; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); opacity: 1; font-size: 13px;
+    }
+
+    .list-mode .fav-btn.active { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+    .list-mode .fav-btn:hover { background: rgba(251,191,36,0.12); color: #fbbf24; }
+
+    /* Place overlay */
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.42);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity var(--transition);
+    }
+
+    .mockup-card:hover .card-overlay { opacity: 1; }
+
+    .place-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 14px;
+      background: var(--accent-gradient); border: none;
+      border-radius: var(--radius-sm); color: #fff;
+      font-family: inherit; font-size: 10.5px; font-weight: 700;
+      cursor: pointer; transition: transform 0.15s; letter-spacing: 0.3px;
+      box-shadow: 0 2px 12px rgba(113,220,41,0.5);
+    }
+
+    .place-btn:hover { transform: scale(1.05); }
+
+    /* List mode */
+    .list-mode .mockup-card { display: flex; align-items: center; padding: 9px 11px; }
+
+    .list-mode .card-thumb-wrap {
+      flex-shrink: 0; width: 44px; height: 44px;
+      border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--bg-elevated); margin-right: 12px;
+    }
+
+    .list-mode .card-thumb { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+    .list-mode .card-name-bar { display: none; }
+    .list-mode .card-overlay { display: none; }
+    .list-mode .card-info { flex: 1; min-width: 0; margin-right: 10px; }
+
+    .list-mode .card-name {
+      flex: none; font-size: 10.5px; font-weight: 600;
+      color: var(--text-primary); white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; letter-spacing: 0.4px; text-transform: uppercase; position: static;
+    }
+
+    .card-name-row { display: flex; align-items: center; min-width: 0; }
+    .card-name-row .card-name { flex: 1; min-width: 0; margin-right: 6px; }
+    .card-category { font-size: 9.5px; color: var(--text-muted); margin-top: 3px; text-transform: capitalize; }
+
+    .list-mode .card-actions { flex-shrink: 0; display: flex; align-items: center; }
+
+    .place-btn-list {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; padding: 0; margin: 0;
+      background: var(--bg-elevated); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm); color: var(--text-secondary);
+      cursor: pointer; transition: all var(--transition); font-size: 15px;
+    }
+
+    .place-btn-list:hover { background: var(--accent-gradient); border-color: var(--accent); color: #fff; }
+
+    /* Empty State */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 40px 20px; text-align: center;
+    }
+
+    .empty-icon svg { width: 44px; height: 44px; color: var(--text-muted); opacity: 0.4; }
+    .empty-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .empty-subtitle { font-size: 10.5px; color: var(--text-muted); line-height: 1.6; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 12px; left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: var(--bg-elevated); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md); padding: 7px 14px;
+      font-size: 11px; font-weight: 500; color: var(--text-primary);
+      white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      opacity: 0; transition: all 0.25s cubic-bezier(0.34,1.4,0.64,1);
+      pointer-events: none; z-index: 999;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--success); color: var(--success); }
+    .toast.error   { border-color: var(--error);   color: var(--error);   }
+
+    /* ── Color Picker ─────────────────────────────────────── */
+    .color-picker-overlay {
+      position: absolute; inset: 0;
+      background: rgba(9,9,11,0.82);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200; opacity: 0; pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .color-picker-overlay.show { opacity: 1; pointer-events: all; }
+
+    .color-picker-panel {
+      background: var(--bg-elevated); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg); padding: 14px;
+      width: 215px; max-width: calc(100% - 28px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.7);
+    }
+
+    /* Live preview with blend overlay */
+    .cp-preview-wrap {
+      position: relative; isolation: isolate;
+      width: 100%; height: 115px;
+      border-radius: 8px; overflow: hidden;
+      margin-bottom: 12px;
+      background: #1a1a1a; border: 1px solid var(--border-strong);
+    }
+
+    .cp-preview-img { width: 100%; height: 100%; object-fit: contain; padding: 8px; display: block; }
+
+    .cp-color-overlay {
+      position: absolute; inset: 0;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      transition: background 0.1s ease;
+    }
+
+    .cp-preview-label {
+      position: absolute; bottom: 5px; left: 0; right: 0; text-align: center;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: rgba(255,255,255,0.45);
+    }
+
+    .color-picker-title {
+      font-size: 10.5px; font-weight: 700; color: var(--text-secondary);
+      letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .color-swatches { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+
+    .color-swatch {
+      width: 26px; height: 26px; border-radius: 6px; cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+    }
+
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.selected { border-color: #fff; transform: scale(1.1); }
+
+    .color-custom-row { display: flex; align-items: center; margin-bottom: 12px; }
+
+    .color-preview-dot {
+      width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
+      margin-right: 8px; border: 1px solid var(--border-strong);
+    }
+
+    .hex-input {
+      flex: 1; min-width: 0; background: var(--bg-surface);
+      border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+      color: var(--text-primary); font-size: 11px; font-family: monospace;
+      padding: 6px 8px; outline: none; transition: border-color var(--transition);
+    }
+
+    .hex-input:focus { border-color: var(--accent); }
+
+    .color-picker-actions { display: flex; gap: 6px; }
+
+    .color-cancel-btn {
+      flex: 1; padding: 7px 0; border-radius: var(--radius-sm);
+      border: 1px solid var(--border-strong); background: transparent;
+      color: var(--text-secondary); font-family: inherit;
+      font-size: 11px; font-weight: 600; cursor: pointer; transition: all var(--transition);
+    }
+
+    .color-cancel-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+    .color-place-btn {
+      flex: 2; padding: 7px 0; border-radius: var(--radius-sm); border: none;
+      background: var(--accent-gradient); color: #fff;
+      font-family: inherit; font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.3px;
+    }
+
+    .color-place-btn:hover { opacity: 0.85; }
+
+    /* ── Mobile / Touch ────────────────────────────────────── */
+    @media (hover: none) and (pointer: coarse) {
+      /* Always show fav buttons — no hover state on touch */
+      .fav-btn { opacity: 0.7; }
+      /* Bigger tap targets for categories */
+      .category-btn { padding: 7px 14px; font-size: 12px; }
+      /* Hex input larger on mobile */
+      .hex-input { font-size: 14px; padding: 8px 10px; }
+      .color-cancel-btn, .color-place-btn { padding: 10px 0; font-size: 12px; }
+      /* Color swatch slightly larger for fingers */
+      .color-swatch { width: 30px; height: 30px; }
+      .color-swatches { gap: 6px; }
+    }
+
+    @media (max-width: 380px) {
+      .color-picker-panel { padding: 12px; }
+      .cp-preview-wrap { height: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Demo Banner -->
+    <div class="demo-banner">
+      <span class="demo-dot"></span>
+      <span id="demoBannerText">Live Demo · Click any mockup to try it</span>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">
+        <img src="../demo-source-file/mockvaultlogo.png" class="logo-img" alt="MockVault">
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="folderBtn" title="Available in Photoshop">&#8943;</button>
+        <button class="icon-btn" id="refreshBtn" title="Refresh">&#8635;</button>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <div class="search-icon-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+          <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search mockups..." autocomplete="off" spellcheck="false">
+      <button class="clear-search" id="clearSearch" style="display:none">✕</button>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-wrapper">
+      <div class="categories" id="categoryTabs">
+        <button class="category-btn active" data-category="all">All</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stats-left">
+        <span id="mockupCount" class="count-label">0 mockups</span>
+        <button class="clear-filters-btn" id="clearFiltersBtn" style="display:none">✕ Clear</button>
+      </div>
+      <div class="stats-right">
+        <div class="filter-popout-wrap" id="filterPopoutWrap">
+          <button class="filter-toggle-btn" id="filterToggleBtn">⚙</button>
+          <div class="filter-popout" id="filterPopout">
+            <button class="color-filter-btn" id="blackBtn" data-filter="black">Black</button>
+            <button class="color-filter-btn" id="whiteBtn" data-filter="white">White</button>
+            <button class="color-filter-btn" id="colorableBtn" data-filter="colorable">Colorable</button>
+          </div>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="gridViewBtn">⊞</button>
+          <button class="view-btn" id="listViewBtn">≡</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mockup Grid -->
+    <div class="mockup-container" id="mockupContainer">
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none">
+            <rect x="8" y="10" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M22 54h20M32 46v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="empty-title">No mockups found</p>
+        <p class="empty-subtitle">Try a different search or filter</p>
+      </div>
+      <div class="mockup-grid" id="mockupGrid"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Color Picker Modal -->
+    <div class="color-picker-overlay" id="colorPickerOverlay">
+      <div class="color-picker-panel">
+        <div class="cp-preview-wrap">
+          <img class="cp-preview-img" id="cpPreviewImg" src="" alt="Preview">
+          <div class="cp-color-overlay" id="cpColorOverlay"></div>
+          <span class="cp-preview-label">Live Color Preview</span>
+        </div>
+        <p class="color-picker-title">Garment Color</p>
+        <div class="color-swatches" id="colorSwatches"></div>
+        <div class="color-custom-row">
+          <div class="color-preview-dot" id="colorPreviewDot"></div>
+          <input type="text" class="hex-input" id="hexInput" maxlength="7" placeholder="#1d4ed8">
+        </div>
+        <div class="color-picker-actions">
+          <button class="color-cancel-btn" id="colorCancelBtn">Cancel</button>
+          <button class="color-place-btn" id="colorPlaceBtn">Place Mockup</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ── Demo Data ─────────────────────────────────────── */
+    const DEMO_MOCKUPS = [
+      { name: "Distressed Hoodie Black",     category: "hoodies", colorType: "black",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/distressedhoodie_black.png"    },
+      { name: "Distressed Hoodie Colorable", category: "hoodies", colorType: "colorable", colorable: true,  thumbUrl: "../demo-source-file/Hoodies/distressedhoodie_colorable.png" },
+      { name: "Distressed Hoodie White",     category: "hoodies", colorType: "white",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/distressedhoodie_white.png"    },
+      { name: "Hoodie Black",                category: "hoodies", colorType: "black",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/hoodie_black.png"               },
+      { name: "Hoodie Colorable",            category: "hoodies", colorType: "colorable", colorable: true,  thumbUrl: "../demo-source-file/Hoodies/hoodie_colorable.png"           },
+      { name: "Hoodie White",                category: "hoodies", colorType: "white",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/hoodie_white.png"               },
+      { name: "Zipup 2 Black",               category: "hoodies", colorType: "black",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/zipup2_black.png"               },
+      { name: "Zipup 2 Colorable",           category: "hoodies", colorType: "colorable", colorable: true,  thumbUrl: "../demo-source-file/Hoodies/zipup2_colorable.png"           },
+      { name: "Zipup 2 White",               category: "hoodies", colorType: "white",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/zipup2_white.png"               },
+      { name: "Zipup Black",                 category: "hoodies", colorType: "black",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/zipup_black.png"                },
+      { name: "Zipup Colorable",             category: "hoodies", colorType: "colorable", colorable: true,  thumbUrl: "../demo-source-file/Hoodies/zipup_colorable.png"            },
+      { name: "Zipup White",                 category: "hoodies", colorType: "white",     colorable: false, thumbUrl: "../demo-source-file/Hoodies/zipup_white.png"                },
+    ];
+
+    const GARMENT_COLORS = [
+      "#ffffff","#e5e5e5","#a3a3a3","#525252","#171717",
+      "#1e3a5f","#1d4ed8","#0284c7","#0d9488","#16a34a",
+      "#65a30d","#ca8a04","#ea580c","#dc2626","#9f1239",
+      "#db2777","#7c3aed","#4c1d95","#92400e","#d4a574",
+    ];
+
+    /* ── State ─────────────────────────────────────────── */
+    let allMockups        = [...DEMO_MOCKUPS];
+    let filteredList      = [];
+    let activeCategory    = "all";
+    let searchQuery       = "";
+    let isListView        = false;
+    let activeColorFilter = null;
+    let favorites         = new Set();
+    let garmentColor      = "#1d4ed8";
+    let colorPickerTarget = null;
+
+    /* ── DOM ───────────────────────────────────────────── */
+    const mockupGrid       = document.getElementById("mockupGrid");
+    const emptyState       = document.getElementById("emptyState");
+    const categoryTabs     = document.getElementById("categoryTabs");
+    const searchInput      = document.getElementById("searchInput");
+    const clearSearch      = document.getElementById("clearSearch");
+    const refreshBtn       = document.getElementById("refreshBtn");
+    const folderBtn        = document.getElementById("folderBtn");
+    const mockupCount      = document.getElementById("mockupCount");
+    const gridViewBtn      = document.getElementById("gridViewBtn");
+    const listViewBtn      = document.getElementById("listViewBtn");
+    const colorableBtn     = document.getElementById("colorableBtn");
+    const blackBtn         = document.getElementById("blackBtn");
+    const whiteBtn         = document.getElementById("whiteBtn");
+    const clearFiltersBtn  = document.getElementById("clearFiltersBtn");
+    const filterToggleBtn  = document.getElementById("filterToggleBtn");
+    const filterPopout     = document.getElementById("filterPopout");
+    const filterPopoutWrap = document.getElementById("filterPopoutWrap");
+    const toast            = document.getElementById("toast");
+    const cpOverlay        = document.getElementById("colorPickerOverlay");
+    const colorSwatches    = document.getElementById("colorSwatches");
+    const colorPreviewDot  = document.getElementById("colorPreviewDot");
+    const hexInput         = document.getElementById("hexInput");
+    const colorCancelBtn   = document.getElementById("colorCancelBtn");
+    const colorPlaceBtn    = document.getElementById("colorPlaceBtn");
+    const cpPreviewImg     = document.getElementById("cpPreviewImg");
+    const cpColorOverlay   = document.getElementById("cpColorOverlay");
+
+    /* ── Helpers ───────────────────────────────────────── */
+    function favKey(m) { return `${m.category}/${m.name}`; }
+
+    function formatName(name) {
+      return name.replace(/[_-]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function cap(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ""; }
+
+    let toastTimer;
+    function showToast(msg, type = "") {
+      clearTimeout(toastTimer);
+      toast.textContent = msg;
+      toast.className = "toast" + (type ? ` ${type}` : "") + " show";
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+    }
+
+    function setColor(hex) {
+      garmentColor = hex;
+      colorPreviewDot.style.background = hex;
+      cpColorOverlay.style.background = hex;
+      hexInput.value = hex;
+      colorSwatches.querySelectorAll(".color-swatch").forEach(s => {
+        s.classList.toggle("selected", s.dataset.color.toLowerCase() === hex.toLowerCase());
+      });
+    }
+
+    const isTouch = () => window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+    /* ── Init ──────────────────────────────────────────── */
+    function init() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("mv_demo_prefs") || "{}");
+        if (saved.isListView !== undefined) isListView = saved.isListView;
+        if (saved.garmentColor) garmentColor = saved.garmentColor;
+        const favSaved = localStorage.getItem("mv_demo_favs");
+        if (favSaved) favorites = new Set(JSON.parse(favSaved));
+      } catch {}
+
+      gridViewBtn.classList.toggle("active", !isListView);
+      listViewBtn.classList.toggle("active", isListView);
+      mockupGrid.classList.toggle("list-mode", isListView);
+
+      bindEvents();
+      renderCategories();
+      renderGrid();
+    }
+
+    function savePrefs() {
+      try {
+        localStorage.setItem("mv_demo_prefs", JSON.stringify({ isListView, garmentColor }));
+        localStorage.setItem("mv_demo_favs", JSON.stringify([...favorites]));
+      } catch {}
+    }
+
+    /* ── Events ────────────────────────────────────────── */
+    function bindEvents() {
+      folderBtn.addEventListener("click", () => {
+        showToast("📁 Folder selection available in the full Photoshop plugin");
+      });
+
+      refreshBtn.addEventListener("click", () => {
+        refreshBtn.classList.add("spinning");
+        setTimeout(() => {
+          refreshBtn.classList.remove("spinning");
+          renderGrid();
+          showToast("✓ Mockups refreshed");
+        }, 600);
+      });
+
+      searchInput.addEventListener("input", () => {
+        searchQuery = searchInput.value.trim().toLowerCase();
+        clearSearch.style.display = searchQuery ? "flex" : "none";
+        renderGrid();
+      });
+
+      clearSearch.addEventListener("click", () => {
+        searchInput.value = ""; searchQuery = "";
+        clearSearch.style.display = "none";
+        renderGrid();
+      });
+
+      gridViewBtn.addEventListener("click", () => {
+        isListView = false;
+        gridViewBtn.classList.add("active"); listViewBtn.classList.remove("active");
+        mockupGrid.classList.remove("list-mode");
+        savePrefs(); renderGrid();
+      });
+
+      listViewBtn.addEventListener("click", () => {
+        isListView = true;
+        listViewBtn.classList.add("active"); gridViewBtn.classList.remove("active");
+        mockupGrid.classList.add("list-mode");
+        savePrefs(); renderGrid();
+      });
+
+      filterToggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        filterPopout.classList.toggle("open");
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!filterPopoutWrap.contains(e.target)) filterPopout.classList.remove("open");
+      });
+
+      [colorableBtn, blackBtn, whiteBtn].forEach(btn => {
+        btn.addEventListener("click", () => {
+          const f = btn.dataset.filter;
+          activeColorFilter = activeColorFilter === f ? null : f;
+          colorableBtn.classList.toggle("active", activeColorFilter === "colorable");
+          blackBtn.classList.toggle("active",     activeColorFilter === "black");
+          whiteBtn.classList.toggle("active",     activeColorFilter === "white");
+          filterToggleBtn.classList.toggle("has-filter", activeColorFilter !== null);
+          filterPopout.classList.remove("open");
+          renderGrid();
+        });
+      });
+
+      clearFiltersBtn.addEventListener("click", () => {
+        activeCategory = "all"; activeColorFilter = null;
+        searchQuery = ""; searchInput.value = "";
+        clearSearch.style.display = "none";
+        [colorableBtn, blackBtn, whiteBtn].forEach(b => b.classList.remove("active"));
+        filterToggleBtn.classList.remove("has-filter");
+        categoryTabs.querySelectorAll(".category-btn").forEach(b =>
+          b.classList.toggle("active", b.dataset.category === "all")
+        );
+        renderGrid();
+      });
+
+      // Color picker
+      colorCancelBtn.addEventListener("click", hideColorPicker);
+      cpOverlay.addEventListener("click", (e) => { if (e.target === cpOverlay) hideColorPicker(); });
+
+      colorPlaceBtn.addEventListener("click", () => {
+        const target = colorPickerTarget;
+        const color = hexInput.value || garmentColor;
+        garmentColor = color;
+        savePrefs();
+        hideColorPicker();
+        placeDemo(target, color);
+      });
+
+      hexInput.addEventListener("input", () => {
+        const val = hexInput.value;
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) setColor(val);
+      });
+    }
+
+    /* ── Categories ────────────────────────────────────── */
+    function renderCategories() {
+      const cats = ["all", ...new Set(allMockups.map(m => m.category))].filter(Boolean);
+      if (favorites.size > 0) cats.splice(1, 0, "favorites");
+
+      categoryTabs.innerHTML = cats.map(cat => {
+        const label = cat === "all" ? "All" : cat === "favorites" ? "★ Saved" : formatName(cat);
+        return `<button class="category-btn${cat === activeCategory ? " active" : ""}" data-category="${cat}">${label}</button>`;
+      }).join("");
+
+      categoryTabs.querySelectorAll(".category-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeCategory = btn.dataset.category;
+          categoryTabs.querySelectorAll(".category-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderGrid();
+        });
+      });
+
+      // Scroll fades
+      const wrapper = document.querySelector(".categories-wrapper");
+      const el = categoryTabs;
+      function updateScroll() {
+        const atStart = el.scrollLeft <= 2;
+        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+        const hasOverflow = el.scrollWidth > el.clientWidth;
+        wrapper.classList.toggle("scroll-left",  hasOverflow && !atStart);
+        wrapper.classList.toggle("scroll-right", hasOverflow && !atEnd);
+      }
+      el.addEventListener("scroll", updateScroll, { passive: true });
+      updateScroll();
+    }
+
+    /* ── Grid ──────────────────────────────────────────── */
+    function renderGrid() {
+      let list = allMockups;
+      if (activeCategory === "favorites")   list = list.filter(m => favorites.has(favKey(m)));
+      else if (activeCategory !== "all")    list = list.filter(m => m.category === activeCategory);
+      if (searchQuery)                      list = list.filter(m => m.name.toLowerCase().includes(searchQuery) || m.category.toLowerCase().includes(searchQuery));
+      if (activeColorFilter)                list = list.filter(m => m.colorType === activeColorFilter);
+
+      filteredList = list;
+      mockupCount.textContent = `${list.length} mockup${list.length !== 1 ? "s" : ""}`;
+
+      const hasFilters = activeCategory !== "all" || activeColorFilter !== null || searchQuery !== "";
+      clearFiltersBtn.style.display = hasFilters ? "inline-flex" : "none";
+
+      if (list.length === 0) {
+        mockupGrid.innerHTML = "";
+        emptyState.style.display = "flex";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      mockupGrid.classList.toggle("list-mode", isListView);
+      mockupGrid.innerHTML = list.map((m, i) => buildCard(m, i)).join("");
+
+      // Load images
+      mockupGrid.querySelectorAll(".mockup-card").forEach(card => {
+        const idx = parseInt(card.dataset.index);
+        const mockup = filteredList[idx];
+        const img = card.querySelector(".card-thumb");
+        if (img && mockup.thumbUrl) {
+          img.addEventListener("load",  () => img.classList.add("loaded"));
+          img.addEventListener("error", () => img.classList.add("loaded"));
+          img.src = mockup.thumbUrl;
+        }
+      });
+
+      // Fav buttons
+      mockupGrid.querySelectorAll(".fav-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const m = filteredList[parseInt(btn.closest(".mockup-card").dataset.index)];
+          const key = favKey(m);
+          if (favorites.has(key)) favorites.delete(key);
+          else favorites.add(key);
+          savePrefs();
+          renderCategories();
+          renderGrid();
+        });
+      });
+
+      // Place buttons
+      mockupGrid.querySelectorAll(".place-btn, .place-btn-list").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handlePlace(filteredList[parseInt(btn.closest(".mockup-card").dataset.index)]);
+        });
+      });
+
+      // Card click/dblclick (touch devices always use single tap)
+      const touch = isTouch();
+      mockupGrid.querySelectorAll(".mockup-card").forEach(card => {
+        if (!isListView) {
+          card.addEventListener("click", () => handlePlace(filteredList[parseInt(card.dataset.index)]));
+        } else {
+          card.addEventListener(touch ? "click" : "dblclick", () => handlePlace(filteredList[parseInt(card.dataset.index)]));
+        }
+      });
+    }
+
+    function buildCard(mockup, index) {
+      const badge = mockup.colorable
+        ? `<span class="colorable-badge"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.2"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="7" cy="4" r="1" fill="currentColor"/><circle cx="9.5" cy="6" r="1" fill="currentColor"/><circle cx="9.2" cy="8.8" r="1.4" fill="currentColor"/></svg></span>`
+        : "";
+      const isFav = favorites.has(favKey(mockup));
+      const star = isFav ? "★" : "☆";
+      const displayName = formatName(mockup.name);
+
+      if (isListView) {
+        return `
+          <div class="mockup-card" data-index="${index}">
+            <div class="card-thumb-wrap">
+              <img class="card-thumb" alt="${displayName}">
+            </div>
+            <div class="card-info">
+              <div class="card-name-row">
+                <div class="card-name">${displayName}</div>
+                ${badge}
+              </div>
+              <div class="card-category">${cap(mockup.category)}</div>
+            </div>
+            <div class="card-actions">
+              <button class="fav-btn${isFav ? " active" : ""}">${star}</button>
+              <button class="place-btn-list">+</button>
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div class="mockup-card" data-index="${index}">
+          <div class="card-thumb-wrap">
+            <img class="card-thumb" alt="${displayName}">
+            ${mockup.colorable ? `<div class="card-color-tint" id="tint-${index}"></div>` : ""}
+            <button class="fav-btn${isFav ? " active" : ""}">${star}</button>
+            <div class="card-name-bar">
+              <div class="card-name">${displayName}</div>
+              ${badge}
+            </div>
+            <div class="card-overlay">
+              <button class="place-btn">+ Place</button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    /* ── Place Logic ───────────────────────────────────── */
+    function handlePlace(mockup) {
+      if (mockup.colorable) {
+        showColorPicker(mockup);
+      } else {
+        placeDemo(mockup, null);
+      }
+    }
+
+    function placeDemo(mockup, color) {
+      // Flash the card
+      mockupGrid.querySelectorAll(".mockup-card").forEach(card => {
+        if (filteredList[parseInt(card.dataset.index)] === mockup) {
+          card.classList.remove("placed-flash");
+          void card.offsetWidth;
+          card.classList.add("placed-flash");
+
+          // Show color tint on colorable cards
+          if (color && !isListView) {
+            const idx = parseInt(card.dataset.index);
+            const tint = document.getElementById(`tint-${idx}`);
+            if (tint) {
+              tint.style.background = color;
+              tint.classList.add("active");
+              setTimeout(() => tint.classList.remove("active"), 2500);
+            }
+          }
+        }
+      });
+
+      const msg = mockup.colorable
+        ? `✓ ${formatName(mockup.name)} — Garment Color layer added`
+        : `✓ ${formatName(mockup.name)} placed & centered`;
+      showToast(msg, "success");
+
+      try {
+        window.parent.postMessage({
+          type: 'mv-placed',
+          name: formatName(mockup.name),
+          thumbUrl: mockup.thumbUrl,
+          color: color || null,
+          colorable: mockup.colorable
+        }, '*');
+      } catch {}
+    }
+
+    /* ── Color Picker ──────────────────────────────────── */
+    function showColorPicker(mockup) {
+      colorPickerTarget = mockup;
+      cpPreviewImg.src = mockup.thumbUrl;
+      cpColorOverlay.style.background = garmentColor;
+
+      colorSwatches.innerHTML = GARMENT_COLORS.map(hex =>
+        `<div class="color-swatch${hex.toLowerCase() === garmentColor.toLowerCase() ? " selected" : ""}" data-color="${hex}" style="background:${hex}"></div>`
+      ).join("");
+
+      colorSwatches.querySelectorAll(".color-swatch").forEach(s => {
+        s.addEventListener("click", () => setColor(s.dataset.color));
+      });
+
+      setColor(garmentColor);
+      cpOverlay.classList.add("show");
+    }
+
+    function hideColorPicker() {
+      cpOverlay.classList.remove("show");
+      colorPickerTarget = null;
+    }
+
+    init();
+
+    // Update hint text for touch devices
+    if (isTouch()) {
+      const bannerText = document.getElementById('demoBannerText');
+      if (bannerText) bannerText.textContent = 'Live Demo · Tap any mockup to try it';
+    }
+  </script>
+</body>
+</html>

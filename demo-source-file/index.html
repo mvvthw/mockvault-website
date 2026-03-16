@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="loading">
+
+    <!-- Initial loader splash -->
+    <div id="pluginLoader" class="plugin-loader">
+      <img src="mockvaultlogo.png" class="loader-logo" alt="MockVault" />
+      <div class="loader-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <p class="loader-label">Loading mockups…</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-logo">
+        <img src="mockvaultlogo.png" class="logo-img" alt="Mockup Hub" />
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn folder-btn" id="folderBtn" title="Select mockups folder">&#8943;</button>
+        <button class="icon-btn refresh-btn" id="refreshBtn" title="Refresh mockups">&#8635;</button>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <div class="search-icon-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+          <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Search mockups..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="clear-search" id="clearSearch" style="display:none">✕</button>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories-wrapper">
+      <div class="categories" id="categoryTabs">
+        <button class="category-btn active" data-category="all">All</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stats-left">
+        <span id="mockupCount" class="count-label">0 mockups</span>
+        <button class="clear-filters-btn" id="clearFiltersBtn" style="display:none">✕ Clear</button>
+      </div>
+      <div class="stats-right">
+        <div class="filter-popout-wrap" id="filterPopoutWrap">
+          <button class="filter-toggle-btn" id="filterToggleBtn" title="Color filters">⚙</button>
+          <div class="filter-popout" id="filterPopout">
+            <button class="color-filter-btn" id="blackBtn" data-filter="black">Black</button>
+            <button class="color-filter-btn" id="whiteBtn" data-filter="white">White</button>
+            <button class="color-filter-btn" id="colorableBtn" data-filter="colorable">Colorable</button>
+          </div>
+        </div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="gridViewBtn" title="Grid view">⊞</button>
+          <button class="view-btn" id="listViewBtn" title="List view">≡</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mockup Grid -->
+    <div class="mockup-container" id="mockupContainer">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="10" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2"/>
+            <path d="M22 54h20M32 46v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M16 28l8-8 6 6 6-6 12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="22" cy="22" r="3" fill="currentColor" opacity="0.4"/>
+          </svg>
+        </div>
+        <p class="empty-title">No mockups found</p>
+        <p class="empty-subtitle">Add images to the<br/><strong>Mockups/</strong> folder in the plugin directory</p>
+      </div>
+      <div class="mockup-grid" id="mockupGrid"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Color Picker Modal -->
+    <div class="color-picker-overlay" id="colorPickerOverlay">
+      <div class="color-picker-panel">
+        <p class="color-picker-title">Garment Color</p>
+        <div class="color-swatches" id="colorSwatches"></div>
+        <div class="color-custom-row">
+          <div class="color-preview-dot" id="colorPreviewDot"></div>
+          <input type="text" class="hex-input" id="hexInput" maxlength="7" spellcheck="false" autocomplete="off" placeholder="#808080" />
+        </div>
+        <div class="color-picker-actions">
+          <button class="color-cancel-btn" id="colorCancelBtn">Cancel</button>
+          <button class="color-place-btn" id="colorPlaceBtn">Place</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

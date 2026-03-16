@@ -1,0 +1,3041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MockVault — Professional Photoshop Mockup Plugin</title>
+  <meta name="description" content="The professional clothing mockup plugin built for Photoshop. Search, apply, and colorize mockups instantly — all without leaving your workspace.">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --accent: #71dc29;
+      --accent-dim: rgba(113, 220, 41, 0.18);
+      --accent-glow: rgba(113, 220, 41, 0.35);
+      --accent-glow-soft: rgba(113, 220, 41, 0.12);
+      --bg: #080808;
+      --bg-2: #0e0e0e;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(113, 220, 41, 0.28);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.55);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(ellipse 55% 35% at 72% 18%, rgba(113,220,41,0.045) 0%, transparent 65%), var(--bg);
+      background-size: 100% 100%, auto;
+      animation: body-shimmer 22s ease-in-out infinite alternate;
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NOISE TEXTURE ─────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── BACKGROUND GRADIENT ────────────────────────────── */
+    @keyframes body-shimmer {
+      0%   { background-position: 72% 18%; }
+      100% { background-position: 50% 38%; }
+    }
+
+    /* ─── BACKGROUND ORBS ───────────────────────────────── */
+    .bg-orbs {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(150px);
+      animation: orb-drift 35s ease-in-out infinite;
+    }
+
+    .bg-orb-1 {
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      top: -160px;
+      right: -80px;
+      opacity: 0.07;
+      animation-delay: 0s;
+    }
+
+    .bg-orb-2 {
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      bottom: 12%;
+      left: -80px;
+      opacity: 0.04;
+      filter: blur(130px);
+      animation-delay: -17s;
+    }
+
+    @keyframes orb-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%  { transform: translate(20px, -25px) scale(1.02); }
+      66%  { transform: translate(-15px, 15px) scale(0.98); }
+    }
+
+    /* ─── SHARED LAYOUT ─────────────────────────────────── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── GLASS BORDER MIXIN ─────────────────────────────── */
+    .glass-border {
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius);
+    }
+
+    .glass-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(
+        135deg,
+        rgba(113, 220, 41, 0.5) 0%,
+        rgba(113, 220, 41, 0.1) 40%,
+        rgba(255, 255, 255, 0.05) 70%,
+        rgba(113, 220, 41, 0.2) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ─── NAV ────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      transition: var(--transition);
+    }
+
+    nav.scrolled {
+      background: rgba(8, 8, 8, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo img {
+      height: 36px;
+      width: auto;
+      display: block;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ─── BUTTONS ────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 24px var(--accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .btn-primary:hover {
+      background: #82e83c;
+      box-shadow: 0 0 40px rgba(113, 220, 41, 0.6), 0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary-lg {
+      font-size: 16px;
+      padding: 15px 32px;
+    }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline-accent {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border-accent);
+    }
+
+    .btn-outline-accent:hover {
+      background: var(--accent-dim);
+      transform: translateY(-1px);
+    }
+
+    /* ─── HERO ───────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-title {
+      font-size: clamp(42px, 5vw, 68px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
+    .hero-title .line-accent {
+      background: linear-gradient(90deg, var(--accent) 0%, #c8ff8a 35%, #a8ff5e 50%, #c8ff8a 65%, var(--accent) 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: title-shimmer 6s linear infinite;
+    }
+
+    .hero-subtitle {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 40px;
+      max-width: 480px;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+
+    .hero-price-label {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hero-price-label span:first-child {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .hero-price-label strong {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .hero-stats {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hero-stat-number {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .hero-stat-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--border);
+    }
+
+    /* ─── HERO PLUGIN FRAME ──────────────────────────────── */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: visible;
+    }
+
+    .hero-plugin-frame {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #0a0a0a;
+      box-shadow:
+        0 0 0 1px rgba(113,220,41,0.35),
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 40px 90px rgba(0,0,0,0.7),
+        0 0 80px rgba(113,220,41,0.12);
+      animation: frame-glow 4s ease-in-out infinite alternate;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    @keyframes frame-glow {
+      0%   { box-shadow: 0 0 0 1px rgba(113,220,41,0.25), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 40px 90px rgba(0,0,0,0.7), 0 0 60px rgba(113,220,41,0.08); }
+      100% { box-shadow: 0 0 0 1px rgba(113,220,41,0.5),  0 0 0 1px rgba(255,255,255,0.04) inset, 0 40px 90px rgba(0,0,0,0.7), 0 0 100px rgba(113,220,41,0.18); }
+    }
+
+    .hero-plugin-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: #111;
+      border-bottom: 1px solid #1e1e1e;
+      flex-shrink: 0;
+    }
+
+    .hero-plugin-chrome-dots {
+      display: flex; gap: 5px;
+    }
+
+    .hero-plugin-chrome-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .hero-plugin-chrome-dot.c-red { background: #ff5f57; }
+
+    .hero-plugin-chrome-title {
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.4); letter-spacing: 0.04em;
+    }
+
+    .hero-plugin-chrome-badge {
+      font-size: 9px; font-weight: 700;
+      color: rgba(255,255,255,0.18); letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .hero-plugin-frame iframe {
+      display: block;
+      width: 100%;
+      height: 600px;
+      border: none;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Transparent overlay blocks all interaction */
+    .hero-plugin-overlay {
+      position: absolute;
+      inset: 36px 0 0; /* below chrome bar */
+      z-index: 10;
+      cursor: default;
+    }
+
+    .hero-float-tag {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.08) inset;
+      border-radius: 100px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      white-space: nowrap;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .hero-float-tag:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.3), 0 0 20px rgba(113,220,41,0.1), 0 1px 0 rgba(255,255,255,0.1) inset;
+    }
+
+    .hero-float-tag-icon {
+      font-size: 15px;
+    }
+
+    .hero-float-tag.tag-1 {
+      top: 12%;
+      left: -6%;
+      animation: float-y 8s ease-in-out infinite;
+    }
+
+    .hero-float-tag.tag-2 {
+      bottom: 24%;
+      right: -6%;
+      animation: float-y 8s ease-in-out infinite;
+      animation-delay: -4s;
+    }
+
+    @keyframes float-y {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ─── DIVIDER / LOGO STRIP ───────────────────────────── */
+    .trust-bar {
+      padding: 22px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+
+    .trust-bar-inner {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      animation: marquee 36s linear infinite;
+    }
+
+    .trust-bar-inner:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .trust-bar-inner { animation: none; }
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 500;
+      flex-shrink: 0;
+      padding: 0 48px;
+    }
+
+    .trust-item svg {
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    .trust-separator {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ─── SECTION HEADERS ────────────────────────────────── */
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .section-tag::before {
+      content: '';
+      display: block;
+      width: 20px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .section-title {
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    .section-header {
+      margin-bottom: 64px;
+    }
+
+    .section-header.centered {
+      text-align: center;
+    }
+
+    .section-header.centered .section-tag {
+      justify-content: center;
+    }
+
+    .section-header.centered .section-subtitle {
+      margin: 0 auto;
+    }
+
+    /* ─── FEATURES ───────────────────────────────────────── */
+    .features {
+      padding: 120px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .feature-card {
+      padding: 32px;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .feature-card:hover::before {
+      background: linear-gradient(
+        135deg,
+        rgba(113, 220, 41, 0.7) 0%,
+        rgba(113, 220, 41, 0.2) 40%,
+        rgba(255, 255, 255, 0.08) 70%,
+        rgba(113, 220, 41, 0.3) 100%
+      );
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .feature-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* Large hero feature card */
+    .feature-card-hero {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .feature-card-hero .feature-desc {
+      font-size: 15px;
+    }
+
+    .feature-hero-image {
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .feature-hero-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Colorable feature card — fills height with swatch strip */
+    .feature-card-colorable {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card-colorable .feature-desc {
+      flex: 1;
+    }
+
+    .colorable-preview {
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .colorable-swatch-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .colorable-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.08);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .colorable-swatch:hover {
+      transform: scale(1.15);
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .colorable-preview-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+
+    /* ─── DEMO SECTION ───────────────────────────────────── */
+    .demo-section {
+      padding: 80px 0 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .demo-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    .demo-content .section-subtitle {
+      margin-bottom: 32px;
+    }
+
+    .demo-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .demo-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      line-height: 1.5;
+    }
+
+    .demo-feat-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* PS Panel wrapper */
+    .demo-panel-wrap {
+      position: relative;
+    }
+
+    .demo-panel-glow {
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(ellipse at 50% 50%, rgba(113,220,41,0.12), transparent 65%);
+      pointer-events: none;
+    }
+
+    /* Fake Photoshop panel chrome */
+    .ps-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      height: 32px;
+      background: #1c1c1c;
+      border-bottom: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+
+    .ps-chrome-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.03em;
+    }
+
+    .ps-chrome-dots {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .ps-chrome-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .ps-chrome-dot.close-dot { background: #ff5f57; }
+
+    .ps-chrome-ps-badge {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    .ps-panel iframe {
+      display: block;
+      width: 100%;
+      height: 524px;
+      border: none;
+      background: #0a0a0a;
+    }
+
+    /* Demo panels row (plugin + canvas side by side) */
+    .demo-panels-row {
+      display: flex;
+      align-items: stretch;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(113,220,41,0.2),
+        0 0 0 1px rgba(255,255,255,0.03) inset,
+        0 32px 80px rgba(0,0,0,0.65),
+        0 0 50px rgba(113,220,41,0.06);
+    }
+
+    .ps-panel {
+      flex-shrink: 0;
+      width: 300px;
+      position: relative;
+      background: #0d0d0d;
+      border-right: 1px solid #1a1a1a;
+    }
+
+    /* ── Photoshop canvas panel ────────────────────────── */
+    .ps-canvas-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #1e1e1e;
+      min-width: 0;
+    }
+
+    .ps-canvas-chrome {
+      display: flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 14px;
+      background: #1c1c1c;
+      border-bottom: 1px solid #111;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .ps-doc-tab {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.02em;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 2px 10px;
+    }
+
+    .ps-canvas-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #3c3c3c;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Subtle checker pattern for PS canvas bg */
+    .ps-canvas-area::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(45deg, rgba(0,0,0,0.08) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,0,0,0.08) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.08) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.08) 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+      pointer-events: none;
+    }
+
+    .ps-document {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      max-height: 340px;
+      background: #ececec;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+
+    .ps-placed-items {
+      position: absolute;
+      inset: 0;
+    }
+
+    /* Each placed mockup item */
+    .ps-item {
+      position: absolute;
+      inset: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    .ps-item.ps-item-entering {
+      opacity: 0;
+      transform: scale(0.88) translateY(-8px);
+    }
+
+    /* Wrapper for the placed mockup image */
+    .ps-img-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ps-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Color overlay — masked to the PNG's own alpha so it never bleeds onto the document */
+    .ps-item-color-overlay {
+      position: absolute;
+      inset: 0;
+      mix-blend-mode: color;
+      pointer-events: none;
+      mask-size: contain;
+      mask-position: center;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: contain;
+      -webkit-mask-position: center;
+      -webkit-mask-repeat: no-repeat;
+      opacity: 0.85;
+    }
+
+    /* Dashed selection border (briefly visible after place) */
+    .ps-selection-border {
+      position: absolute;
+      inset: 6px;
+      border: 1.5px dashed rgba(113,220,41,0.85);
+      border-radius: 1px;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    /* Hint message when canvas is empty */
+    .ps-canvas-hint {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .ps-canvas-hint svg {
+      opacity: 0.25;
+      width: 32px;
+      height: 32px;
+      color: #333;
+    }
+
+    .ps-canvas-hint p {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(0,0,0,0.3);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+
+    /* Layers panel */
+    .ps-layers-panel {
+      height: 148px;
+      background: #1a1a1a;
+      border-top: 1px solid #111;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .ps-layers-header {
+      padding: 5px 10px;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid #111;
+      flex-shrink: 0;
+    }
+
+    .ps-layers-list {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+
+    .ps-layers-list::-webkit-scrollbar { display: none; }
+
+    .ps-layer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 10px;
+      height: 34px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      transition: background 0.2s;
+    }
+
+    .ps-layer:hover { background: rgba(255,255,255,0.04); }
+
+    .ps-layer.ps-layer-new {
+      background: rgba(113,220,41,0.1);
+      animation: layer-flash 0.7s ease forwards;
+    }
+
+    @keyframes layer-flash {
+      0%   { background: rgba(113,220,41,0.18); }
+      100% { background: transparent; }
+    }
+
+    .ps-layer-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 3px;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #ececec;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .ps-layer-thumb-bg {
+      width: 26px;
+      height: 26px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #d0d0d0 50%, #b8b8b8 50%);
+      background-size: 6px 6px;
+    }
+
+    .ps-layer-name {
+      flex: 1;
+      font-size: 10px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ps-layer-bg-name {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .ps-layer-color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .ps-layer-eye {
+      font-size: 11px;
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    .ps-layer-delete {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: rgba(255,255,255,0.25);
+      font-size: 15px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s, color 0.15s;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .ps-layer:hover .ps-layer-delete {
+      opacity: 1;
+    }
+
+    .ps-layer-delete:hover {
+      background: rgba(255, 60, 60, 0.15);
+      color: #ff5f57;
+    }
+
+    @media (max-width: 1100px) {
+      .demo-layout { grid-template-columns: 1fr; gap: 48px; }
+      .ps-panel { width: 300px; }
+    }
+
+    @media (max-width: 800px) {
+      /* Tighten section spacing on mobile */
+      .demo-section { padding: 60px 0 48px; }
+      .demo-layout { gap: 28px; }
+      /* Hide the PS canvas panel — replaced by the mobile canvas modal */
+      .ps-canvas-container { display: none; }
+      .demo-panels-row { border-radius: 14px; overflow: hidden; }
+      .ps-panel { width: 100%; border-right: none; }
+      .ps-panel iframe { height: min(580px, 62vh); }
+    }
+
+    @media (max-width: 480px) {
+      .ps-panel iframe { height: min(520px, 58vh); }
+    }
+
+    /* ── Mobile PS canvas modal (hidden on desktop) ─────── */
+    .mobile-canvas-modal {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+    }
+
+    .mobile-canvas-modal.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .mobile-canvas-modal.show .mcm-sheet {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .mcm-sheet {
+      width: 100%;
+      height: 100%;
+      background: #1e1e1e;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(8px) scale(0.98);
+      opacity: 0;
+      transition: transform 0.35s cubic-bezier(0.34, 1.1, 0.64, 1), opacity 0.25s ease;
+    }
+
+    .mcm-chrome {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px 8px;
+      flex-shrink: 0;
+    }
+
+    .mcm-doc-tab {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      background: #2a2a2a;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 3px 10px;
+      letter-spacing: 0.02em;
+    }
+
+    .mcm-close {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1; padding: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mcm-close:hover { background: rgba(255,60,60,0.2); color: #ff5f57; }
+
+    .mcm-canvas-area {
+      flex: 1;
+      background: #3c3c3c;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* subtle checker */
+    .mcm-canvas-area::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(45deg, rgba(0,0,0,0.07) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0,0,0,0.07) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.07) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.07) 75%);
+      background-size: 10px 10px;
+      background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+      pointer-events: none;
+    }
+
+    .mcm-document {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      max-height: 100%;
+      background: #ececec;
+      border-radius: 2px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+
+    .mcm-placed-items { position: absolute; inset: 0; }
+
+    .mcm-item {
+      position: absolute;
+      inset: 8px;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.4s ease, transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .mcm-item.entering { opacity: 0; transform: scale(0.88) translateY(-8px); }
+
+    .mcm-img-wrap {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      isolation: isolate;
+    }
+
+    .mcm-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain; display: block;
+      position: relative; z-index: 1;
+    }
+
+    .mcm-color-overlay {
+      position: absolute; inset: 0;
+      mix-blend-mode: color;
+      pointer-events: none; z-index: 2;
+      mask-size: contain; mask-position: center; mask-repeat: no-repeat;
+      -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
+      opacity: 0.85;
+    }
+
+    .mcm-selection {
+      position: absolute; inset: 6px;
+      border: 1.5px dashed rgba(113,220,41,0.85);
+      border-radius: 1px;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+
+    .mcm-hint {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .mcm-hint p {
+      font-size: 9px; font-weight: 600;
+      color: rgba(0,0,0,0.3); letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Layers panel */
+    .mcm-layers {
+      flex-shrink: 0;
+      background: #1a1a1a;
+      border-top: 1px solid #111;
+      max-height: 130px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .mcm-layers-header {
+      padding: 5px 10px;
+      font-size: 9px; font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      border-bottom: 1px solid #111;
+      flex-shrink: 0;
+    }
+
+    .mcm-layers-list { overflow-y: auto; scrollbar-width: none; }
+    .mcm-layers-list::-webkit-scrollbar { display: none; }
+
+    .mcm-layer {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 10px; height: 34px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .mcm-layer-thumb {
+      width: 24px; height: 24px; border-radius: 3px;
+      background-size: contain; background-position: center;
+      background-repeat: no-repeat; background-color: #ececec;
+      flex-shrink: 0; border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .mcm-layer-thumb-bg {
+      width: 24px; height: 24px; border-radius: 3px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #d0d0d0 50%, #b8b8b8 50%);
+      background-size: 6px 6px;
+    }
+
+    .mcm-layer-name {
+      flex: 1; font-size: 10px; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .mcm-layer-bg-name { color: rgba(255,255,255,0.28); }
+
+    .mcm-layer-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .mcm-layer-eye { font-size: 10px; opacity: 0.4; flex-shrink: 0; }
+
+    .mcm-layer-new { animation: mcm-flash 0.7s ease forwards; }
+    @keyframes mcm-flash {
+      0%   { background: rgba(113,220,41,0.18); }
+      100% { background: transparent; }
+    }
+
+    @media (max-width: 800px) {
+      .mobile-canvas-modal { display: flex; }
+    }
+
+    /* ─── HOW IT WORKS ───────────────────────────────────── */
+    .how {
+      padding: 120px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .how-card {
+      padding: 36px 28px;
+      border-radius: var(--radius-lg);
+      position: relative;
+    }
+
+    .how-number {
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(180deg, rgba(113, 220, 41, 0.3) 0%, transparent 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: -0.04em;
+    }
+
+    .how-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .how-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ─── WHAT'S INSIDE ──────────────────────────────────── */
+    .whats-inside {
+      padding: 80px 0 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .category-chip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      font-size: 15px;
+      font-weight: 600;
+      transition: var(--transition);
+      cursor: default;
+    }
+
+    .category-chip:hover {
+      background: rgba(255,255,255,0.06);
+      transform: translateY(-2px);
+    }
+
+    .category-chip-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ─── PRICING / CTA ──────────────────────────────────── */
+    .pricing {
+      padding: 80px 0 120px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pricing-card {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 52px 48px;
+      border-radius: 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-card::after {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(113, 220, 41, 0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .pricing-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 28px;
+    }
+
+    .pricing-price {
+      font-size: 80px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      margin-bottom: 0;
+    }
+
+    .pricing-dollar {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: rgba(255,255,255,0.6);
+      vertical-align: top;
+      display: inline-block;
+      margin-top: 14px;
+      margin-right: 1px;
+    }
+
+    .pricing-type {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      letter-spacing: 0.02em;
+    }
+
+    .pricing-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .pricing-features li::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4.5 9l3 3 6-6' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-size: contain;
+    }
+
+    .pricing-cta {
+      width: 100%;
+      justify-content: center;
+      font-size: 16px;
+      padding: 16px 32px;
+    }
+
+    .pricing-note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .pricing-price-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .pricing-cents {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      vertical-align: baseline;
+    }
+
+    .pricing-original {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding-bottom: 12px;
+      gap: 1px;
+    }
+
+    .pricing-was {
+      font-size: 9px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+
+    .pricing-original s {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-decoration-color: rgba(255,255,255,0.25);
+      letter-spacing: -0.01em;
+    }
+
+    /* ─── COUNTDOWN ──────────────────────────────────────────── */
+    .countdown-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 32px;
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      background: rgba(113, 220, 41, 0.06);
+      border: 1px solid rgba(113, 220, 41, 0.2);
+    }
+
+    .countdown-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+
+    .countdown-timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 52px;
+    }
+
+    .countdown-num {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px 12px;
+      min-width: 52px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .countdown-unit-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .countdown-colon {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--accent);
+      opacity: 0.6;
+      padding-bottom: 18px;
+      line-height: 1;
+    }
+
+    .countdown-expired {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ─── TESTIMONIAL ────────────────────────────────────── */
+    .testimonials {
+      padding: 80px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .testimonial-card {
+      padding: 28px;
+      border-radius: var(--radius-lg);
+    }
+
+    .testimonial-stars {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 16px;
+    }
+
+    .star {
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    .testimonial-text {
+      font-size: 15px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #3a8a0e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .author-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .author-role {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ─── FINAL CTA BAND ─────────────────────────────────── */
+    .final-cta {
+      padding: 100px 0;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .final-cta-card {
+      padding: 80px 60px;
+      border-radius: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% -20%, rgba(113, 220, 41, 0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .final-cta-title {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-sub {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    footer {
+      padding: 48px 0 32px;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .footer-logo img {
+      height: 28px;
+      width: auto;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-muted);
+    }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* ─── CUSTOM CURSOR ──────────────────────────────────── */
+    .cursor-glow {
+      position: fixed;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(113, 220, 41, 0.07), transparent 65%);
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s;
+    }
+
+    /* ─── SCROLL REVEAL ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px) scale(0.985);
+      transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      .hero-visual { order: -1; }
+      .hero-plugin-frame { max-width: 360px; }
+      .hero-plugin-frame iframe { height: 480px; }
+      .hero-float-tag.tag-1,
+      .hero-float-tag.tag-2 { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .feature-card-hero { grid-column: span 2; }
+      .how-grid { grid-template-columns: 1fr; gap: 16px; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+      .categories-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 0 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-card-hero { grid-column: span 1; grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .pricing-card { padding: 40px 24px; }
+      .countdown-wrap { padding: 16px 12px; margin: 20px 0 24px; }
+      .countdown-timer { gap: 4px; }
+      .countdown-num { font-size: 24px; padding: 6px 8px; min-width: 40px; }
+      .countdown-unit { min-width: 40px; }
+      .countdown-colon { font-size: 20px; padding-bottom: 14px; }
+      .countdown-unit-label { font-size: 9px; }
+      .final-cta-card { padding: 60px 28px; }
+      .categories-grid { grid-template-columns: 1fr 1fr; }
+      .hero-plugin-frame { max-width: 100%; border-radius: 14px; }
+      .hero-plugin-frame iframe { height: 420px; }
+      .hero-float-tag.tag-2 { display: none; }
+      .hero-stats { gap: 20px; }
+      .hero-float-tag.tag-2 { display: none; }
+    }
+    /* ─── SCROLL PROGRESS BAR ─────────────────────────────── */
+    #scrollProgress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, #71dc29, #a8ff5e, #71dc29);
+      background-size: 200% 100%;
+      animation: pg-shimmer 2s linear infinite;
+      z-index: 201;
+      pointer-events: none;
+      box-shadow: 0 0 10px rgba(113,220,41,0.7), 0 0 3px rgba(113,220,41,0.4);
+      transition: width 0.12s linear;
+    }
+    @keyframes pg-shimmer {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes title-shimmer {
+      0% { background-position: 0% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    /* ─── HERO BADGE GLOW PULSE ─────────────────────────────── */
+    .hero-badge {
+      animation: badge-glow 3.5s ease-in-out infinite alternate;
+    }
+    @keyframes badge-glow {
+      0% { box-shadow: 0 0 0 rgba(113,220,41,0); }
+      100% { box-shadow: 0 0 14px rgba(113,220,41,0.28); }
+    }
+
+    /* ─── CARD CURSOR SPOTLIGHT ─────────────────────────────── */
+    .feature-card,
+    .how-card,
+    .testimonial-card,
+    .category-chip {
+      overflow: hidden;
+    }
+    .feature-card::after,
+    .how-card::after,
+    .testimonial-card::after,
+    .category-chip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(280px circle at var(--mx, -200px) var(--my, -200px), rgba(113,220,41,0.08), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.35s;
+      pointer-events: none;
+    }
+    .feature-card:hover::after,
+    .how-card:hover::after,
+    .testimonial-card:hover::after,
+    .category-chip:hover::after {
+      opacity: 1;
+    }
+
+    /* ─── ANIMATED GLASS BORDER ─────────────────────────────── */
+    @property --border-angle {
+      syntax: '<angle>';
+      initial-value: 135deg;
+      inherits: false;
+    }
+    .glass-border::before {
+      background: linear-gradient(
+        var(--border-angle),
+        rgba(113, 220, 41, 0.5) 0%,
+        rgba(113, 220, 41, 0.1) 40%,
+        rgba(255, 255, 255, 0.05) 70%,
+        rgba(113, 220, 41, 0.2) 100%
+      );
+      animation: border-rotate 9s linear infinite;
+    }
+    @keyframes border-rotate {
+      to { --border-angle: 495deg; }
+    }
+
+    /* ─── SECTION ACCENT SEPARATOR LINES ───────────────────── */
+    .features::before,
+    .testimonials::before,
+    .pricing::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: min(920px, 90%);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(113,220,41,0.15) 20%, rgba(113,220,41,0.35) 50%, rgba(113,220,41,0.15) 80%, transparent);
+      pointer-events: none;
+    }
+
+    /* ─── HOW-IT-WORKS NUMBER HOVER GLOW ───────────────────── */
+    .how-number { transition: filter 0.35s ease; }
+    .how-card:hover .how-number {
+      filter: brightness(2.4) drop-shadow(0 0 10px rgba(113,220,41,0.3));
+    }
+
+    /* ─── CATEGORY CHIP ICON BOUNCE ─────────────────────────── */
+    .category-chip-icon {
+      transition: transform 0.32s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+    .category-chip:hover .category-chip-icon {
+      transform: translateY(-3px) scale(1.14);
+    }
+
+    /* ─── TESTIMONIAL AVATAR GLOW ───────────────────────────── */
+    .author-avatar { transition: box-shadow 0.3s ease; }
+    .testimonial-card:hover .author-avatar {
+      box-shadow: 0 0 20px rgba(113,220,41,0.38), 0 0 6px rgba(113,220,41,0.18);
+    }
+
+    /* ─── PRICING CARD TOP GLOW PULSE ───────────────────────── */
+    .pricing-card::after {
+      animation: pricing-pulse 5s ease-in-out infinite alternate;
+    }
+    @keyframes pricing-pulse {
+      0% { opacity: 0.65; transform: translateX(-50%) scale(0.92); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.18); }
+    }
+
+    /* ─── PRICING CTA PULSE RINGS ───────────────────────────── */
+    .pricing-cta {
+      position: relative;
+    }
+    .pricing-cta::before,
+    .pricing-cta::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 100px;
+      border: 1.5px solid rgba(113,220,41,0.4);
+      animation: cta-pulse-ring 2.8s ease-out infinite;
+      pointer-events: none;
+    }
+    .pricing-cta::after {
+      animation-delay: 1.4s;
+    }
+    @keyframes cta-pulse-ring {
+      0%   { transform: scale(1);    opacity: 0.65; }
+      100% { transform: scale(1.5);  opacity: 0; }
+    }
+
+    /* ─── COUNTDOWN DIGIT TICK ──────────────────────────────── */
+    @keyframes digit-tick {
+      0%  { transform: translateY(0); opacity: 1; }
+      25% { transform: translateY(-6px); opacity: 0; }
+      26% { transform: translateY(6px);  opacity: 0; }
+      100%{ transform: translateY(0); opacity: 1; }
+    }
+    .countdown-num.tick {
+      animation: digit-tick 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* ─── FINAL CTA GLOW PULSE ──────────────────────────────── */
+    .final-cta-card::after {
+      animation: final-glow 6s ease-in-out infinite alternate;
+    }
+    @keyframes final-glow {
+      0%   { opacity: 0.65; transform: scaleX(0.88); }
+      100% { opacity: 1;    transform: scaleX(1.12); }
+    }
+
+    /* ─── FEATURE ICON SUBTLE BOUNCE ON HOVER ──────────────── */
+    .feature-icon { transition: transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1); }
+    .feature-card:hover .feature-icon { transform: translateY(-3px) scale(1.08); }
+
+    /* ─── SECTION TAG LINE GROW ─────────────────────────────── */
+    .section-tag::before {
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .visible .section-tag::before,
+    .reveal.visible .section-tag::before {
+      width: 24px;
+    }
+    /* Start width at 0 for sections that have section-tag inside a .reveal */
+    .reveal .section-tag::before {
+      width: 0;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div id="scrollProgress"></div>
+
+  <!-- Cursor Glow -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- Background Orbs -->
+  <div class="bg-orbs">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <!-- ─── NAV ─────────────────────────────────────────────── -->
+  <nav id="navbar">
+    <div class="container">
+      <div class="nav-inner">
+        <a class="nav-logo" href="#">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#demo">Demo</a></li>
+          <li><a href="#whats-inside">Mockups</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+
+        <div class="nav-cta">
+          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary" target="_blank" rel="noopener">
+            Get MockVault
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─────────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="container">
+      <div class="hero-grid">
+
+        <!-- Left Content -->
+        <div class="hero-content">
+          <div class="hero-badge reveal">
+            <span class="hero-badge-dot"></span>
+            Photoshop Plugin — Available Now
+          </div>
+
+          <h1 class="hero-title reveal reveal-delay-1">
+            Every Mockup<br>
+            You Need.<br>
+            <span class="line-accent">Right Inside PS.</span>
+          </h1>
+
+          <p class="hero-subtitle reveal reveal-delay-2">
+            MockVault gives you instant access to a professional library of clothing mockups — searchable, colorable, and ready to use without ever leaving Photoshop.
+          </p>
+
+          <div class="hero-actions reveal reveal-delay-3">
+            <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+              Get MockVault Now
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <div class="hero-price-label">
+              <span>Launch price</span>
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <strong>$54.99</strong>
+                <s style="font-size:14px;font-weight:500;color:var(--text-dim);">$74.99</s>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-stats reveal reveal-delay-4">
+            <div class="hero-stat">
+              <span class="hero-stat-number">50+</span>
+              <span class="hero-stat-label">Mockups</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+              <span class="hero-stat-number">∞</span>
+              <span class="hero-stat-label">Categories</span>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+              <span class="hero-stat-number">1-click</span>
+              <span class="hero-stat-label">Apply</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Plugin UI (non-interactive showcase) -->
+        <div class="hero-visual reveal reveal-delay-2">
+          <div class="hero-plugin-frame">
+            <div class="hero-plugin-chrome">
+              <div class="hero-plugin-chrome-dots">
+                <div class="hero-plugin-chrome-dot c-red"></div>
+                <div class="hero-plugin-chrome-dot"></div>
+                <div class="hero-plugin-chrome-dot"></div>
+              </div>
+              <span class="hero-plugin-chrome-title">MockVault</span>
+              <span class="hero-plugin-chrome-badge">Plugin</span>
+            </div>
+            <iframe
+              src="demo/index.html"
+              title="MockVault Plugin Preview"
+              scrolling="no"
+              tabindex="-1"
+              aria-hidden="true"
+            ></iframe>
+            <div class="hero-plugin-overlay"></div>
+          </div>
+          <div class="hero-float-tag tag-1">
+            <span class="hero-float-tag-icon">⚡</span>
+            Instant Search
+          </div>
+          <div class="hero-float-tag tag-2">
+            <span class="hero-float-tag-icon">🎨</span>
+            Colorable Mockups
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TRUST BAR ─────────────────────────────────────────── -->
+  <div class="trust-bar" aria-label="Features">
+    <div class="trust-bar-inner">
+      <!-- Original set -->
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M5 9l3 3 5-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Native Photoshop Plugin</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 5v4l2.5 2.5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>One-Time Purchase</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Professional Quality</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 15V7M9 15V3M15 15v-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Constantly Growing</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Instant Download</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M9 3v12" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Unlimited Categories</div>
+      <div class="trust-separator"></div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Colorable Mockups</div>
+      <div class="trust-separator"></div>
+      <!-- Duplicate for seamless loop (aria-hidden) -->
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="16" height="16" rx="3" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M5 9l3 3 5-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Native Photoshop Plugin</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 5v4l2.5 2.5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>One-Time Purchase</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Professional Quality</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 15V7M9 15V3M15 15v-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Constantly Growing</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Instant Download</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M9 3v12" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Unlimited Categories</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="3" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 1v2M9 15v2M1 9h2M15 9h2" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Colorable Mockups</div>
+      <div class="trust-separator" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- ─── FEATURES ──────────────────────────────────────────── -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">Features</div>
+        <h2 class="section-title">Built for speed.<br>Designed for pros.</h2>
+        <p class="section-subtitle">Everything you need to present your apparel designs without the friction.</p>
+      </div>
+
+      <div class="features-grid">
+
+        <!-- Big card with image -->
+        <div class="feature-card feature-card-hero glass-border reveal">
+          <div>
+            <div class="feature-icon">🗂️</div>
+            <h3 class="feature-title">Massive Mockup Library</h3>
+            <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — all organized, searchable, and accessible in a single panel. No more browsing folders or hunting down files.</p>
+          </div>
+          <div class="feature-hero-image">
+            <img src="brand_assets/mockvaultui.png" alt="MockVault library UI">
+          </div>
+        </div>
+
+        <!-- Small cards -->
+        <div class="feature-card feature-card-colorable glass-border reveal reveal-delay-1">
+          <div class="feature-icon">🎨</div>
+          <h3 class="feature-title">Colorable Mockups</h3>
+          <p class="feature-desc">Push your presentations further with fully colorable variants. Change garment colors without rebuilding anything — just pick and go.</p>
+          <div class="colorable-preview">
+            <span class="colorable-preview-label">Garment colors</span>
+            <div class="colorable-swatch-row">
+              <div class="colorable-swatch" style="background:#1a1a1a;"></div>
+              <div class="colorable-swatch" style="background:#f0f0f0; border-color:rgba(255,255,255,0.18);"></div>
+              <div class="colorable-swatch" style="background:#1e3a5f;"></div>
+              <div class="colorable-swatch" style="background:#2d5016;"></div>
+              <div class="colorable-swatch" style="background:#6b2a2a;"></div>
+              <div class="colorable-swatch" style="background:#5a3d7a;"></div>
+              <div class="colorable-swatch" style="background:#8b6914;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-card glass-border reveal">
+          <div class="feature-icon">⚡</div>
+          <h3 class="feature-title">Photoshop Native</h3>
+          <p class="feature-desc">Works directly as a Photoshop plugin. No exports, no context switching — your mockup library lives right inside your workspace.</p>
+        </div>
+
+        <div class="feature-card glass-border reveal reveal-delay-1">
+          <div class="feature-icon">🔍</div>
+          <h3 class="feature-title">Smart Search & Filters</h3>
+          <p class="feature-desc">Find exactly the mockup you need in seconds. Filter by category, search by name, and switch between grid and list views effortlessly.</p>
+        </div>
+
+        <div class="feature-card glass-border reveal reveal-delay-2">
+          <div class="feature-icon">📦</div>
+          <h3 class="feature-title">Always Expanding</h3>
+          <p class="feature-desc">New mockups are added regularly. Your one-time purchase grows with every update — you buy it once and keep getting more.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── INTERACTIVE DEMO ──────────────────────────────────── -->
+  <section class="demo-section" id="demo">
+    <div class="container">
+      <div class="demo-layout">
+
+        <!-- Left: Context -->
+        <div class="demo-content">
+          <div class="section-tag reveal">Try it yourself</div>
+          <h2 class="section-title reveal reveal-delay-1">
+            The real plugin.<br>
+            <span style="background:linear-gradient(90deg,#71dc29,#a8ff5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Live in your browser.</span>
+          </h2>
+          <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:32px;">
+            This is the actual MockVault UI — not a screenshot. Search, filter, switch views, save favorites, and use the color picker to see live garment colorization.
+          </p>
+
+          <ul class="demo-features-list reveal reveal-delay-2">
+            <li>
+              <span class="demo-feat-icon">🔍</span>
+              <span>Type in the search bar to filter mockups in real time</span>
+            </li>
+            <li>
+              <span class="demo-feat-icon">🎨</span>
+              <span>Click a <strong style="color:var(--accent)">colorable</strong> mockup and pick a garment color — see it applied live</span>
+            </li>
+            <li>
+              <span class="demo-feat-icon">⊞</span>
+              <span>Toggle between grid and list view with the buttons top-right</span>
+            </li>
+            <li>
+              <span class="demo-feat-icon">★</span>
+              <span>Hover any card and star it to save it to your favorites</span>
+            </li>
+          </ul>
+
+          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary reveal reveal-delay-3" target="_blank" rel="noopener">
+            Get the Full Plugin — $54.99
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+
+        <!-- Right: Plugin Panel + PS Canvas -->
+        <div class="demo-panel-wrap reveal reveal-delay-1">
+          <div class="demo-panel-glow"></div>
+          <div class="demo-panels-row">
+
+            <!-- MockVault plugin panel -->
+            <div class="ps-panel">
+              <div class="ps-chrome">
+                <div class="ps-chrome-dots">
+                  <div class="ps-chrome-dot close-dot"></div>
+                  <div class="ps-chrome-dot"></div>
+                  <div class="ps-chrome-dot"></div>
+                </div>
+                <span class="ps-chrome-title">MockVault</span>
+                <span class="ps-chrome-ps-badge">Plugin</span>
+              </div>
+              <iframe
+                src="demo/index.html"
+                id="demoFrame"
+                title="MockVault Interactive Demo"
+                scrolling="no"
+                loading="lazy"
+              ></iframe>
+            </div>
+
+            <!-- Fake Photoshop canvas -->
+            <div class="ps-canvas-container">
+              <div class="ps-canvas-chrome">
+                <span class="ps-doc-tab">Untitled-1.psd @ 100%</span>
+              </div>
+              <div class="ps-canvas-area">
+                <div class="ps-document" id="psDocument">
+                  <div class="ps-placed-items" id="psPlacedItems"></div>
+                  <div class="ps-canvas-hint" id="psHint">
+                    <svg viewBox="0 0 32 32" fill="none">
+                      <rect x="4" y="4" width="24" height="24" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M4 20l6-6 5 5 4-4 9 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="11" cy="11" r="2.5" fill="currentColor" opacity="0.4"/>
+                    </svg>
+                    <p>Click a mockup in the panel</p>
+                  </div>
+                </div>
+              </div>
+              <div class="ps-layers-panel">
+                <div class="ps-layers-header">Layers</div>
+                <div class="ps-layers-list" id="psLayersList">
+                  <div class="ps-layer">
+                    <div class="ps-layer-thumb-bg"></div>
+                    <span class="ps-layer-name ps-layer-bg-name">Background</span>
+                    <span class="ps-layer-eye">👁</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mobile PS canvas modal — overlays the demo box on mobile only -->
+            <div class="mobile-canvas-modal" id="mobileCanvasModal">
+              <div class="mcm-sheet">
+                <div class="mcm-chrome">
+                  <span class="mcm-doc-tab">Untitled-1.psd @ 100%</span>
+                  <button class="mcm-close" id="mcmClose">×</button>
+                </div>
+                <div class="mcm-canvas-area">
+                  <div class="mcm-document">
+                    <div class="mcm-placed-items" id="mcmPlacedItems"></div>
+                    <div class="mcm-hint" id="mcmHint">
+                      <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+                        <rect x="4" y="4" width="24" height="24" rx="2" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>
+                        <path d="M4 20l6-6 5 5 4-4 9 9" stroke="rgba(0,0,0,0.25)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <p>Tap a mockup to place it</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mcm-layers">
+                  <div class="mcm-layers-header">Layers</div>
+                  <div class="mcm-layers-list" id="mcmLayersList">
+                    <div class="mcm-layer">
+                      <div class="mcm-layer-thumb-bg"></div>
+                      <span class="mcm-layer-name mcm-layer-bg-name">Background</span>
+                      <span class="mcm-layer-eye">👁</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS ──────────────────────────────────────── -->
+  <section class="how" id="how-it-works">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <div class="section-tag">How It Works</div>
+        <h2 class="section-title">From install to mockup<br>in under a minute.</h2>
+      </div>
+
+      <div class="how-grid">
+        <div class="how-card glass-border reveal">
+          <div class="how-number">01</div>
+          <h3 class="how-title">Install the Plugin</h3>
+          <p class="how-desc">Download MockVault and install it as a Photoshop plugin in just a few clicks. It shows up right in your plugins panel.</p>
+        </div>
+        <div class="how-card glass-border reveal reveal-delay-1">
+          <div class="how-number">02</div>
+          <h3 class="how-title">Browse & Search</h3>
+          <p class="how-desc">Open the MockVault panel, search for the garment you need, and filter by category — hoodies, tees, pants, and more.</p>
+        </div>
+        <div class="how-card glass-border reveal reveal-delay-2">
+          <div class="how-number">03</div>
+          <h3 class="how-title">Apply & Design</h3>
+          <p class="how-desc">Click a mockup to apply it instantly. Place your design, adjust colors if needed, and export. Done — in minutes, not hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── WHAT'S INSIDE ─────────────────────────────────────── -->
+  <section class="whats-inside" id="whats-inside">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="section-tag">The Library</div>
+        <h2 class="section-title">Every garment<br>you present.</h2>
+        <p class="section-subtitle">MockVault supports unlimited categories based on your folder structure. 4 categories included out of the box — and you can add as many more as you need.</p>
+      </div>
+
+      <div class="categories-grid reveal">
+        <div class="category-chip glass-border">
+          <div class="category-chip-icon">🧥</div>
+          Hoodies
+        </div>
+        <div class="category-chip glass-border">
+          <div class="category-chip-icon">👕</div>
+          T-Shirts
+        </div>
+        <div class="category-chip glass-border">
+          <div class="category-chip-icon">👚</div>
+          Longsleeves
+        </div>
+        <div class="category-chip glass-border">
+          <div class="category-chip-icon">👖</div>
+          Pants
+        </div>
+        <div class="category-chip glass-border" style="grid-column: span 2;">
+          <div class="category-chip-icon">🎨</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;">Colorable Variants</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Push designs further with recolorable garments</div>
+          </div>
+        </div>
+        <div class="category-chip glass-border" style="grid-column: span 2;">
+          <div class="category-chip-icon">✨</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;">Distressed Variants</div>
+            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Vintage & worn-in aesthetics for streetwear brands</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TESTIMONIALS ──────────────────────────────────────── -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <div class="section-tag">Reviews</div>
+        <h2 class="section-title">Designers love it.</h2>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card glass-border reveal">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="testimonial-text">"MockVault completely changed how I present my apparel clients. It's in Photoshop, it's fast, and the quality is insane."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">JM</div>
+            <div>
+              <div class="author-name">Jordan M.</div>
+              <div class="author-role">Apparel Designer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass-border reveal reveal-delay-1">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="testimonial-text">"The colorable mockups are a game changer. I can show clients multiple colorways in minutes instead of hours."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">SR</div>
+            <div>
+              <div class="author-name">Sofia R.</div>
+              <div class="author-role">Brand Identity Designer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card glass-border reveal reveal-delay-2">
+          <div class="testimonial-stars">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="testimonial-text">"Finally a mockup plugin that doesn't feel like an afterthought. The UI is clean, the mockups are excellent, worth every penny."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">DK</div>
+            <div>
+              <div class="author-name">Daniel K.</div>
+              <div class="author-role">Streetwear Designer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRICING ───────────────────────────────────────────── -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-title">One price. Forever.</h2>
+        <p class="section-subtitle">No subscriptions. No renewals. Pay once and get every future update included.</p>
+      </div>
+
+      <div class="pricing-card glass-border reveal">
+        <div class="pricing-label">
+          🔥 Launch Sale — Limited Time
+        </div>
+
+        <div class="pricing-price-row">
+          <div class="pricing-price">
+            <span class="pricing-dollar">$</span>54<span class="pricing-cents">.99</span>
+          </div>
+          <div class="pricing-original">
+            <span class="pricing-was">Was</span>
+            <s>$74.99</s>
+          </div>
+        </div>
+        <p class="pricing-type">One-time purchase &nbsp;·&nbsp; Lifetime access &nbsp;·&nbsp; All updates included</p>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-wrap">
+          <div class="countdown-label">Sale ends in</div>
+          <div class="countdown-timer" id="countdown">
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-days">00</span>
+              <span class="countdown-unit-label">days</span>
+            </div>
+            <span class="countdown-colon">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-hours">00</span>
+              <span class="countdown-unit-label">hrs</span>
+            </div>
+            <span class="countdown-colon">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-mins">00</span>
+              <span class="countdown-unit-label">min</span>
+            </div>
+            <span class="countdown-colon">:</span>
+            <div class="countdown-unit">
+              <span class="countdown-num" id="cd-secs">00</span>
+              <span class="countdown-unit-label">sec</span>
+            </div>
+          </div>
+        </div>
+
+        <ul class="pricing-features">
+          <li>50+ professional clothing mockups</li>
+          <li>Hoodies, Tees, Longsleeves & Pants</li>
+          <li>Colorable & distressed variants</li>
+          <li>Native Photoshop plugin panel</li>
+          <li>Smart search & category filters</li>
+          <li>All future mockup updates free</li>
+        </ul>
+
+        <a
+          href="https://mvvthw.gumroad.com/l/mockvault?wanted=true"
+          class="btn btn-primary pricing-cta"
+          target="_blank"
+          rel="noopener"
+        >
+          Buy MockVault — $54.99
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <p class="pricing-note">Secure checkout via Gumroad · Instant download · Price returns to $74.99 after sale</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FINAL CTA ─────────────────────────────────────────── -->
+  <section class="final-cta">
+    <div class="container">
+      <div class="final-cta-card glass-border reveal">
+        <h2 class="final-cta-title">
+          Stop hunting for mockups.<br>
+          <span style="background: linear-gradient(90deg, #71dc29, #a8ff5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Start designing faster.</span>
+        </h2>
+        <p class="final-cta-sub">MockVault is the last mockup tool you'll ever need inside Photoshop.</p>
+        <div class="final-cta-actions">
+          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+            Get MockVault — $54.99
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <span style="font-size:13px;color:var(--text-dim);">One-time · No subscription · <s style="opacity:0.5;">$74.99</s></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────────── -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a class="footer-logo" href="#">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+
+        <ul class="footer-links">
+          <li><a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" target="_blank" rel="noopener">Buy Now</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+
+        <p class="footer-copy">© 2026 MockVault. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── SCRIPTS ───────────────────────────────────────────── -->
+  <script>
+    // ─── NAV SCROLL ────────────────────────────────────────────
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 30) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // ─── CURSOR GLOW ───────────────────────────────────────────
+    const cursorGlow = document.getElementById('cursorGlow');
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateCursor() {
+      glowX += (mouseX - glowX) * 0.08;
+      glowY += (mouseY - glowY) * 0.08;
+      cursorGlow.style.left = glowX + 'px';
+      cursorGlow.style.top = glowY + 'px';
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+
+    // ─── SCROLL REVEAL ─────────────────────────────────────────
+    const reveals = document.querySelectorAll('.reveal');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -40px 0px'
+    });
+
+    reveals.forEach(el => observer.observe(el));
+
+    // ─── SCROLL PROGRESS BAR ───────────────────────────────────
+    const progressBar = document.getElementById('scrollProgress');
+    window.addEventListener('scroll', () => {
+      const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      progressBar.style.width = (Math.min(pct, 1) * 100) + '%';
+    }, { passive: true });
+
+    // ─── CARD CURSOR SPOTLIGHT ─────────────────────────────────
+    document.querySelectorAll('.feature-card, .how-card, .testimonial-card, .category-chip').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.setProperty('--mx', '-200px');
+        card.style.setProperty('--my', '-200px');
+      });
+    });
+
+    // ─── STAGGERED GRID REVEALS ────────────────────────────────
+    // Feature cards (3 small ones — big card already has stagger)
+    document.querySelectorAll('.features-grid .feature-card').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.09}s`;
+    });
+    // Testimonial cards
+    document.querySelectorAll('.testimonials-grid .testimonial-card').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.11}s`;
+    });
+    // How cards
+    document.querySelectorAll('.how-grid .how-card').forEach((el, i) => {
+      el.style.transitionDelay = `${i * 0.13}s`;
+    });
+
+    // ─── HERO PLUGIN FRAME PARALLAX (desktop only) ─────────────
+    (function() {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const frame = document.querySelector('.hero-plugin-frame');
+      const visual = document.querySelector('.hero-visual');
+      if (!frame || !visual) return;
+
+      let targetX = 0, targetY = 0, currX = 0, currY = 0;
+      let rafId = null;
+      let inside = false;
+
+      visual.addEventListener('mouseenter', () => { inside = true; });
+      visual.addEventListener('mouseleave', () => {
+        inside = false;
+        targetX = 0; targetY = 0;
+      });
+
+      visual.addEventListener('mousemove', (e) => {
+        const rect = visual.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = (e.clientX - cx) / (rect.width / 2);   // -1 → 1
+        const dy = (e.clientY - cy) / (rect.height / 2);  // -1 → 1
+        targetX = dy * -7;   // rotateX: tilt up/down
+        targetY = dx * 9;    // rotateY: tilt left/right
+      });
+
+      function tick() {
+        currX += (targetX - currX) * 0.08;
+        currY += (targetY - currY) * 0.08;
+        frame.style.transform = `perspective(900px) rotateX(${currX}deg) rotateY(${currY}deg)`;
+        rafId = requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+
+    // ─── PS CANVAS — postMessage receiver ──────────────────────
+    window.addEventListener('message', (e) => {
+      if (!e.data || e.data.type !== 'mv-placed') return;
+      const { name, thumbUrl, color, colorable } = e.data;
+      const imgSrc = thumbUrl.replace(/^\.\.\//, '');
+      addToCanvas({ name, imgSrc, color: color || null, colorable });
+      // On mobile the canvas is hidden — show a toast instead
+      if (window.innerWidth <= 800) {
+        showMobilePlaceToast({ name, imgSrc, color: color || null, colorable });
+      }
+    });
+
+    // ── Mobile PS canvas modal ──────────────────────────────────
+    const _mcmModal = document.getElementById('mobileCanvasModal');
+    let _mcmDismissTimer;
+
+    function mcmHide() {
+      _mcmModal.classList.remove('show');
+      clearTimeout(_mcmDismissTimer);
+    }
+
+    document.getElementById('mcmClose').addEventListener('click', mcmHide);
+
+    let _mcmLayerId = 0;
+
+    function showMobilePlaceToast({ name, imgSrc, color, colorable }) {
+      // Open the modal, auto-dismiss after 3.5s
+      _mcmModal.classList.add('show');
+      clearTimeout(_mcmDismissTimer);
+      _mcmDismissTimer = setTimeout(mcmHide, 3500);
+
+      // Hide hint
+      const hint = document.getElementById('mcmHint');
+      if (hint) hint.style.opacity = '0';
+
+      // Add/replace item on canvas (replace previous for simplicity on small screen)
+      const container = document.getElementById('mcmPlacedItems');
+      container.innerHTML = ''; // replace with latest
+      const el = document.createElement('div');
+      el.className = 'mcm-item entering';
+      el.innerHTML = `
+        <div class="mcm-img-wrap">
+          <img src="${imgSrc}" alt="${name}">
+          ${color ? `<div class="mcm-color-overlay" style="background:${color}; mask-image:url('${imgSrc}'); -webkit-mask-image:url('${imgSrc}');"></div>` : ''}
+        </div>
+        <div class="mcm-selection"></div>
+      `;
+      container.appendChild(el);
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('entering')));
+      setTimeout(() => { const s = el.querySelector('.mcm-selection'); if (s) s.style.opacity = '0'; }, 1400);
+
+      // Add layer entry (keep history)
+      const layersList = document.getElementById('mcmLayersList');
+      const layer = document.createElement('div');
+      layer.className = 'mcm-layer mcm-layer-new';
+      layer.innerHTML = `
+        <div class="mcm-layer-thumb" style="background-image:url('${imgSrc}')"></div>
+        <span class="mcm-layer-name">${name}</span>
+        ${colorable && color ? `<span class="mcm-layer-dot" style="background:${color}"></span>` : ''}
+        <span class="mcm-layer-eye">👁</span>
+      `;
+      layersList.insertBefore(layer, layersList.firstChild);
+      setTimeout(() => layer.classList.remove('mcm-layer-new'), 800);
+    }
+
+    let _layerId = 0;
+
+    function addToCanvas({ name, imgSrc, color, colorable }) {
+      const hint = document.getElementById('psHint');
+      if (hint) hint.style.opacity = '0';
+
+      const id = ++_layerId;
+
+      // Add mockup to the document
+      const container = document.getElementById('psPlacedItems');
+      const el = document.createElement('div');
+      el.className = 'ps-item ps-item-entering';
+      el.dataset.layerId = id;
+      el.innerHTML = `
+        <div class="ps-img-wrap">
+          <img src="${imgSrc}" alt="${name}">
+          ${color ? `<div class="ps-item-color-overlay" style="background:${color}; mask-image:url('${imgSrc}'); -webkit-mask-image:url('${imgSrc}');"></div>` : ''}
+        </div>
+        <div class="ps-selection-border"></div>
+      `;
+      container.appendChild(el);
+
+      // Trigger enter animation
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.remove('ps-item-entering');
+      }));
+
+      // Fade selection border out after 1.4s
+      setTimeout(() => {
+        const border = el.querySelector('.ps-selection-border');
+        if (border) border.style.opacity = '0';
+      }, 1400);
+
+      // Add layer entry
+      const layersList = document.getElementById('psLayersList');
+      const layer = document.createElement('div');
+      layer.className = 'ps-layer ps-layer-new';
+      layer.dataset.layerId = id;
+      layer.innerHTML = `
+        <div class="ps-layer-thumb" style="background-image:url('${imgSrc}')"></div>
+        <span class="ps-layer-name">${name}</span>
+        ${colorable && color ? `<span class="ps-layer-color-dot" style="background:${color}"></span>` : ''}
+        <span class="ps-layer-eye">👁</span>
+        <button class="ps-layer-delete" title="Delete layer">×</button>
+      `;
+      layer.querySelector('.ps-layer-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lid = layer.dataset.layerId;
+        layer.remove();
+        const canvasItem = container.querySelector(`[data-layer-id="${lid}"]`);
+        if (canvasItem) canvasItem.remove();
+        // If no placed items left, show hint again
+        if (container.children.length === 0) {
+          const h = document.getElementById('psHint');
+          if (h) h.style.opacity = '1';
+        }
+      });
+      layersList.insertBefore(layer, layersList.firstChild);
+      setTimeout(() => layer.classList.remove('ps-layer-new'), 800);
+    }
+
+    // ─── COUNTDOWN TIMER ───────────────────────────────────────
+    // Change this date to whenever your sale ends
+    const SALE_END = new Date('2026-03-23T23:59:59');
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = SALE_END - now;
+
+      if (diff <= 0) {
+        document.getElementById('countdown').innerHTML =
+          '<span class="countdown-expired">Sale has ended — regular pricing applies</span>';
+        return;
+      }
+
+      const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins  = Math.floor((diff / (1000 * 60)) % 60);
+      const secs  = Math.floor((diff / 1000) % 60);
+
+      function tickNum(el, val) {
+        const str = pad(val);
+        if (el.textContent !== str) {
+          el.classList.remove('tick');
+          void el.offsetWidth; // reflow to restart animation
+          el.textContent = str;
+          el.classList.add('tick');
+          setTimeout(() => el.classList.remove('tick'), 300);
+        }
+      }
+      tickNum(document.getElementById('cd-days'),  days);
+      tickNum(document.getElementById('cd-hours'), hours);
+      tickNum(document.getElementById('cd-mins'),  mins);
+      tickNum(document.getElementById('cd-secs'),  secs);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+
+</body>
+</html>
