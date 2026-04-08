@@ -528,7 +528,9 @@
     }
 
     .hero-float-tag-icon {
-      font-size: 15px;
+      display: flex;
+      align-items: center;
+      color: var(--accent);
     }
 
     .hero-float-tag.tag-1 {
@@ -700,7 +702,8 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 20px;
-      font-size: 22px;
+      color: var(--accent);
+      flex-shrink: 0;
     }
 
     .feature-title {
@@ -872,7 +875,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px;
+      color: var(--accent);
       flex-shrink: 0;
       margin-top: 0;
     }
@@ -1577,7 +1580,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      color: var(--accent);
       flex-shrink: 0;
     }
 
@@ -2379,7 +2382,7 @@
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
               <div class="hero-stat-icon">
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13 7.5A4.5 4.5 0 0 0 8.5 3H7.8A4 4 0 1 0 3 7.5v.5h10v-.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11h6M6.5 13.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
               </div>
               <div class="hero-stat-text">
                 <span class="hero-stat-number">Cloud Library</span>
@@ -2421,11 +2424,11 @@
             <div class="hero-plugin-overlay"></div>
           </div>
           <div class="hero-float-tag tag-1">
-            <span class="hero-float-tag-icon">☁️</span>
+            <span class="hero-float-tag-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></span>
             Cloud Library
           </div>
           <div class="hero-float-tag tag-2">
-            <span class="hero-float-tag-icon">🎨</span>
+            <span class="hero-float-tag-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="16" cy="10" r="1.2" fill="currentColor" stroke="none"/><path d="M12 22c0-2 1.5-3.5 1.5-5a1.5 1.5 0 0 0-3 0c0 1.5 1.5 3 1.5 5z" fill="currentColor" stroke="none"/></svg></span>
             Colorable Mockups
           </div>
         </div>
@@ -2484,7 +2487,7 @@
         <!-- Big card with image -->
         <div class="feature-card feature-card-hero glass-border reveal">
           <div>
-            <div class="feature-icon">🗂️</div>
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
             <h3 class="feature-title">Cloud Mockup Library</h3>
             <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — all hosted in the cloud and loaded directly into your panel. No folders, no unzipping, nothing to manage.</p>
           </div>
@@ -2495,7 +2498,7 @@
 
         <!-- Small cards -->
         <div class="feature-card feature-card-colorable glass-border reveal reveal-delay-1">
-          <div class="feature-icon">🎨</div>
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.1 0 2-.9 2-2 0-.55-.22-1.05-.56-1.43a1 1 0 0 1 .76-1.66H16c3.31 0 6-2.69 6-6 0-4.42-4.48-8-10-8z"/><circle cx="6.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/></svg></div>
           <h3 class="feature-title">Colorable Mockups</h3>
           <p class="feature-desc">Push your presentations further with fully colorable variants. Change garment colors without rebuilding anything — just pick and go.</p>
           <div class="colorable-preview">
@@ -2513,19 +2516,19 @@
         </div>
 
         <div class="feature-card glass-border reveal">
-          <div class="feature-icon">⚡</div>
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
           <h3 class="feature-title">Photoshop Native</h3>
           <p class="feature-desc">Works directly as a Photoshop plugin. No exports, no context switching — your mockup library lives right inside your workspace.</p>
         </div>
 
         <div class="feature-card glass-border reveal reveal-delay-1">
-          <div class="feature-icon">🔍</div>
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
           <h3 class="feature-title">Smart Search & Filters</h3>
           <p class="feature-desc">Find exactly the mockup you need in seconds. Filter by category, search by name, and switch between grid and list views effortlessly.</p>
         </div>
 
         <div class="feature-card glass-border reveal reveal-delay-2">
-          <div class="feature-icon">☁️</div>
+          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
           <h3 class="feature-title">Weekly Mockup Drops</h3>
           <p class="feature-desc">New mockups are added to the cloud every week and appear in your panel automatically — no updates, no re-downloads, nothing to install.</p>
         </div>
@@ -2552,15 +2555,15 @@
 
           <ul class="demo-features-list reveal reveal-delay-2">
             <li>
-              <span class="demo-feat-icon">🔍</span>
+              <span class="demo-feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
               <span>Search and filter mockups in real time</span>
             </li>
             <li>
-              <span class="demo-feat-icon">🎨</span>
+              <span class="demo-feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.1 0 2-.9 2-2 0-.55-.22-1.05-.56-1.43a1 1 0 0 1 .76-1.66H16c3.31 0 6-2.69 6-6 0-4.42-4.48-8-10-8z"/><circle cx="6.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/></svg></span>
               <span>Pick a garment color on any <strong style="color:var(--accent)">colorable</strong> mockup and see it applied live</span>
             </li>
             <li>
-              <span class="demo-feat-icon">★</span>
+              <span class="demo-feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
               <span>Star any mockup to save it to your favorites</span>
             </li>
           </ul>
@@ -2715,30 +2718,30 @@
 
       <div class="categories-grid reveal">
         <div class="category-chip glass-border">
-          <div class="category-chip-icon">🧥</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2l-2 3.5c-.5.86-1.34 1.5-2 1.5s-1.5-.64-2-1.5L8 2 3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/><rect x="9" y="13" width="6" height="4" rx="1"/></svg></div>
           Hoodies
         </div>
         <div class="category-chip glass-border">
-          <div class="category-chip-icon">👕</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/></svg></div>
           T-Shirts
         </div>
         <div class="category-chip glass-border">
-          <div class="category-chip-icon">👚</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2a4 4 0 0 1-8 0L3 4.5v7l3-1.5V21h12V10l3 1.5v-7L16 2z"/></svg></div>
           Longsleeves
         </div>
         <div class="category-chip glass-border">
-          <div class="category-chip-icon">👖</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h16v5l-2.5 15H14l-2-10-2 10H6.5L4 7V2z"/><line x1="4" y1="7" x2="20" y2="7"/></svg></div>
           Pants
         </div>
         <div class="category-chip glass-border" style="grid-column: span 2;">
-          <div class="category-chip-icon">🎨</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.1 0 2-.9 2-2 0-.55-.22-1.05-.56-1.43a1 1 0 0 1 .76-1.66H16c3.31 0 6-2.69 6-6 0-4.42-4.48-8-10-8z"/><circle cx="6.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/></svg></div>
           <div>
             <div style="font-size:15px;font-weight:600;">Colorable Variants</div>
             <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Push designs further with recolorable garments</div>
           </div>
         </div>
         <div class="category-chip glass-border" style="grid-column: span 2;">
-          <div class="category-chip-icon">✨</div>
+          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3-3 3 3 3-3 3 3 3-3 3 3"/><path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3"/><path d="M3 20l3-3 3 3 3-3 3 3 3-3 3 3"/></svg></div>
           <div>
             <div style="font-size:15px;font-weight:600;">Distressed Variants</div>
             <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Vintage & worn-in aesthetics for streetwear brands</div>
@@ -2813,7 +2816,7 @@
 
       <div class="pricing-card glass-border reveal">
         <div class="pricing-label">
-          🔥 Launch Sale — Limited Time
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="flex-shrink:0;"><path d="M12 2c0 0-6 5.69-6 10.5a6 6 0 0 0 12 0C18 7.69 12 2 12 2zm0 15.5a3.5 3.5 0 0 1-3.5-3.5c0-2.5 2-5 3.5-7 1.5 2 3.5 4.5 3.5 7a3.5 3.5 0 0 1-3.5 3.5z"/></svg> Launch Sale — Limited Time
         </div>
 
         <div class="pricing-price-row">

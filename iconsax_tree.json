@@ -1,0 +1,15 @@
+{
+  "sha": "f8c37014a94fc8c50bde9902bde7d74a0255f37e",
+  "url": "https://api.github.com/repos/lusaxweb/iconsax/git/trees/f8c37014a94fc8c50bde9902bde7d74a0255f37e",
+  "tree": [
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "838c72c8a0b677acf7f991a4047eed2f4112e096",
+      "size": 47,
+      "url": "https://api.github.com/repos/lusaxweb/iconsax/git/blobs/838c72c8a0b677acf7f991a4047eed2f4112e096"
+    }
+  ],
+  "truncated": false
+}
