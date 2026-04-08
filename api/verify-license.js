@@ -27,18 +27,19 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        product_id: "NaQbZOCQeTdF7RyKgqvgXA==",
+        product_id: "mockvault",
         license_key: license_key.trim(),
         increment_uses_count: "false"
       })
     });
 
     const data = await gumroadRes.json();
+    console.log("Gumroad response:", JSON.stringify(data));
 
     if (data.success) {
       return res.status(200).json({ success: true });
     } else {
-      return res.status(200).json({ success: false, error: "Invalid license key" });
+      return res.status(200).json({ success: false, error: data.message || "Invalid license key" });
     }
   } catch (err) {
     console.error("Gumroad verify error:", err);
