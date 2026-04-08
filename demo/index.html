@@ -156,7 +156,14 @@
 
     /* ── Categories ───────────────────────────────────────── */
     .categories-wrapper {
-      padding: 0 14px; flex-shrink: 0; overflow: hidden; position: relative;
+      display: none;
+    }
+    body.show-categories .categories-wrapper {
+      display: block;
+      padding: 0 14px;
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
     }
 
     .categories-wrapper::before, .categories-wrapper::after {
@@ -598,12 +605,6 @@
 <body>
   <div id="app">
 
-    <!-- Demo Banner -->
-    <div class="demo-banner">
-      <span class="demo-dot"></span>
-      <span id="demoBannerText">Live Demo · Click any mockup to try it</span>
-    </div>
-
     <!-- Header -->
     <header class="header">
       <div class="header-logo">
@@ -803,6 +804,10 @@
       listViewBtn.classList.toggle("active", isListView);
       mockupGrid.classList.toggle("list-mode", isListView);
 
+      if (new URLSearchParams(window.location.search).has('preview')) {
+        document.body.classList.add('show-categories');
+      }
+
       bindEvents();
       renderCategories();
       renderGrid();
@@ -911,7 +916,10 @@
 
     /* ── Categories ────────────────────────────────────── */
     function renderCategories() {
-      const cats = ["all", ...new Set(allMockups.map(m => m.category))].filter(Boolean);
+      const isPreview = new URLSearchParams(window.location.search).has('preview');
+      const cats = isPreview
+        ? ["all", "hoodies", "t-shirts", "longsleeves", "pants", "shorts"]
+        : ["all", ...new Set(allMockups.map(m => m.category))].filter(Boolean);
       if (favorites.size > 0) cats.splice(1, 0, "favorites");
 
       categoryTabs.innerHTML = cats.map(cat => {

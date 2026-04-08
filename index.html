@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MockVault — Professional Photoshop Mockup Plugin</title>
-  <meta name="description" content="The professional clothing mockup plugin built for Photoshop. Search, apply, and colorize mockups instantly — all without leaving your workspace.">
+  <meta name="description" content="The professional clothing mockup plugin built for Photoshop. Cloud-based library, weekly mockup drops, license key activation — nothing to download or manage.">
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
 
   <style>
@@ -36,6 +36,7 @@
 
     html {
       scroll-behavior: smooth;
+      overflow-x: hidden;
     }
 
     body {
@@ -45,6 +46,7 @@
       animation: body-shimmer 22s ease-in-out infinite alternate;
       color: var(--text);
       overflow-x: hidden;
+      width: 100%;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -112,8 +114,10 @@
     /* ─── SHARED LAYOUT ─────────────────────────────────── */
     .container {
       max-width: 1200px;
+      width: 100%;
       margin: 0 auto;
       padding: 0 32px;
+      box-sizing: border-box;
       position: relative;
       z-index: 1;
     }
@@ -374,23 +378,44 @@
 
     .hero-stat {
       display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-stat-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(113,220,41,0.1);
+      border: 1px solid rgba(113,220,41,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .hero-stat-text {
+      display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 1px;
     }
 
     .hero-stat-number {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--accent);
-      letter-spacing: -0.02em;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
     }
 
     .hero-stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-dim);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      line-height: 1.2;
     }
 
     .hero-stat-divider {
@@ -778,38 +803,78 @@
     }
 
     .demo-content .section-subtitle {
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
+
+    .demo-post-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 48px;
+    }
+
+    .demo-post-note {
+      font-size: 13px;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+
+    .demo-hint {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      background: rgba(113,220,41,0.06);
+      border: 1px solid rgba(113,220,41,0.18);
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .demo-hint svg { color: var(--accent); opacity: 0.8; }
 
     .demo-features-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-bottom: 36px;
+      gap: 10px;
+      margin-bottom: 28px;
     }
 
     .demo-features-list li {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 15px;
+      align-items: center;
+      gap: 14px;
+      font-size: 14px;
       color: rgba(255,255,255,0.75);
       line-height: 1.5;
+      padding: 14px 18px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .demo-features-list li:hover {
+      background: rgba(255,255,255,0.055);
+      border-color: rgba(255,255,255,0.12);
     }
 
     .demo-feat-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 7px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       background: var(--accent-dim);
       border: 1px solid var(--border-accent);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 15px;
       flex-shrink: 0;
-      margin-top: 1px;
+      margin-top: 0;
     }
 
     /* PS Panel wrapper */
@@ -1191,8 +1256,9 @@
 
     @media (max-width: 800px) {
       /* Tighten section spacing on mobile */
-      .demo-section { padding: 60px 0 48px; }
-      .demo-layout { gap: 28px; }
+      .demo-section { padding: 64px 0 56px; }
+      .demo-layout { gap: 36px; }
+      .demo-post-cta .btn { width: 100%; justify-content: center; }
       /* Hide the PS canvas panel — replaced by the mobile canvas modal */
       .ps-canvas-container { display: none; }
       .demo-panels-row { border-radius: 14px; overflow: hidden; }
@@ -1932,10 +1998,11 @@
 
     /* ─── RESPONSIVE ─────────────────────────────────────── */
     @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+      /* Layout */
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
       .hero-visual { order: -1; }
-      .hero-plugin-frame { max-width: 360px; }
-      .hero-plugin-frame iframe { height: 480px; }
+      .hero-plugin-frame { max-width: 380px; }
+      .hero-plugin-frame iframe { height: 460px; }
       .hero-float-tag.tag-1,
       .hero-float-tag.tag-2 { display: none; }
       .features-grid { grid-template-columns: 1fr 1fr; }
@@ -1944,27 +2011,102 @@
       .testimonials-grid { grid-template-columns: 1fr 1fr; }
       .categories-grid { grid-template-columns: repeat(2, 1fr); }
       .nav-links { display: none; }
+      .nav-cta .btn { font-size: 13px; padding: 9px 16px; }
+      .nav-cta .btn svg { display: none; }
+      /* Section spacing */
+      .hero { padding: 100px 0 64px; }
+      .hero-subtitle { font-size: 16px; margin-bottom: 40px; }
+      .hero-actions { margin-bottom: 40px; }
+      .features { padding: 80px 0; }
+      .how { padding: 80px 0; }
+      .whats-inside { padding: 60px 0 80px; }
+      .testimonials { padding: 60px 0; }
+      .pricing { padding: 60px 0 80px; }
+      .final-cta { padding: 72px 0; }
+      .section-header { margin-bottom: 48px; }
     }
 
     @media (max-width: 600px) {
-      .container { padding: 0 20px; }
+      /* Layout */
+      .container { padding: 0 18px; }
       .features-grid { grid-template-columns: 1fr; }
       .feature-card-hero { grid-column: span 1; grid-template-columns: 1fr; }
       .testimonials-grid { grid-template-columns: 1fr; }
-      .pricing-card { padding: 40px 24px; }
+      .categories-grid { grid-template-columns: 1fr 1fr; }
+      .hero-plugin-frame { max-width: 100%; border-radius: 14px; }
+      .hero-plugin-frame iframe { height: 390px; }
+      /* Hero */
+      .hero { padding: 88px 0 48px; }
+      .hero-subtitle { font-size: 15px; margin-bottom: 24px; }
+      .hero-actions { margin-bottom: 20px; gap: 10px; flex-direction: column; align-items: stretch; }
+      .hero-actions .btn-primary-lg { text-align: center; justify-content: center; }
+      .hero-price-label { flex-direction: row; align-items: center; gap: 10px; justify-content: center; padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 10px; border: 1px solid var(--border); }
+      .hero-price-label span:first-child { margin-bottom: 0; }
+      .hero-price-label strong { font-size: 17px; }
+      /* Stats: 3-column mini card grid */
+      .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; margin-top: 8px; align-items: stretch; }
+      .hero-stat-divider { display: none; }
+      .hero-stat { flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 12px 8px; background: rgba(255,255,255,0.035); border-radius: 10px; border: 1px solid var(--border); min-width: 0; overflow: hidden; }
+      .hero-stat-text { align-items: center; gap: 2px; }
+      .hero-stat-number { font-size: 11px; font-weight: 700; word-break: break-word; overflow-wrap: break-word; width: 100%; }
+      .hero-stat-label { font-size: 9px; letter-spacing: 0.04em; word-break: break-word; overflow-wrap: break-word; width: 100%; }
+      /* Section spacing */
+      .section-header { margin-bottom: 32px; }
+      .features { padding: 60px 0; }
+      .how { padding: 60px 0; }
+      .whats-inside { padding: 48px 0 56px; }
+      .testimonials { padding: 48px 0; }
+      .pricing { padding: 48px 0 60px; }
+      .final-cta { padding: 52px 0; }
+      /* Cards */
+      .feature-card { padding: 24px 22px; }
+      .how-card { padding: 28px 22px; }
+      .how-number { font-size: 54px; margin-bottom: 14px; }
+      .how-title { font-size: 18px; }
+      /* Pricing */
+      .pricing-card { padding: 36px 20px; }
+      .pricing-price { font-size: 62px; }
+      .pricing-price-row { gap: 10px; }
       .countdown-wrap { padding: 16px 12px; margin: 20px 0 24px; }
       .countdown-timer { gap: 4px; }
       .countdown-num { font-size: 24px; padding: 6px 8px; min-width: 40px; }
       .countdown-unit { min-width: 40px; }
       .countdown-colon { font-size: 20px; padding-bottom: 14px; }
       .countdown-unit-label { font-size: 9px; }
-      .final-cta-card { padding: 60px 28px; }
-      .categories-grid { grid-template-columns: 1fr 1fr; }
-      .hero-plugin-frame { max-width: 100%; border-radius: 14px; }
-      .hero-plugin-frame iframe { height: 420px; }
-      .hero-float-tag.tag-2 { display: none; }
-      .hero-stats { gap: 20px; }
-      .hero-float-tag.tag-2 { display: none; }
+      /* Final CTA */
+      .final-cta-card { padding: 44px 22px; }
+      .final-cta-sub { font-size: 15px; }
+      /* Button full-width on small hero */
+      .hero-actions .btn-primary-lg { width: 100%; justify-content: center; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      /* Hero */
+      .hero { padding: 80px 0 40px; }
+      .hero-plugin-frame iframe { height: 340px; }
+      .hero-stat { padding: 10px 6px; }
+      .hero-stat-icon { width: 24px; height: 24px; border-radius: 6px; }
+      .hero-stat-icon svg { width: 12px; height: 12px; }
+      .hero-stat-number { font-size: 10px; }
+      .hero-stat-label { font-size: 8px; }
+      /* Section */
+      .section-header { margin-bottom: 28px; }
+      .features { padding: 48px 0; }
+      .how { padding: 48px 0; }
+      .whats-inside { padding: 40px 0 48px; }
+      .testimonials { padding: 40px 0; }
+      .pricing { padding: 40px 0 52px; }
+      .final-cta { padding: 44px 0; }
+      /* Cards */
+      .feature-card { padding: 20px 18px; }
+      .how-card { padding: 24px 18px; }
+      .how-number { font-size: 44px; }
+      /* Pricing */
+      .pricing-price { font-size: 52px; }
+      .pricing-card { padding: 32px 18px; }
+      /* Buttons */
+      .btn-primary-lg { font-size: 15px; padding: 14px 24px; }
     }
     /* ─── SCROLL PROGRESS BAR ─────────────────────────────── */
     #scrollProgress {
@@ -2207,7 +2349,7 @@
           </h1>
 
           <p class="hero-subtitle reveal reveal-delay-2">
-            MockVault gives you instant access to a professional library of clothing mockups — searchable, colorable, and ready to use without ever leaving Photoshop.
+            MockVault gives you instant access to a cloud-hosted library of 50+ clothing mockups — searchable, colorable, and loaded automatically inside Photoshop. Activate once, get new mockups every week.
           </p>
 
           <div class="hero-actions reveal reveal-delay-3">
@@ -2218,26 +2360,41 @@
             <div class="hero-price-label">
               <span>Launch price</span>
               <div style="display:flex;align-items:baseline;gap:8px;">
-                <strong>$54.99</strong>
-                <s style="font-size:14px;font-weight:500;color:var(--text-dim);">$74.99</s>
+                <strong>$74.99</strong>
+                <s style="font-size:14px;font-weight:500;color:var(--text-dim);">$124.99</s>
               </div>
             </div>
           </div>
 
           <div class="hero-stats reveal reveal-delay-4">
             <div class="hero-stat">
-              <span class="hero-stat-number">50+</span>
-              <span class="hero-stat-label">Mockups</span>
+              <div class="hero-stat-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v2M11 1v2M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="hero-stat-text">
+                <span class="hero-stat-number">50+ Mockups</span>
+                <span class="hero-stat-label">New ones added weekly</span>
+              </div>
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-              <span class="hero-stat-number">∞</span>
-              <span class="hero-stat-label">Categories</span>
+              <div class="hero-stat-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M13 7.5A4.5 4.5 0 0 0 8.5 3H7.8A4 4 0 1 0 3 7.5v.5h10v-.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 11h6M6.5 13.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="hero-stat-text">
+                <span class="hero-stat-number">Cloud Library</span>
+                <span class="hero-stat-label">Nothing to download</span>
+              </div>
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-              <span class="hero-stat-number">1-click</span>
-              <span class="hero-stat-label">Apply</span>
+              <div class="hero-stat-icon">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 8l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="hero-stat-text">
+                <span class="hero-stat-number">License Key</span>
+                <span class="hero-stat-label">One-time activation</span>
+              </div>
             </div>
           </div>
         </div>
@@ -2255,7 +2412,7 @@
               <span class="hero-plugin-chrome-badge">Plugin</span>
             </div>
             <iframe
-              src="demo/index.html"
+              src="demo/index.html?preview=1"
               title="MockVault Plugin Preview"
               scrolling="no"
               tabindex="-1"
@@ -2264,8 +2421,8 @@
             <div class="hero-plugin-overlay"></div>
           </div>
           <div class="hero-float-tag tag-1">
-            <span class="hero-float-tag-icon">⚡</span>
-            Instant Search
+            <span class="hero-float-tag-icon">☁️</span>
+            Cloud Library
           </div>
           <div class="hero-float-tag tag-2">
             <span class="hero-float-tag-icon">🎨</span>
@@ -2289,7 +2446,7 @@
       <div class="trust-separator"></div>
       <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 15V7M9 15V3M15 15v-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Constantly Growing</div>
       <div class="trust-separator"></div>
-      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M6 9l2 2 4-4" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Instant Download</div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M14 10.5A3.5 3.5 0 0 0 10.5 7H9.8A5 5 0 1 0 4 12h10a2.5 2.5 0 0 0 0-5z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>Cloud-Based Library</div>
       <div class="trust-separator"></div>
       <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M9 3v12" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Unlimited Categories</div>
       <div class="trust-separator"></div>
@@ -2328,8 +2485,8 @@
         <div class="feature-card feature-card-hero glass-border reveal">
           <div>
             <div class="feature-icon">🗂️</div>
-            <h3 class="feature-title">Massive Mockup Library</h3>
-            <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — all organized, searchable, and accessible in a single panel. No more browsing folders or hunting down files.</p>
+            <h3 class="feature-title">Cloud Mockup Library</h3>
+            <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — all hosted in the cloud and loaded directly into your panel. No folders, no unzipping, nothing to manage.</p>
           </div>
           <div class="feature-hero-image">
             <img src="brand_assets/mockvaultui.png" alt="MockVault library UI">
@@ -2368,9 +2525,9 @@
         </div>
 
         <div class="feature-card glass-border reveal reveal-delay-2">
-          <div class="feature-icon">📦</div>
-          <h3 class="feature-title">Always Expanding</h3>
-          <p class="feature-desc">New mockups are added regularly. Your one-time purchase grows with every update — you buy it once and keep getting more.</p>
+          <div class="feature-icon">☁️</div>
+          <h3 class="feature-title">Weekly Mockup Drops</h3>
+          <p class="feature-desc">New mockups are added to the cloud every week and appear in your panel automatically — no updates, no re-downloads, nothing to install.</p>
         </div>
 
       </div>
@@ -2389,33 +2546,30 @@
             The real plugin.<br>
             <span style="background:linear-gradient(90deg,#71dc29,#a8ff5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Live in your browser.</span>
           </h2>
-          <p class="section-subtitle reveal reveal-delay-2" style="margin-bottom:32px;">
-            This is the actual MockVault UI — not a screenshot. Search, filter, switch views, save favorites, and use the color picker to see live garment colorization.
+          <p class="section-subtitle reveal reveal-delay-2">
+            This is the actual MockVault UI — not a screenshot. Search, filter, colorize garments, and save favorites.
           </p>
 
           <ul class="demo-features-list reveal reveal-delay-2">
             <li>
               <span class="demo-feat-icon">🔍</span>
-              <span>Type in the search bar to filter mockups in real time</span>
+              <span>Search and filter mockups in real time</span>
             </li>
             <li>
               <span class="demo-feat-icon">🎨</span>
-              <span>Click a <strong style="color:var(--accent)">colorable</strong> mockup and pick a garment color — see it applied live</span>
-            </li>
-            <li>
-              <span class="demo-feat-icon">⊞</span>
-              <span>Toggle between grid and list view with the buttons top-right</span>
+              <span>Pick a garment color on any <strong style="color:var(--accent)">colorable</strong> mockup and see it applied live</span>
             </li>
             <li>
               <span class="demo-feat-icon">★</span>
-              <span>Hover any card and star it to save it to your favorites</span>
+              <span>Star any mockup to save it to your favorites</span>
             </li>
           </ul>
 
-          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary reveal reveal-delay-3" target="_blank" rel="noopener">
-            Get the Full Plugin — $54.99
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
+          <div class="demo-hint reveal reveal-delay-3">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span>Hoodies only in this demo — the full plugin includes T-Shirts, Longsleeves, Pants, Shorts & more with weekly drops.</span>
+          </div>
+
         </div>
 
         <!-- Right: Plugin Panel + PS Canvas -->
@@ -2509,6 +2663,16 @@
         </div>
 
       </div>
+
+      <!-- CTA after demo — shock factor -->
+      <div class="demo-post-cta reveal">
+        <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+          Get the Full Plugin — $74.99
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <span class="demo-post-note">50+ mockups · Cloud-based · Weekly drops</span>
+      </div>
+
     </div>
   </section>
 
@@ -2524,17 +2688,17 @@
         <div class="how-card glass-border reveal">
           <div class="how-number">01</div>
           <h3 class="how-title">Install the Plugin</h3>
-          <p class="how-desc">Download MockVault and install it as a Photoshop plugin in just a few clicks. It shows up right in your plugins panel.</p>
+          <p class="how-desc">Download MockVault and install it as a Photoshop plugin in a few clicks. Works on Windows and Mac, Photoshop 2021 and up.</p>
         </div>
         <div class="how-card glass-border reveal reveal-delay-1">
           <div class="how-number">02</div>
-          <h3 class="how-title">Browse & Search</h3>
-          <p class="how-desc">Open the MockVault panel, search for the garment you need, and filter by category — hoodies, tees, pants, and more.</p>
+          <h3 class="how-title">Activate with License Key</h3>
+          <p class="how-desc">Enter your Gumroad license key once on first launch. MockVault activates instantly and loads your full cloud library — no setup, no folders.</p>
         </div>
         <div class="how-card glass-border reveal reveal-delay-2">
           <div class="how-number">03</div>
-          <h3 class="how-title">Apply & Design</h3>
-          <p class="how-desc">Click a mockup to apply it instantly. Place your design, adjust colors if needed, and export. Done — in minutes, not hours.</p>
+          <h3 class="how-title">Browse, Pick & Apply</h3>
+          <p class="how-desc">Search your mockup library, pick a garment, choose a color if needed, and click to apply. Done — in minutes, not hours.</p>
         </div>
       </div>
     </div>
@@ -2546,7 +2710,7 @@
       <div class="section-header reveal">
         <div class="section-tag">The Library</div>
         <h2 class="section-title">Every garment<br>you present.</h2>
-        <p class="section-subtitle">MockVault supports unlimited categories based on your folder structure. 4 categories included out of the box — and you can add as many more as you need.</p>
+        <p class="section-subtitle">50+ mockups and growing — new categories and styles are added to the cloud every week. Each style comes in black, white, and colorable variants.</p>
       </div>
 
       <div class="categories-grid reveal">
@@ -2654,11 +2818,11 @@
 
         <div class="pricing-price-row">
           <div class="pricing-price">
-            <span class="pricing-dollar">$</span>54<span class="pricing-cents">.99</span>
+            <span class="pricing-dollar">$</span>74<span class="pricing-cents">.99</span>
           </div>
           <div class="pricing-original">
             <span class="pricing-was">Was</span>
-            <s>$74.99</s>
+            <s>$124.99</s>
           </div>
         </div>
         <p class="pricing-type">One-time purchase &nbsp;·&nbsp; Lifetime access &nbsp;·&nbsp; All updates included</p>
@@ -2692,10 +2856,11 @@
         <ul class="pricing-features">
           <li>50+ professional clothing mockups</li>
           <li>Hoodies, Tees, Longsleeves & Pants</li>
-          <li>Colorable & distressed variants</li>
-          <li>Native Photoshop plugin panel</li>
-          <li>Smart search & category filters</li>
-          <li>All future mockup updates free</li>
+          <li>Black, white & colorable variants</li>
+          <li>Cloud-hosted — nothing to download or manage</li>
+          <li>License key activation via Gumroad</li>
+          <li>Weekly mockup drops, auto-delivered to your panel</li>
+          <li>Works on Windows & Mac, Photoshop 2021+</li>
         </ul>
 
         <a
@@ -2704,10 +2869,10 @@
           target="_blank"
           rel="noopener"
         >
-          Buy MockVault — $54.99
+          Buy MockVault — $74.99
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <p class="pricing-note">Secure checkout via Gumroad · Instant download · Price returns to $74.99 after sale</p>
+        <p class="pricing-note">Secure checkout via Gumroad · License key delivered instantly · Price returns to $124.99 after sale</p>
       </div>
     </div>
   </section>
@@ -2723,10 +2888,10 @@
         <p class="final-cta-sub">MockVault is the last mockup tool you'll ever need inside Photoshop.</p>
         <div class="final-cta-actions">
           <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
-            Get MockVault — $54.99
+            Get MockVault — $74.99
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
-          <span style="font-size:13px;color:var(--text-dim);">One-time · No subscription · <s style="opacity:0.5;">$74.99</s></span>
+          <span style="font-size:13px;color:var(--text-dim);">One-time · No subscription · <s style="opacity:0.5;">$124.99</s></span>
         </div>
       </div>
     </div>
@@ -2997,8 +3162,22 @@
     }
 
     // ─── COUNTDOWN TIMER ───────────────────────────────────────
-    // Change this date to whenever your sale ends
-    const SALE_END = new Date('2026-03-23T23:59:59');
+    // Each visitor gets a random end date (2–7 days from first visit),
+    // stored in localStorage so it stays consistent on return visits.
+    (function() {
+      const KEY = 'mv_sale_end';
+      let stored = localStorage.getItem(KEY);
+      if (!stored) {
+        // Random offset: 2 days + up to 5 extra days, randomized per visitor
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const offset = (2 + Math.floor(Math.random() * 5)) * msPerDay
+                     + Math.floor(Math.random() * msPerDay); // sub-day jitter
+        stored = String(Date.now() + offset);
+        localStorage.setItem(KEY, stored);
+      }
+      window._SALE_END = new Date(parseInt(stored, 10));
+    })();
+    const SALE_END = window._SALE_END;
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
@@ -3008,7 +3187,7 @@
 
       if (diff <= 0) {
         document.getElementById('countdown').innerHTML =
-          '<span class="countdown-expired">Sale has ended — regular pricing applies</span>';
+          '<span class="countdown-expired">Sale ending soon — grab it now</span>';
         return;
       }
 
