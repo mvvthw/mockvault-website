@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        product_id: "mockvault",
+        product_id: "NaQbZ0CQeTdF7RyKgqvgXA==",
         license_key: license_key.trim(),
         increment_uses_count: "false"
       })
