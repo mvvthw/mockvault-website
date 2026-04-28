@@ -410,6 +410,110 @@
       border-radius: var(--radius-sm);
     }
 
+    /* ─── DOWNLOAD SECTION ───────────────────────────────── */
+    .download-card {
+      padding: 32px;
+      margin-top: 24px;
+    }
+    .download-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .download-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .download-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .download-version {
+      display: inline-block;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      padding: 4px 10px;
+      border-radius: 100px;
+      margin-left: 8px;
+      vertical-align: 2px;
+    }
+    .download-meta {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .changelog {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .changelog-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .changelog-toggle:hover { color: var(--text); }
+    .changelog-toggle svg { transition: transform 0.2s; }
+    .changelog-toggle.open svg { transform: rotate(90deg); }
+    .changelog-body {
+      margin-top: 14px;
+      padding: 16px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+    }
+    .install-steps {
+      list-style: none;
+      counter-reset: step;
+      margin-top: 16px;
+    }
+    .install-steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 32px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .install-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     /* ─── EMPTY / ERROR STATES ───────────────────────────── */
     .empty {
       max-width: 520px;
@@ -556,6 +660,38 @@
 
         <div id="license-stack" class="license-stack"></div>
 
+        <!-- ─── DOWNLOAD SECTION (only shown when user has an active license) ─── -->
+        <div id="download-card" class="download-card glass-border" hidden>
+          <div class="download-head">
+            <div>
+              <div class="download-title">Download</div>
+              <div class="download-name">MockVault<span id="download-version" class="download-version"></span></div>
+              <div id="download-meta" class="download-meta"></div>
+            </div>
+            <a id="download-button" href="#" class="btn btn-primary" download>
+              Download .ccx
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 2v8m0 0L3 6m4 4l4-4M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+
+          <ol class="install-steps">
+            <li>Download the <code>.ccx</code> file above</li>
+            <li>Double-click it to install via Adobe Creative Cloud</li>
+            <li>Open Photoshop → <strong>Window → Extensions (UXP) → MockVault</strong></li>
+            <li>Paste your license key (above) and hit Activate</li>
+          </ol>
+
+          <div id="changelog-wrap" class="changelog" hidden>
+            <button id="changelog-toggle" class="changelog-toggle" type="button">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 2l4 3-4 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>What's new</span>
+            </button>
+            <div id="changelog-body" class="changelog-body" hidden></div>
+          </div>
+        </div>
+
         <div id="no-licenses" class="empty glass-border" hidden>
           <h3>No licenses on this account yet</h3>
           <p>If you just paid, give it a few seconds for the receipt to land — then refresh. Otherwise, you may have signed in with the wrong email.</p>
@@ -595,17 +731,24 @@
     });
 
     // ─── DOM refs ───────────────────────────────────────
-    const stateLoading   = document.getElementById("state-loading");
-    const stateSignedOut = document.getElementById("state-signedout");
-    const stateSignedIn  = document.getElementById("state-signedin");
-    const navSignOut     = document.getElementById("nav-signout");
-    const signedInEmail  = document.getElementById("signedin-email");
-    const licenseStack   = document.getElementById("license-stack");
-    const noLicenses     = document.getElementById("no-licenses");
-    const signinForm     = document.getElementById("signin-form");
-    const signinEmail    = document.getElementById("signin-email");
-    const signinSubmit   = document.getElementById("signin-submit");
-    const signinMsg      = document.getElementById("signin-msg");
+    const stateLoading    = document.getElementById("state-loading");
+    const stateSignedOut  = document.getElementById("state-signedout");
+    const stateSignedIn   = document.getElementById("state-signedin");
+    const navSignOut      = document.getElementById("nav-signout");
+    const signedInEmail   = document.getElementById("signedin-email");
+    const licenseStack    = document.getElementById("license-stack");
+    const noLicenses      = document.getElementById("no-licenses");
+    const signinForm      = document.getElementById("signin-form");
+    const signinEmail     = document.getElementById("signin-email");
+    const signinSubmit    = document.getElementById("signin-submit");
+    const signinMsg       = document.getElementById("signin-msg");
+    const downloadCard    = document.getElementById("download-card");
+    const downloadVersion = document.getElementById("download-version");
+    const downloadMeta    = document.getElementById("download-meta");
+    const downloadButton  = document.getElementById("download-button");
+    const changelogWrap   = document.getElementById("changelog-wrap");
+    const changelogToggle = document.getElementById("changelog-toggle");
+    const changelogBody   = document.getElementById("changelog-body");
 
     // ─── Show one state, hide the others ───────────────
     function showState(state) {
@@ -699,6 +842,7 @@
         if (licenses.length === 0) {
           licenseStack.innerHTML = "";
           noLicenses.hidden = false;
+          downloadCard.hidden = true;
           noLicenses.querySelector("h3").textContent = "No licenses on this account yet";
           noLicenses.querySelector("p").textContent = "If you just paid, give it a few seconds for the receipt to land — then refresh. Otherwise, you may have signed in with the wrong email.";
           return;
@@ -720,11 +864,49 @@
             console.error("[account] renderLicense failed for", lic, renderErr);
           }
         }
+
+        // Load latest plugin release for download section
+        loadDownload().catch(err => console.error("[account] loadDownload error:", err));
       } catch (err) {
         console.error("[account] loadLicenses unexpected error:", err);
         showLoadError("Something went wrong", "Refresh the page. If this keeps happening, email support.");
       }
     }
+
+    async function loadDownload() {
+      const { data, error } = await supabase
+        .from("plugin_releases")
+        .select("*")
+        .eq("is_latest", true)
+        .maybeSingle();
+
+      console.log("[account] latest release:", { data, error });
+
+      if (error || !data) {
+        downloadCard.hidden = true;
+        return;
+      }
+
+      downloadVersion.textContent = `v${data.version}`;
+      const released = new Date(data.released_at);
+      downloadMeta.textContent = `Released ${released.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}`;
+      downloadButton.href = data.download_url;
+      downloadButton.setAttribute("download", `mockvault-${data.version}.ccx`);
+
+      if (data.changelog && data.changelog.trim()) {
+        changelogWrap.hidden = false;
+        changelogBody.textContent = data.changelog;
+      } else {
+        changelogWrap.hidden = true;
+      }
+
+      downloadCard.hidden = false;
+    }
+
+    changelogToggle.addEventListener("click", () => {
+      const open = changelogToggle.classList.toggle("open");
+      changelogBody.hidden = !open;
+    });
 
     function showLoadError(title, body) {
       licenseStack.innerHTML = "";
