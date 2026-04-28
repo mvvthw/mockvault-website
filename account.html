@@ -878,6 +878,8 @@
     // onAuthStateChange fires immediately with INITIAL_SESSION, so a separate
     // init pass would just race with this and double-render.
     let lastUserId = null;
+    let didEagerRefresh = false;
+
     supabase.auth.onAuthStateChange(async (event, session) => {
       const userId = session?.user?.id || null;
       console.log("[account] auth event:", event, "user:", session?.user?.email || "(none)");
@@ -885,6 +887,25 @@
       if (session?.user) {
         // Avoid duplicate render when token refresh fires for the same user
         if (event === "TOKEN_REFRESHED" && lastUserId === userId) return;
+
+        // On the very first auth signal after a page load, eagerly refresh the
+        // token. This avoids the case where a persisted but slightly-stale
+        // access_token gets rejected by PostgREST on the first query, leaving
+        // the user stuck on a "Couldn't load" screen until they sign back in.
+        if (!didEagerRefresh && event === "INITIAL_SESSION") {
+          didEagerRefresh = true;
+          console.log("[account] eagerly refreshing token on first load");
+          const { error: refreshErr } = await supabase.auth.refreshSession();
+          if (refreshErr) {
+            console.warn("[account] eager refresh failed — likely a stale session", refreshErr);
+            await forceSignOut();
+            return;
+          }
+          // refreshSession will fire another auth event (TOKEN_REFRESHED).
+          // Let that one drive the actual render so we use the fresh token.
+          return;
+        }
+
         lastUserId = userId;
         showState("signedin");
         await loadLicenses(session.user);
