@@ -659,16 +659,39 @@
 
     // ─── Sign-out ──────────────────────────────────────
     navSignOut.addEventListener("click", async () => {
-      navSignOut.disabled = true;
-      await supabase.auth.signOut();
-      // onAuthStateChange handler will flip the UI
+      console.log("[account] sign-out clicked");
+      await forceSignOut();
     });
+
+    async function forceSignOut() {
+      navSignOut.disabled = true;
+      navSignOut.textContent = "Signing out…";
+      try { await supabase.auth.signOut({ scope: "local" }); } catch (e) { console.warn("signOut error:", e); }
+      // Belt-and-braces: nuke any leftover supabase session keys in localStorage
+      try {
+        Object.keys(localStorage)
+          .filter(k => k.startsWith("sb-") || k.includes("supabase"))
+          .forEach(k => localStorage.removeItem(k));
+      } catch {}
+      navSignOut.disabled = false;
+      navSignOut.textContent = "Sign out";
+      lastUserId = null;
+      showState("signedout");
+    }
 
     // ─── Render licenses ───────────────────────────────
     async function loadLicenses(user) {
       signedInEmail.textContent = user.email || "your account";
 
       try {
+        // Validate session before querying — if expired, refresh or bail.
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.warn("[account] no session — forcing sign-out");
+          await forceSignOut();
+          return;
+        }
+
         const [licResp, actResp] = await Promise.all([
           supabase.from("licenses").select("*").order("created_at", { ascending: false }),
           supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
@@ -683,7 +706,15 @@
 
         if (fetchError) {
           console.error("[account] fetch error:", fetchError);
-          showLoadError("Couldn't load your licenses", "Try refreshing in a moment. If this keeps happening, email support.");
+          // Auth failure: 401, JWT expired, invalid token — clean up and bounce to sign-in
+          const msg = (fetchError.message || "").toLowerCase();
+          const code = fetchError.code || "";
+          if (msg.includes("jwt") || msg.includes("expired") || msg.includes("invalid") || code === "PGRST301" || fetchError.status === 401) {
+            console.warn("[account] auth-related fetch error — forcing sign-out");
+            await forceSignOut();
+            return;
+          }
+          showLoadError("Couldn't load your licenses", `Try refreshing in a moment. If this keeps happening, email support. (${fetchError.message || "unknown error"})`);
           return;
         }
 
