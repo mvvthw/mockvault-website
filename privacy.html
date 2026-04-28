@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — MockVault</title>
+  <meta name="description" content="MockVault privacy policy — what we collect, what we don't, and how we use it.">
+  <link rel="icon" href="brand_assets/mockvaultlogo.png">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #71dc29;
+      --accent-dim: rgba(113, 220, 41, 0.18);
+      --bg: #080808;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.07);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.55);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --radius: 16px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body {
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse 55% 35% at 72% 18%, rgba(113,220,41,0.04) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    nav {
+      padding: 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 8, 8, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .container {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo img { height: 32px; }
+    .nav-back {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text); }
+    main {
+      flex: 1;
+      padding: 64px 0 96px;
+      position: relative;
+      z-index: 1;
+    }
+    h1 {
+      font-size: clamp(32px, 4.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .updated {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin-bottom: 40px;
+      letter-spacing: 0.02em;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 36px 0 12px;
+      letter-spacing: -0.01em;
+    }
+    p, li {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    ul { padding-left: 22px; margin-bottom: 12px; }
+    strong { color: var(--text); font-weight: 600; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo img { height: 24px; opacity: 0.6; }
+    .footer-meta { font-size: 12px; color: var(--text-dim); }
+    .footer-meta a { color: var(--text-dim); margin-left: 12px; }
+    .footer-meta a:hover { color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .container { padding: 0 20px; }
+      main { padding: 40px 0 64px; }
+      h1 { font-size: 28px; }
+      h2 { font-size: 18px; margin-top: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <a class="nav-logo" href="/"><img src="brand_assets/mockvaultlogo.png" alt="MockVault"></a>
+        <a class="nav-back" href="/">← Back to MockVault</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: April 28, 2026</p>
+
+      <p>MockVault ("we", "us") makes a Photoshop mockup plugin sold at <a href="https://www.mockvaultps.com">mockvaultps.com</a>. This page is the short, plain-English version of what we collect and what we do with it. We try to collect the minimum we need to make the product work.</p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li><strong>Email address.</strong> Tied to your purchase and your account dashboard. Used to deliver your license key, magic-link sign-ins, support replies, and occasional product updates (no marketing without consent).</li>
+        <li><strong>Payment details.</strong> Handled entirely by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a> — we never see your full card number. Stripe shares only metadata with us (last 4 digits, country, success/failure).</li>
+        <li><strong>License + activation data.</strong> Your license key, the devices you've activated MockVault on (a stable random ID + a label like "Photoshop 2024 (Windows)"), and timestamps for first/last seen. This lets you manage your active devices from your dashboard.</li>
+        <li><strong>Browser analytics.</strong> The marketing site uses <a href="https://www.facebook.com/business/help/471978536642445" target="_blank" rel="noopener">Meta Pixel</a> for ad attribution. The plugin itself does not.</li>
+      </ul>
+
+      <h2>What we don't collect</h2>
+      <ul>
+        <li>Your designs, files, or anything you make in Photoshop — the plugin reads from a public mockup library and writes to your active document. Nothing leaves your machine.</li>
+        <li>Cookies on the marketing site beyond what's needed for Meta Pixel attribution.</li>
+        <li>Anything from your local file system besides the plugin's own settings.</li>
+      </ul>
+
+      <h2>How we use it</h2>
+      <ul>
+        <li>To deliver your license, fulfill your purchase, and let you re-download the plugin from your dashboard.</li>
+        <li>To verify your license activation in Photoshop (the plugin pings our server with your license key + device ID).</li>
+        <li>To respond to support questions you send us.</li>
+        <li>To track ad performance via Meta Pixel — aggregated, not used to identify you individually.</li>
+      </ul>
+
+      <h2>Who we share it with</h2>
+      <ul>
+        <li><strong>Stripe</strong> — payment processing.</li>
+        <li><strong>Supabase</strong> — database + auth + edge functions hosting our backend.</li>
+        <li><strong>Cloudflare</strong> — hosts the mockup library files.</li>
+        <li><strong>Resend</strong> — sends transactional email (license key, sign-in links, receipts).</li>
+        <li><strong>Netlify</strong> — hosts this website.</li>
+        <li><strong>Meta</strong> — receives ad-related events (page views, checkout starts) via the Pixel.</li>
+      </ul>
+      <p>We do not sell your data, ever.</p>
+
+      <h2>Your rights</h2>
+      <p>You can:</p>
+      <ul>
+        <li><strong>Access</strong> your data — sign in at <a href="/account">mockvaultps.com/account</a> to see your licenses + active devices.</li>
+        <li><strong>Delete</strong> your account and license records — email <a href="mailto:support@mockvaultps.com">support@mockvaultps.com</a> and we'll handle it within 7 days.</li>
+        <li><strong>Opt out of analytics</strong> — use a browser that blocks Meta Pixel (Brave, Firefox + uBlock, Safari) and we'll never see you.</li>
+      </ul>
+
+      <h2>Data retention</h2>
+      <p>License + activation records are kept for as long as your license is active, plus 12 months for tax/refund records. After that, identifying details are anonymized.</p>
+
+      <h2>Contact</h2>
+      <p>Questions about this policy or your data: <a href="mailto:support@mockvaultps.com">support@mockvaultps.com</a>.</p>
+
+      <h2>Changes</h2>
+      <p>If we make material changes to this policy we'll update the "Last updated" date and email anyone with an active license at least 14 days before the change takes effect.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a class="footer-logo" href="/"><img src="brand_assets/mockvaultlogo.png" alt="MockVault"></a>
+        <p class="footer-meta">
+          © 2026 MockVault
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="mailto:support@mockvaultps.com">Support</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
