@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're in — MockVault</title>
+  <meta name="description" content="Install and activate MockVault — your Photoshop mockup plugin.">
+  <meta name="robots" content="noindex">
+
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+  <link rel="icon" href="brand_assets/mockvaultlogo.png">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #71dc29;
+      --accent-dim: rgba(113, 220, 41, 0.18);
+      --accent-glow: rgba(113, 220, 41, 0.35);
+      --bg: #080808;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(113, 220, 41, 0.28);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.55);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --danger: #f87171;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(ellipse 55% 35% at 72% 18%, rgba(113,220,41,0.045) 0%, transparent 65%), var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-orb { position: absolute; border-radius: 50%; filter: blur(150px); }
+    .bg-orb-1 {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      top: -160px; right: -80px; opacity: 0.07;
+    }
+    .bg-orb-2 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      bottom: 12%; left: -80px; opacity: 0.04;
+    }
+
+    .container {
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    .glass-border {
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius);
+    }
+    .glass-border::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(113,220,41,0.5) 0%, rgba(113,220,41,0.1) 40%, rgba(255,255,255,0.05) 70%, rgba(113,220,41,0.2) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ─── NAV ───────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(8, 8, 8, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo img { height: 36px; width: auto; display: block; }
+
+    /* ─── BUTTONS ─────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 24px var(--accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-primary:hover {
+      background: #82e83c;
+      box-shadow: 0 0 40px rgba(113,220,41,0.6), 0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-1px);
+    }
+    .btn-primary-lg { font-size: 16px; padding: 15px 32px; }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .btn-ghost:hover { background: var(--surface-hover); border-color: rgba(255,255,255,0.14); }
+
+    /* ─── PAGE HEADER ──────────────────────────────────────── */
+    .page { padding: 64px 0 96px; position: relative; z-index: 1; }
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      padding: 6px 14px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+    }
+    .hero-title {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+    .hero-cta {
+      display: inline-flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ─── STEP CARDS ──────────────────────────────────────── */
+    .step-card {
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px var(--accent-glow-soft, rgba(113,220,41,0.2));
+    }
+    .step-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .step-body {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .step-body p { margin-bottom: 12px; }
+    .step-body p:last-child { margin-bottom: 0; }
+    .step-body strong { color: var(--text); font-weight: 600; }
+    .step-body code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 6px;
+      color: var(--text);
+    }
+    .step-body ol, .step-body ul {
+      padding-left: 22px;
+      margin-bottom: 12px;
+    }
+    .step-body li { margin-bottom: 6px; }
+
+    .step-tip {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(113,220,41,0.05);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .step-tip strong { color: var(--accent); }
+
+    /* ─── SECTION HEADERS ──────────────────────────────────── */
+    .section-divider {
+      margin: 56px 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-divider::before, .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-divider span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ─── REQUIREMENTS TABLE ─────────────────────────────── */
+    .req-card {
+      padding: 24px 32px;
+      margin-bottom: 20px;
+    }
+    .req-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .req-row {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .req-row:last-child { border-bottom: none; }
+    .req-key { font-weight: 600; color: var(--text); }
+    .req-val { color: var(--text-muted); }
+
+    /* ─── TROUBLESHOOTING ─────────────────────────────────── */
+    .issue {
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .issue-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .issue-title::before {
+      content: '!';
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(248,113,113,0.15);
+      color: var(--danger);
+      font-size: 11px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .issue p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ─── FOOTER CTA ──────────────────────────────────────── */
+    .help-block {
+      margin-top: 48px;
+      padding: 28px 32px;
+      text-align: center;
+    }
+    .help-block h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .help-block p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .help-block a { color: var(--accent); text-decoration: none; }
+    .help-block a:hover { text-decoration: underline; }
+
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo img { height: 24px; width: auto; opacity: 0.7; }
+    .footer-copy { font-size: 13px; color: var(--text-dim); }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .container { padding: 0 20px; }
+      .page { padding: 40px 0 64px; }
+      .step-card, .help-block { padding: 24px; }
+      .req-card { padding: 20px 24px; }
+      .req-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 0; }
+      .req-key { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <a class="nav-logo" href="/">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+        <a href="/account" class="btn btn-ghost">Your account</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+
+      <!-- ─── HERO ───────────────────────────────────── -->
+      <div class="hero">
+        <div class="hero-tag">Welcome to MockVault</div>
+        <h1 class="hero-title">You're <em>in.</em><br>Let's get you set up.</h1>
+        <p class="hero-subtitle">
+          Your license is in your inbox and on your dashboard. Three quick steps and you'll be placing mockups in Photoshop.
+        </p>
+        <div class="hero-cta">
+          <a href="/account" class="btn btn-primary btn-primary-lg">
+            Go to your dashboard
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── STEP 1 ─── -->
+      <div class="step-card glass-border">
+        <div class="step-head">
+          <div class="step-num">1</div>
+          <h2 class="step-title">Grab your license + download</h2>
+        </div>
+        <div class="step-body">
+          <p>
+            Sign in to <a href="/account" style="color: var(--accent); text-decoration: none;">your dashboard</a> with the email you used at checkout. We'll send you a one-time link — no password.
+          </p>
+          <p>
+            On your dashboard you'll find:
+          </p>
+          <ul>
+            <li>Your <strong>license key</strong> — copy it for the activation step</li>
+            <li>The <strong>MockVault plugin</strong> download (latest version)</li>
+            <li>A list of devices you've activated MockVault on</li>
+          </ul>
+          <div class="step-tip">
+            <strong>Tip:</strong> We also emailed your license key with the receipt. Check the email titled "Your MockVault license key" if you'd rather find it there.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── STEP 2 ─── -->
+      <div class="step-card glass-border">
+        <div class="step-head">
+          <div class="step-num">2</div>
+          <h2 class="step-title">Install the plugin</h2>
+        </div>
+        <div class="step-body">
+          <p>Make sure <strong>Adobe Creative Cloud Desktop</strong> is open and running.</p>
+          <ol>
+            <li>Double-click the <code>MockVault.ccx</code> file you just downloaded.</li>
+            <li>Creative Cloud will pop up an install prompt — click <strong>Install</strong>.</li>
+            <li>Open or restart <strong>Adobe Photoshop</strong>.</li>
+            <li>In the Photoshop menu bar, go to <strong>Plugins → MockVault</strong> to open the panel.</li>
+          </ol>
+          <div class="step-tip">
+            <strong>macOS only:</strong> If you see a Gatekeeper warning, right-click the <code>.ccx</code> file and choose <strong>Open</strong> instead of double-clicking.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── STEP 3 ─── -->
+      <div class="step-card glass-border">
+        <div class="step-head">
+          <div class="step-num">3</div>
+          <h2 class="step-title">Activate your license</h2>
+        </div>
+        <div class="step-body">
+          <p>
+            The first time you open MockVault, you'll see the <strong>Activate MockVault</strong> screen.
+          </p>
+          <ol>
+            <li>Paste your license key into the field.</li>
+            <li>Click <strong>Activate</strong>.</li>
+          </ol>
+          <p>
+            That's it. MockVault verifies your key and loads every mockup in the library. <strong>You only do this once per device</strong> — install on up to 3 machines.
+          </p>
+          <div class="step-tip">
+            <strong>Need to free up a slot?</strong> Head to <a href="/account" style="color: var(--accent); text-decoration: none;">your dashboard</a> and deactivate any device you no longer use.
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── REQUIREMENTS ─── -->
+      <div class="section-divider"><span>System requirements</span></div>
+      <div class="req-card glass-border">
+        <div class="req-list">
+          <div class="req-row"><div class="req-key">Photoshop</div><div class="req-val">2021 or newer (version 22.0+)</div></div>
+          <div class="req-row"><div class="req-key">Creative Cloud</div><div class="req-val">Desktop app must be installed and running</div></div>
+          <div class="req-row"><div class="req-key">Windows</div><div class="req-val">Windows 10 or 11</div></div>
+          <div class="req-row"><div class="req-key">macOS</div><div class="req-val">macOS 11 Big Sur or newer</div></div>
+          <div class="req-row"><div class="req-key">Internet</div><div class="req-val">Required to activate and stream mockups (cached locally after first load)</div></div>
+        </div>
+      </div>
+
+      <!-- ─── TROUBLESHOOTING ─── -->
+      <div class="section-divider"><span>Troubleshooting</span></div>
+
+      <div class="issue">
+        <div class="issue-title">MockVault doesn't appear in the Plugins menu</div>
+        <p>Make sure Creative Cloud shows MockVault as <em>Installed</em>. Fully quit and relaunch Photoshop. Confirm you're on Photoshop 2021 (22.0) or newer via Help → About Photoshop.</p>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title">Creative Cloud didn't prompt to install</div>
+        <p>Make sure Creative Cloud Desktop is running first, then double-click the <code>.ccx</code> again. Alternative: Creative Cloud → gear icon → <strong>Manage Plugins → Install from Disk</strong>.</p>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title">"Invalid license key" on activation</div>
+        <p>Copy the full key from your purchase email — no extra spaces. If you've lost the email, sign in to <a href="/account" style="color: var(--accent); text-decoration: none;">your dashboard</a> to retrieve it.</p>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title">Activation screen keeps reappearing</div>
+        <p>The plugin's local storage may have been cleared. Re-enter your license key — you can reuse it any time.</p>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title">Mockups won't load / blank grid</div>
+        <p>Check your internet connection and click the refresh button (↻) in the panel. If it still misbehaves, restart Photoshop.</p>
+      </div>
+
+      <div class="issue">
+        <div class="issue-title">Placing a mockup does nothing</div>
+        <p>You need a document open in Photoshop before placing. Create or open a file first.</p>
+      </div>
+
+      <!-- ─── HELP ─── -->
+      <div class="help-block glass-border">
+        <h3>Still stuck?</h3>
+        <p>Send us a note and we'll get you sorted. Include your Photoshop version + OS for fastest help.</p>
+        <a href="mailto:support@mockvaultps.com" class="btn btn-ghost">support@mockvaultps.com</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a class="footer-logo" href="/">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+        <p class="footer-copy">© 2026 MockVault. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
