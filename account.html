@@ -668,38 +668,60 @@
     async function loadLicenses(user) {
       signedInEmail.textContent = user.email || "your account";
 
-      const [{ data: licenses, error: licErr }, { data: activations, error: actErr }] = await Promise.all([
-        supabase.from("licenses").select("*").order("created_at", { ascending: false }),
-        supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
-      ]);
+      try {
+        const [licResp, actResp] = await Promise.all([
+          supabase.from("licenses").select("*").order("created_at", { ascending: false }),
+          supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
+        ]);
 
-      if (licErr || actErr) {
-        console.error("loadLicenses error:", licErr || actErr);
+        console.log("[account] licenses:", licResp);
+        console.log("[account] activations:", actResp);
+
+        const licenses    = licResp.data    || [];
+        const activations = actResp.data    || [];
+        const fetchError  = licResp.error || actResp.error;
+
+        if (fetchError) {
+          console.error("[account] fetch error:", fetchError);
+          showLoadError("Couldn't load your licenses", "Try refreshing in a moment. If this keeps happening, email support.");
+          return;
+        }
+
+        if (licenses.length === 0) {
+          licenseStack.innerHTML = "";
+          noLicenses.hidden = false;
+          noLicenses.querySelector("h3").textContent = "No licenses on this account yet";
+          noLicenses.querySelector("p").textContent = "If you just paid, give it a few seconds for the receipt to land — then refresh. Otherwise, you may have signed in with the wrong email.";
+          return;
+        }
+
+        const byLicense = new Map();
+        for (const a of activations) {
+          const arr = byLicense.get(a.license_id) || [];
+          arr.push(a);
+          byLicense.set(a.license_id, arr);
+        }
+
+        noLicenses.hidden = true;
         licenseStack.innerHTML = "";
-        noLicenses.hidden = false;
-        noLicenses.querySelector("h3").textContent = "Couldn't load your licenses";
-        noLicenses.querySelector("p").textContent = "Try refreshing in a moment. If this keeps happening, email support.";
-        return;
+        for (const lic of licenses) {
+          try {
+            licenseStack.appendChild(renderLicense(lic, byLicense.get(lic.id) || []));
+          } catch (renderErr) {
+            console.error("[account] renderLicense failed for", lic, renderErr);
+          }
+        }
+      } catch (err) {
+        console.error("[account] loadLicenses unexpected error:", err);
+        showLoadError("Something went wrong", "Refresh the page. If this keeps happening, email support.");
       }
+    }
 
-      if (!licenses || licenses.length === 0) {
-        licenseStack.innerHTML = "";
-        noLicenses.hidden = false;
-        return;
-      }
-
-      noLicenses.hidden = true;
-      const byLicense = new Map();
-      for (const a of activations || []) {
-        const arr = byLicense.get(a.license_id) || [];
-        arr.push(a);
-        byLicense.set(a.license_id, arr);
-      }
-
+    function showLoadError(title, body) {
       licenseStack.innerHTML = "";
-      for (const lic of licenses) {
-        licenseStack.appendChild(renderLicense(lic, byLicense.get(lic.id) || []));
-      }
+      noLicenses.hidden = false;
+      noLicenses.querySelector("h3").textContent = title;
+      noLicenses.querySelector("p").textContent  = body;
     }
 
     function renderLicense(lic, devices) {
@@ -821,30 +843,28 @@
       })[c]);
     }
 
-    // ─── Init: react to auth state ─────────────────────
+    // ─── Init: react to auth state changes ──────────────
+    // onAuthStateChange fires immediately with INITIAL_SESSION, so a separate
+    // init pass would just race with this and double-render.
+    let lastUserId = null;
     supabase.auth.onAuthStateChange(async (event, session) => {
+      const userId = session?.user?.id || null;
+      console.log("[account] auth event:", event, "user:", session?.user?.email || "(none)");
+
       if (session?.user) {
+        // Avoid duplicate render when token refresh fires for the same user
+        if (event === "TOKEN_REFRESHED" && lastUserId === userId) return;
+        lastUserId = userId;
         showState("signedin");
         await loadLicenses(session.user);
-        // Strip the magic-link tokens from the URL after sign-in
         if (window.location.hash || window.location.search.includes("code=")) {
           history.replaceState(null, "", "/account");
         }
       } else {
+        lastUserId = null;
         showState("signedout");
       }
     });
-
-    // First load: kick off session check
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        showState("signedin");
-        await loadLicenses(session.user);
-      } else {
-        showState("signedout");
-      }
-    })();
   </script>
 </body>
 </html>
