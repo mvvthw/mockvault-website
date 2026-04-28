@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Keep the existing /api/verify-license URL working so the plugin doesn't need an update
+[[redirects]]
+  from = "/api/verify-license"
+  to = "/.netlify/functions/verify-license"
+  status = 200
+  force = true
