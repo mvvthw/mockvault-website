@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Account — MockVault</title>
+  <meta name="description" content="Manage your MockVault license and active devices.">
+  <meta name="robots" content="noindex">
+
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+  <link rel="icon" href="brand_assets/mockvaultlogo.png">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #71dc29;
+      --accent-dim: rgba(113, 220, 41, 0.18);
+      --accent-glow: rgba(113, 220, 41, 0.35);
+      --accent-glow-soft: rgba(113, 220, 41, 0.12);
+      --bg: #080808;
+      --bg-2: #0e0e0e;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(113, 220, 41, 0.28);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.55);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --danger: #ef4444;
+      --danger-dim: rgba(239, 68, 68, 0.15);
+      --warning: #f59e0b;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(ellipse 55% 35% at 72% 18%, rgba(113,220,41,0.045) 0%, transparent 65%), var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-orb { position: absolute; border-radius: 50%; filter: blur(150px); }
+    .bg-orb-1 {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      top: -160px; right: -80px; opacity: 0.07;
+    }
+    .bg-orb-2 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, #71dc29, transparent 70%);
+      bottom: 12%; left: -80px; opacity: 0.04; filter: blur(130px);
+    }
+
+    .container {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    .glass-border {
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius);
+    }
+    .glass-border::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(113,220,41,0.5) 0%, rgba(113,220,41,0.1) 40%, rgba(255,255,255,0.05) 70%, rgba(113,220,41,0.2) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ─── NAV ───────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(8, 8, 8, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .nav-logo img { height: 36px; width: auto; display: block; }
+    .nav-cta { display: flex; align-items: center; gap: 12px; }
+
+    /* ─── BUTTONS ────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 24px var(--accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-primary:hover {
+      background: #82e83c;
+      box-shadow: 0 0 40px rgba(113,220,41,0.6), 0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      background: rgba(113,220,41,0.4);
+      color: rgba(0,0,0,0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .btn-ghost:hover {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.14);
+      transform: translateY(-1px);
+    }
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      padding: 8px 14px;
+    }
+    .btn-danger-ghost:hover {
+      color: var(--danger);
+      border-color: rgba(239,68,68,0.4);
+      background: var(--danger-dim);
+    }
+    .btn-sm { font-size: 13px; padding: 9px 18px; }
+
+    /* ─── PAGE HEADING ───────────────────────────────────── */
+    .page {
+      padding: 64px 0 96px;
+      position: relative;
+      z-index: 1;
+    }
+    .page-header {
+      margin-bottom: 40px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .page-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .page-title {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    /* ─── SIGN-IN CARD ───────────────────────────────────── */
+    .signin-card {
+      max-width: 480px;
+      margin: 32px auto 0;
+      padding: 40px;
+    }
+    .signin-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .signin-card p.muted {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .signin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .input {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .input:focus {
+      outline: none;
+      border-color: var(--border-accent);
+      background: rgba(0,0,0,0.6);
+    }
+    .input::placeholder { color: var(--text-dim); }
+
+    .signin-msg {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      margin-top: 4px;
+    }
+    .signin-msg.error {
+      background: var(--danger-dim);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .signin-msg.success {
+      background: var(--accent-dim);
+      color: #c4f4a3;
+      border: 1px solid var(--border-accent);
+    }
+
+    /* ─── LICENSE CARDS ──────────────────────────────────── */
+    .license-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .license-card {
+      padding: 32px;
+    }
+    .license-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .license-product {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .license-key-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .license-key {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: rgba(0,0,0,0.4);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      color: var(--text);
+      user-select: all;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .copy-btn:hover {
+      border-color: var(--border-accent);
+      color: var(--accent);
+    }
+    .copy-btn.copied {
+      color: var(--accent);
+      border-color: var(--border-accent);
+      background: var(--accent-dim);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .status-badge.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--border-accent);
+    }
+    .status-badge.refunded, .status-badge.revoked {
+      background: var(--danger-dim);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .devices-section {
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+    .devices-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .devices-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .devices-count {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .device-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+    }
+    .device-row:last-child { margin-bottom: 0; }
+    .device-meta { min-width: 0; }
+    .device-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .device-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .device-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      background: rgba(0,0,0,0.2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    /* ─── EMPTY / ERROR STATES ───────────────────────────── */
+    .empty {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 48px 32px;
+      text-align: center;
+    }
+    .empty h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .empty p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* ─── LOADER ─────────────────────────────────────────── */
+    .loader-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 96px 0;
+    }
+    .loader-dots { display: flex; gap: 8px; }
+    .loader-dots span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.85); }
+      50%      { opacity: 1;   transform: scale(1.1); }
+    }
+
+    /* ─── HELP NOTE ──────────────────────────────────────── */
+    .help-note {
+      margin-top: 48px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .help-note a { color: var(--accent); text-decoration: none; }
+    .help-note a:hover { text-decoration: underline; }
+
+    /* ─── FOOTER ─────────────────────────────────────────── */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo img { height: 24px; width: auto; opacity: 0.7; }
+    .footer-copy { font-size: 13px; color: var(--text-dim); }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .container { padding: 0 20px; }
+      .page { padding: 40px 0 64px; }
+      .signin-card, .license-card { padding: 28px 24px; }
+      .license-key { font-size: 15px; }
+      .nav-cta .btn { font-size: 13px; padding: 9px 16px; }
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <a class="nav-logo" href="/">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+        <div class="nav-cta">
+          <button id="nav-signout" class="btn btn-ghost btn-sm" hidden>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+      <!-- ─── LOADING STATE ─── -->
+      <div id="state-loading" class="loader-wrap">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+      </div>
+
+      <!-- ─── SIGNED-OUT STATE ─── -->
+      <div id="state-signedout" hidden>
+        <div class="page-header" style="justify-content: center; text-align: center;">
+          <div style="margin: 0 auto;">
+            <div class="page-tag">Account</div>
+            <h1 class="page-title">Manage your license</h1>
+            <p class="page-subtitle">Sign in with the email you used at checkout.</p>
+          </div>
+        </div>
+
+        <div class="signin-card glass-border">
+          <h2>Sign in</h2>
+          <p class="muted">We'll email you a one-time link. No password — just click and you're in.</p>
+          <form id="signin-form" class="signin-form" novalidate>
+            <input
+              type="email"
+              id="signin-email"
+              class="input"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            >
+            <button type="submit" id="signin-submit" class="btn btn-primary">
+              Email me a sign-in link
+            </button>
+            <div id="signin-msg" class="signin-msg" hidden></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ─── SIGNED-IN STATE ─── -->
+      <div id="state-signedin" hidden>
+        <div class="page-header">
+          <div>
+            <div class="page-tag">Account</div>
+            <h1 class="page-title">Your licenses</h1>
+            <p class="page-subtitle">Signed in as <span id="signedin-email"></span></p>
+          </div>
+        </div>
+
+        <div id="license-stack" class="license-stack"></div>
+
+        <div id="no-licenses" class="empty glass-border" hidden>
+          <h3>No licenses on this account yet</h3>
+          <p>If you just paid, give it a few seconds for the receipt to land — then refresh. Otherwise, you may have signed in with the wrong email.</p>
+          <a href="/" class="btn btn-ghost">Back to MockVault</a>
+        </div>
+
+        <p class="help-note">
+          Need a hand? Email <a href="mailto:support@mockvaultps.com">support@mockvaultps.com</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a class="footer-logo" href="/">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+        </a>
+        <p class="footer-copy">© 2026 MockVault. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://mbdftnypfdhvdgdgkhjc.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_it_Px7Rhk4DHtNJ3_qYpNA_YvFMpXLP";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    // ─── DOM refs ───────────────────────────────────────
+    const stateLoading   = document.getElementById("state-loading");
+    const stateSignedOut = document.getElementById("state-signedout");
+    const stateSignedIn  = document.getElementById("state-signedin");
+    const navSignOut     = document.getElementById("nav-signout");
+    const signedInEmail  = document.getElementById("signedin-email");
+    const licenseStack   = document.getElementById("license-stack");
+    const noLicenses     = document.getElementById("no-licenses");
+    const signinForm     = document.getElementById("signin-form");
+    const signinEmail    = document.getElementById("signin-email");
+    const signinSubmit   = document.getElementById("signin-submit");
+    const signinMsg      = document.getElementById("signin-msg");
+
+    // ─── Show one state, hide the others ───────────────
+    function showState(state) {
+      stateLoading.hidden   = state !== "loading";
+      stateSignedOut.hidden = state !== "signedout";
+      stateSignedIn.hidden  = state !== "signedin";
+      navSignOut.hidden     = state !== "signedin";
+    }
+
+    // ─── Sign-in form ──────────────────────────────────
+    signinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = signinEmail.value.trim().toLowerCase();
+      if (!email || !email.includes("@")) {
+        showSigninMsg("Please enter a valid email address.", "error");
+        return;
+      }
+
+      signinSubmit.disabled = true;
+      signinSubmit.textContent = "Sending…";
+      signinMsg.hidden = true;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/account`,
+          shouldCreateUser: false,
+        },
+      });
+
+      signinSubmit.disabled = false;
+      signinSubmit.textContent = "Email me a sign-in link";
+
+      if (error) {
+        // Friendly handling for the common "account not found" case
+        const msg = error.message.toLowerCase().includes("not found") || error.message.toLowerCase().includes("signup")
+          ? "We couldn't find an account for that email. Make sure you're using the same email you used at checkout."
+          : `Something went wrong: ${error.message}`;
+        showSigninMsg(msg, "error");
+        return;
+      }
+
+      showSigninMsg("Check your email — we just sent a sign-in link. It's good for 1 hour.", "success");
+    });
+
+    function showSigninMsg(text, type) {
+      signinMsg.textContent = text;
+      signinMsg.className = `signin-msg ${type}`;
+      signinMsg.hidden = false;
+    }
+
+    // ─── Sign-out ──────────────────────────────────────
+    navSignOut.addEventListener("click", async () => {
+      navSignOut.disabled = true;
+      await supabase.auth.signOut();
+      // onAuthStateChange handler will flip the UI
+    });
+
+    // ─── Render licenses ───────────────────────────────
+    async function loadLicenses(user) {
+      signedInEmail.textContent = user.email || "your account";
+
+      const [{ data: licenses, error: licErr }, { data: activations, error: actErr }] = await Promise.all([
+        supabase.from("licenses").select("*").order("created_at", { ascending: false }),
+        supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
+      ]);
+
+      if (licErr || actErr) {
+        console.error("loadLicenses error:", licErr || actErr);
+        licenseStack.innerHTML = "";
+        noLicenses.hidden = false;
+        noLicenses.querySelector("h3").textContent = "Couldn't load your licenses";
+        noLicenses.querySelector("p").textContent = "Try refreshing in a moment. If this keeps happening, email support.";
+        return;
+      }
+
+      if (!licenses || licenses.length === 0) {
+        licenseStack.innerHTML = "";
+        noLicenses.hidden = false;
+        return;
+      }
+
+      noLicenses.hidden = true;
+      const byLicense = new Map();
+      for (const a of activations || []) {
+        const arr = byLicense.get(a.license_id) || [];
+        arr.push(a);
+        byLicense.set(a.license_id, arr);
+      }
+
+      licenseStack.innerHTML = "";
+      for (const lic of licenses) {
+        licenseStack.appendChild(renderLicense(lic, byLicense.get(lic.id) || []));
+      }
+    }
+
+    function renderLicense(lic, devices) {
+      const card = document.createElement("div");
+      card.className = "license-card glass-border";
+
+      const productLabel = formatProduct(lic.product);
+      const statusLabel  = lic.status[0].toUpperCase() + lic.status.slice(1);
+      const used   = devices.length;
+      const max    = lic.max_activations;
+
+      card.innerHTML = `
+        <div class="license-head">
+          <div style="min-width: 0; flex: 1;">
+            <div class="license-product">${escapeHtml(productLabel)}</div>
+            <div class="license-key-row">
+              <code class="license-key">${escapeHtml(lic.key)}</code>
+              <button class="copy-btn" data-key="${escapeHtml(lic.key)}">Copy</button>
+            </div>
+          </div>
+          <span class="status-badge ${escapeHtml(lic.status)}">
+            <span class="status-dot"></span>${escapeHtml(statusLabel)}
+          </span>
+        </div>
+
+        <div class="devices-section">
+          <div class="devices-head">
+            <span class="devices-title">Active devices</span>
+            <span class="devices-count">${used} of ${max} used</span>
+          </div>
+          <div class="devices-list"></div>
+        </div>
+      `;
+
+      const list = card.querySelector(".devices-list");
+      if (devices.length === 0) {
+        list.innerHTML = `<div class="device-empty">No devices yet — paste your key into the MockVault panel in Photoshop to activate.</div>`;
+      } else {
+        for (const dev of devices) {
+          list.appendChild(renderDevice(dev));
+        }
+      }
+
+      // Copy button
+      card.querySelector(".copy-btn").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        try {
+          await navigator.clipboard.writeText(btn.dataset.key);
+          btn.textContent = "Copied!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copy";
+            btn.classList.remove("copied");
+          }, 1800);
+        } catch {
+          btn.textContent = "Press ⌘C / Ctrl+C";
+        }
+      });
+
+      return card;
+    }
+
+    function renderDevice(dev) {
+      const row = document.createElement("div");
+      row.className = "device-row";
+      row.innerHTML = `
+        <div class="device-meta">
+          <div class="device-label">${escapeHtml(dev.device_label || "Unnamed device")}</div>
+          <div class="device-sub">First active ${formatRelative(dev.first_seen_at)} · last seen ${formatRelative(dev.last_seen_at)}</div>
+        </div>
+        <button class="btn btn-danger-ghost" data-id="${dev.id}">Deactivate</button>
+      `;
+      row.querySelector("button").addEventListener("click", async (e) => {
+        const btn = e.currentTarget;
+        if (!confirm("Deactivate this device? You'll need to re-enter your license key on it to use MockVault again.")) return;
+        btn.disabled = true;
+        btn.textContent = "Removing…";
+        const { error } = await supabase.from("activations").delete().eq("id", btn.dataset.id);
+        if (error) {
+          console.error(error);
+          btn.disabled = false;
+          btn.textContent = "Deactivate";
+          alert("Couldn't deactivate that device. Try again or email support.");
+          return;
+        }
+        // Reload to refresh counts
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) loadLicenses(user);
+      });
+      return row;
+    }
+
+    function formatProduct(slug) {
+      if (!slug) return "MockVault";
+      return slug
+        .replace(/^mockvault-?/i, "MockVault ")
+        .replace(/(^|\s)([a-z])/g, (_, p, c) => p + c.toUpperCase())
+        .trim();
+    }
+
+    function formatRelative(iso) {
+      const ts = new Date(iso).getTime();
+      if (isNaN(ts)) return "—";
+      const diffMs = Date.now() - ts;
+      const sec = Math.round(diffMs / 1000);
+      if (sec < 60) return "just now";
+      const min = Math.round(sec / 60);
+      if (min < 60) return `${min} min ago`;
+      const hr  = Math.round(min / 60);
+      if (hr < 24) return `${hr} hr ago`;
+      const day = Math.round(hr / 24);
+      if (day < 30) return `${day} day${day === 1 ? "" : "s"} ago`;
+      return new Date(iso).toLocaleDateString();
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[c]);
+    }
+
+    // ─── Init: react to auth state ─────────────────────
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        showState("signedin");
+        await loadLicenses(session.user);
+        // Strip the magic-link tokens from the URL after sign-in
+        if (window.location.hash || window.location.search.includes("code=")) {
+          history.replaceState(null, "", "/account");
+        }
+      } else {
+        showState("signedout");
+      }
+    });
+
+    // First load: kick off session check
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        showState("signedin");
+        await loadLicenses(session.user);
+      } else {
+        showState("signedout");
+      }
+    })();
+  </script>
+</body>
+</html>
