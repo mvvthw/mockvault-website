@@ -2216,7 +2216,10 @@
       transform: translateY(120%);
       transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
     }
+    .mobile-sticky-cta * { text-decoration: none; }
     .mobile-sticky-cta.visible {
       opacity: 1;
       transform: translateY(0);
