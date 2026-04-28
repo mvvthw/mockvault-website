@@ -658,40 +658,26 @@
     }
 
     // ─── Sign-out ──────────────────────────────────────
+    // NOTE: do NOT await inside onAuthStateChange — see the comment on the
+    // bottom-of-file handler. Sign-out itself is a button click, so awaiting
+    // here is fine.
     navSignOut.addEventListener("click", async () => {
       console.log("[account] sign-out clicked");
-      await forceSignOut();
-    });
-
-    async function forceSignOut() {
       navSignOut.disabled = true;
       navSignOut.textContent = "Signing out…";
-      try { await supabase.auth.signOut({ scope: "local" }); } catch (e) { console.warn("signOut error:", e); }
-      // Belt-and-braces: nuke any leftover supabase session keys in localStorage
-      try {
-        Object.keys(localStorage)
-          .filter(k => k.startsWith("sb-") || k.includes("supabase"))
-          .forEach(k => localStorage.removeItem(k));
-      } catch {}
+      try { await supabase.auth.signOut({ scope: "local" }); }
+      catch (e) { console.warn("signOut error:", e); }
       navSignOut.disabled = false;
       navSignOut.textContent = "Sign out";
-      lastUserId = null;
-      showState("signedout");
-    }
+      // SIGNED_OUT event will fire and onAuthStateChange will flip the state
+    });
 
     // ─── Render licenses ───────────────────────────────
     async function loadLicenses(user) {
+      console.log("[account] loadLicenses for", user?.email);
       signedInEmail.textContent = user.email || "your account";
 
       try {
-        // Validate session before querying — if expired, refresh or bail.
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.warn("[account] no session — forcing sign-out");
-          await forceSignOut();
-          return;
-        }
-
         const [licResp, actResp] = await Promise.all([
           supabase.from("licenses").select("*").order("created_at", { ascending: false }),
           supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
@@ -706,14 +692,6 @@
 
         if (fetchError) {
           console.error("[account] fetch error:", fetchError);
-          // Auth failure: 401, JWT expired, invalid token — clean up and bounce to sign-in
-          const msg = (fetchError.message || "").toLowerCase();
-          const code = fetchError.code || "";
-          if (msg.includes("jwt") || msg.includes("expired") || msg.includes("invalid") || code === "PGRST301" || fetchError.status === 401) {
-            console.warn("[account] auth-related fetch error — forcing sign-out");
-            await forceSignOut();
-            return;
-          }
           showLoadError("Couldn't load your licenses", `Try refreshing in a moment. If this keeps happening, email support. (${fetchError.message || "unknown error"})`);
           return;
         }
@@ -875,43 +853,34 @@
     }
 
     // ─── Init: react to auth state changes ──────────────
-    // onAuthStateChange fires immediately with INITIAL_SESSION, so a separate
-    // init pass would just race with this and double-render.
+    // CRITICAL: do NOT `await` async work inside onAuthStateChange. The
+    // Supabase SDK holds an internal lock while the callback runs; awaiting
+    // an SDK call (like a query) inside it can deadlock. We escape to a
+    // setTimeout so the SDK can release its lock before queries run.
+    // Reference: https://supabase.com/docs/reference/javascript/auth-onauthstatechange
     let lastUserId = null;
-    let didEagerRefresh = false;
+    let renderTimer = null;
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       const userId = session?.user?.id || null;
       console.log("[account] auth event:", event, "user:", session?.user?.email || "(none)");
 
       if (session?.user) {
-        // Avoid duplicate render when token refresh fires for the same user
+        // Avoid double-render on TOKEN_REFRESHED for the same user
         if (event === "TOKEN_REFRESHED" && lastUserId === userId) return;
-
-        // On the very first auth signal after a page load, eagerly refresh the
-        // token. This avoids the case where a persisted but slightly-stale
-        // access_token gets rejected by PostgREST on the first query, leaving
-        // the user stuck on a "Couldn't load" screen until they sign back in.
-        if (!didEagerRefresh && event === "INITIAL_SESSION") {
-          didEagerRefresh = true;
-          console.log("[account] eagerly refreshing token on first load");
-          const { error: refreshErr } = await supabase.auth.refreshSession();
-          if (refreshErr) {
-            console.warn("[account] eager refresh failed — likely a stale session", refreshErr);
-            await forceSignOut();
-            return;
-          }
-          // refreshSession will fire another auth event (TOKEN_REFRESHED).
-          // Let that one drive the actual render so we use the fresh token.
-          return;
-        }
-
         lastUserId = userId;
+
         showState("signedin");
-        await loadLicenses(session.user);
+
+        // Strip magic-link tokens from URL after sign-in
         if (window.location.hash || window.location.search.includes("code=")) {
           history.replaceState(null, "", "/account");
         }
+
+        // Defer loadLicenses outside the SDK event handler. Coalesce rapid
+        // back-to-back events (INITIAL_SESSION + TOKEN_REFRESHED) into one render.
+        if (renderTimer) clearTimeout(renderTimer);
+        renderTimer = setTimeout(() => loadLicenses(session.user), 0);
       } else {
         lastUserId = null;
         showState("signedout");
