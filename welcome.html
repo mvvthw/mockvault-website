@@ -9,6 +9,7 @@
 
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
   <link rel="icon" href="brand_assets/mockvaultlogo.png">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -547,5 +548,70 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // ─── Welcome confetti — fires once per fresh arrival from Stripe redirect ─
+    // Sessionstorage gates it so refreshes don't re-fire and refunders don't
+    // get re-celebrated.
+    (function() {
+      try {
+        if (sessionStorage.getItem('mv_welcome_confetti_fired')) return;
+        sessionStorage.setItem('mv_welcome_confetti_fired', '1');
+      } catch {}
+
+      function fire() {
+        if (typeof confetti !== 'function') {
+          // canvas-confetti hasn't loaded yet — try again shortly
+          setTimeout(fire, 120);
+          return;
+        }
+        const accent = '#71dc29';
+        const accentLight = '#a8ff5e';
+        const white = '#ffffff';
+        // Two staggered bursts from each lower corner — feels like a "release"
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          startVelocity: 55,
+          origin: { x: 0.1, y: 0.85 },
+          angle: 60,
+          colors: [accent, accentLight, white],
+          scalar: 1.05,
+          ticks: 220,
+        });
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          startVelocity: 55,
+          origin: { x: 0.9, y: 0.85 },
+          angle: 120,
+          colors: [accent, accentLight, white],
+          scalar: 1.05,
+          ticks: 220,
+        });
+        // Soft top-down sprinkle a moment later
+        setTimeout(() => {
+          confetti({
+            particleCount: 40,
+            spread: 110,
+            startVelocity: 28,
+            origin: { x: 0.5, y: 0.0 },
+            angle: 270,
+            colors: [accent, accentLight, white],
+            scalar: 0.85,
+            ticks: 180,
+          });
+        }, 350);
+      }
+
+      // Wait until the page has actually painted so the burst lands on a
+      // visible UI rather than mid-load skeleton.
+      if (document.readyState === 'complete') {
+        setTimeout(fire, 200);
+      } else {
+        window.addEventListener('load', () => setTimeout(fire, 200), { once: true });
+      }
+    })();
+  </script>
 </body>
 </html>
