@@ -3,9 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MockVault — Professional Photoshop Mockup Plugin</title>
-  <meta name="description" content="The professional clothing mockup plugin built for Photoshop. Cloud-based library, weekly mockup drops, license key activation — nothing to download or manage.">
+  <title>MockVault — Cloud Mockup Library for Photoshop</title>
+  <meta name="description" content="The cloud-based mockup plugin built for Photoshop. 50+ apparel mockups, new ones added weekly, instant license activation — nothing to download or manage.">
   <meta name="facebook-domain-verification" content="8vbfzune796jega8b3998t1d3eebms" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/brand_assets/favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/brand_assets/mockvaultlogo.png">
+  <link rel="apple-touch-icon" href="/brand_assets/favicon.svg">
+
+  <!-- Open Graph (Facebook, Discord, LinkedIn, etc.) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.mockvaultps.com/">
+  <meta property="og:title" content="MockVault — Cloud Mockup Library for Photoshop">
+  <meta property="og:description" content="50+ apparel mockups streamed straight into your Photoshop panel. New ones every week. One-time $74.99 — no subscriptions.">
+  <meta property="og:image" content="https://www.mockvaultps.com/brand_assets/mockvaultui.png">
+  <meta property="og:site_name" content="MockVault">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://www.mockvaultps.com/">
+  <meta name="twitter:title" content="MockVault — Cloud Mockup Library for Photoshop">
+  <meta name="twitter:description" content="50+ apparel mockups streamed straight into your Photoshop panel. New ones every week. One-time $74.99 — no subscriptions.">
+  <meta name="twitter:image" content="https://www.mockvaultps.com/brand_assets/mockvaultui.png">
+
+  <!-- Theme color for mobile browsers -->
+  <meta name="theme-color" content="#080808">
+
+  <!-- Structured data: helps Google show price + product info in search results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "MockVault",
+    "alternateName": "MockVault Cloud Mockup Plugin",
+    "image": "https://www.mockvaultps.com/brand_assets/mockvaultui.png",
+    "description": "The cloud-based apparel mockup plugin for Adobe Photoshop. 50+ mockups streamed straight into your panel, with new ones added weekly.",
+    "brand": { "@type": "Brand", "name": "MockVault" },
+    "offers": {
+      "@type": "Offer",
+      "url": "https://www.mockvaultps.com/",
+      "priceCurrency": "USD",
+      "price": "74.99",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": "2026-05-06"
+    },
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Windows 10+, macOS 11+"
+  }
+  </script>
 
   <!-- Meta Pixel Code -->
   <script>
@@ -509,7 +555,9 @@
 
     .hero-plugin-frame iframe {
       display: block;
-      width: 100%;
+      /* Extend past container so the inner scrollbar gets clipped by
+         .hero-plugin-frame's overflow:hidden — keeps the preview clean. */
+      width: calc(100% + 22px);
       height: 600px;
       border: none;
       pointer-events: none;
@@ -743,8 +791,8 @@
     .feature-card-hero {
       grid-column: span 2;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 40px;
       align-items: center;
       padding: 40px;
     }
@@ -753,17 +801,71 @@
       font-size: 15px;
     }
 
-    .feature-hero-image {
-      width: 100%;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    /* Library breakdown — shows variety in concrete numbers */
+    .library-breakdown {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    .feature-hero-image img {
-      width: 100%;
-      height: auto;
-      display: block;
+    .library-breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: var(--transition);
+    }
+
+    .library-breakdown-item:hover {
+      background: rgba(113,220,41,0.05);
+      border-color: rgba(113,220,41,0.18);
+    }
+
+    .library-breakdown-icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: rgba(113,220,41,0.08);
+      border: 1px solid rgba(113,220,41,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .library-breakdown-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .library-breakdown-count {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .library-breakdown-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .library-breakdown-more {
+      grid-column: span 2;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      padding-top: 4px;
+      letter-spacing: 0.04em;
     }
 
     /* Colorable feature card — fills height with swatch strip */
@@ -774,6 +876,64 @@
 
     .feature-card-colorable .feature-desc {
       flex: 1;
+    }
+
+    /* Weekly Drops card — wide, bottom row of bento */
+    .feature-card-weekly {
+      grid-column: span 2;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .feature-card-weekly .feature-desc { max-width: 360px; }
+
+    .weekly-drops-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .weekly-drop-pill {
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-width: 180px;
+      transition: var(--transition);
+    }
+
+    .weekly-drop-pill.is-latest {
+      background: var(--accent-dim);
+      border-color: var(--border-accent);
+    }
+
+    .weekly-drop-pill-day {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .weekly-drop-pill.is-latest .weekly-drop-pill-day {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .weekly-drop-pill-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Photoshop-native card — small visual ornament */
+    .feature-card-native .feature-icon {
+      background: linear-gradient(135deg, rgba(113,220,41,0.18), rgba(113,220,41,0.04));
     }
 
     .colorable-preview {
@@ -813,9 +973,62 @@
 
     /* ─── DEMO SECTION ───────────────────────────────────── */
     .demo-section {
-      padding: 80px 0 120px;
+      padding: 120px 0 140px;
       position: relative;
       z-index: 1;
+      /* Subtle full-bleed darker band — makes the demo feel like a "moment" */
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.35) 12%, rgba(0,0,0,0.4) 88%, transparent 100%);
+    }
+
+    .demo-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(113,220,41,0.06), transparent 65%);
+      pointer-events: none;
+    }
+
+    .demo-section .section-tag {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      border-radius: 100px;
+      color: var(--accent);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+
+    .demo-section .section-title {
+      font-size: clamp(36px, 4.5vw, 56px);
+    }
+
+    .demo-try-callout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      width: fit-content;
+      margin: 0 auto 14px;
+      background: rgba(113,220,41,0.08);
+      border: 1px solid rgba(113,220,41,0.32);
+      border-radius: 100px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      animation: try-pulse 2.4s ease-in-out infinite;
+      position: relative;
+      z-index: 2;
+    }
+    .demo-try-callout svg { animation: try-bounce 1.6s ease-in-out infinite; }
+    @keyframes try-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(113,220,41,0.35); }
+      50%      { box-shadow: 0 0 0 12px rgba(113,220,41,0); }
+    }
+    @keyframes try-bounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(3px); }
     }
 
     .demo-layout {
@@ -907,9 +1120,15 @@
 
     .demo-panel-glow {
       position: absolute;
-      inset: -40px;
-      background: radial-gradient(ellipse at 50% 50%, rgba(113,220,41,0.12), transparent 65%);
+      inset: -60px;
+      background: radial-gradient(ellipse at 50% 50%, rgba(113,220,41,0.22), transparent 60%);
       pointer-events: none;
+      filter: blur(8px);
+      animation: demo-glow-pulse 4s ease-in-out infinite;
+    }
+    @keyframes demo-glow-pulse {
+      0%, 100% { opacity: 0.85; }
+      50%      { opacity: 1; }
     }
 
     /* Fake Photoshop panel chrome */
@@ -1828,71 +2047,202 @@
       font-weight: 500;
     }
 
-    /* ─── TESTIMONIAL ────────────────────────────────────── */
-    .testimonials {
-      padding: 80px 0;
+    /* ─── STAT BAND ──────────────────────────────────────── */
+    .stat-band {
+      padding: 72px 0;
       position: relative;
       z-index: 1;
     }
 
-    .testimonials-grid {
+    .stat-band-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-
-    .testimonial-card {
-      padding: 28px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      padding: 36px 24px;
+      background: rgba(113,220,41,0.04);
+      border: 1px solid rgba(113,220,41,0.18);
       border-radius: var(--radius-lg);
+      position: relative;
     }
 
-    .testimonial-stars {
-      display: flex;
-      gap: 3px;
-      margin-bottom: 16px;
+    .stat-band-grid::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(113,220,41,0.08), transparent 70%);
+      pointer-events: none;
     }
 
-    .star {
+    .stat-band-item {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-band-num {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 900;
       color: var(--accent);
-      font-size: 14px;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .testimonial-text {
-      font-size: 15px;
-      color: rgba(255,255,255,0.8);
-      line-height: 1.7;
-      margin-bottom: 20px;
-      font-style: italic;
+    .stat-band-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.01em;
     }
 
-    .testimonial-author {
+    /* ─── FAQ ────────────────────────────────────────────── */
+    .faq {
+      padding: 80px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .faq-list {
+      max-width: 720px;
+      margin: 0 auto;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 12px;
     }
-
-    .author-avatar {
-      width: 36px;
-      height: 36px;
+    .faq-item {
+      padding: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+    }
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 28px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .faq-q::-webkit-details-marker { display: none; }
+    .faq-q:hover { background: rgba(255,255,255,0.02); }
+    .faq-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), #3a8a0e);
+      background: rgba(113,220,41,0.1);
+      border: 1px solid rgba(113,220,41,0.25);
+      position: relative;
+      transition: var(--transition);
+    }
+    .faq-icon::before,
+    .faq-icon::after {
+      content: '';
+      position: absolute;
+      inset: 50% 5px auto 5px;
+      height: 1.5px;
+      background: var(--accent);
+      transform: translateY(-50%);
+      transition: transform 0.25s ease;
+    }
+    .faq-icon::after { transform: translateY(-50%) rotate(90deg); }
+    .faq-item[open] .faq-icon { background: var(--accent); border-color: var(--accent); }
+    .faq-item[open] .faq-icon::before,
+    .faq-item[open] .faq-icon::after { background: #000; }
+    .faq-item[open] .faq-icon::after { transform: translateY(-50%) rotate(0); }
+    .faq-a {
+      padding: 0 28px 24px;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    .faq-a strong { color: var(--text); font-weight: 600; }
+    .faq-a a { color: var(--accent); text-decoration: none; }
+    .faq-a a:hover { text-decoration: underline; }
+    .faq-steps {
+      list-style: none;
+      counter-reset: step;
+      padding: 0;
+      margin: 4px 0 0;
+    }
+    .faq-steps li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 32px;
+      margin-bottom: 10px;
+    }
+    .faq-steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0; top: 1px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--border-accent);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    /* ─── MOBILE STICKY CTA ──────────────────────────────── */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 90;
+      padding: 10px 14px;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(113,220,41,0.25);
+      border-radius: 100px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 24px rgba(113,220,41,0.15);
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      opacity: 0;
+      transform: translateY(120%);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .mobile-sticky-cta.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .mobile-sticky-cta-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+      padding-left: 8px;
+    }
+    .mobile-sticky-cta-price {
       font-size: 14px;
       font-weight: 700;
-      color: #000;
-      flex-shrink: 0;
+      color: var(--text);
+      letter-spacing: -0.01em;
     }
-
-    .author-name {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .author-role {
-      font-size: 12px;
+    .mobile-sticky-cta-was {
+      font-size: 11px;
       color: var(--text-dim);
+    }
+    .mobile-sticky-cta .btn {
+      padding: 10px 18px;
+      font-size: 13px;
+      flex-shrink: 0;
     }
 
     /* ─── FINAL CTA BAND ─────────────────────────────────── */
@@ -1919,12 +2269,14 @@
     }
 
     .final-cta-title {
-      font-size: clamp(36px, 5vw, 56px);
+      font-size: clamp(30px, 5vw, 56px);
       font-weight: 900;
       letter-spacing: -0.03em;
+      line-height: 1.05;
       margin-bottom: 20px;
       position: relative;
       z-index: 1;
+      text-wrap: balance;
     }
 
     .final-cta-sub {
@@ -2021,29 +2373,32 @@
 
     /* ─── RESPONSIVE ─────────────────────────────────────── */
     @media (max-width: 900px) {
-      /* Layout */
-      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-      .hero-visual { order: -1; }
-      .hero-plugin-frame { max-width: 380px; }
-      .hero-plugin-frame iframe { height: 460px; }
+      /* Hero: stack with text first (centered), plugin UI below taller */
+      .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+      .hero-content { text-align: center; align-items: center; }
+      .hero-content > * { max-width: 100%; }
+      .hero-subtitle { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero-plugin-frame { max-width: 100%; }
+      .hero-plugin-frame iframe { height: 580px; }
       .hero-float-tag.tag-1,
       .hero-float-tag.tag-2 { display: none; }
+      /* Layout */
       .features-grid { grid-template-columns: 1fr 1fr; }
       .feature-card-hero { grid-column: span 2; }
+      .feature-card-weekly { grid-column: span 2; grid-template-columns: 1fr; gap: 24px; }
       .how-grid { grid-template-columns: 1fr; gap: 16px; }
-      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+      .stat-band-grid { grid-template-columns: repeat(2, 1fr); gap: 32px 16px; }
       .categories-grid { grid-template-columns: repeat(2, 1fr); }
       .nav-links { display: none; }
       .nav-cta .btn { font-size: 13px; padding: 9px 16px; }
       .nav-cta .btn svg { display: none; }
       /* Section spacing */
       .hero { padding: 100px 0 64px; }
-      .hero-subtitle { font-size: 16px; margin-bottom: 40px; }
-      .hero-actions { margin-bottom: 40px; }
+      .hero-subtitle { font-size: 16px; margin-bottom: 32px; }
+      .hero-actions { margin-bottom: 8px; }
       .features { padding: 80px 0; }
       .how { padding: 80px 0; }
-      .whats-inside { padding: 60px 0 80px; }
-      .testimonials { padding: 60px 0; }
       .pricing { padding: 60px 0 80px; }
       .final-cta { padding: 72px 0; }
       .section-header { margin-bottom: 48px; }
@@ -2054,10 +2409,14 @@
       .container { padding: 0 18px; }
       .features-grid { grid-template-columns: 1fr; }
       .feature-card-hero { grid-column: span 1; grid-template-columns: 1fr; }
-      .testimonials-grid { grid-template-columns: 1fr; }
+      .feature-card-weekly { grid-column: span 1; }
+      .weekly-drops-preview { width: 100%; justify-content: stretch; }
+      .weekly-drop-pill { flex: 1; }
+      .stat-band { padding: 48px 0; }
+      .stat-band-grid { padding: 28px 16px; gap: 28px 12px; }
       .categories-grid { grid-template-columns: 1fr 1fr; }
       .hero-plugin-frame { max-width: 100%; border-radius: 14px; }
-      .hero-plugin-frame iframe { height: 390px; }
+      .hero-plugin-frame iframe { height: 540px; }
       /* Hero */
       .hero { padding: 88px 0 48px; }
       .hero-subtitle { font-size: 15px; margin-bottom: 24px; }
@@ -2077,10 +2436,16 @@
       .section-header { margin-bottom: 32px; }
       .features { padding: 60px 0; }
       .how { padding: 60px 0; }
-      .whats-inside { padding: 48px 0 56px; }
-      .testimonials { padding: 48px 0; }
       .pricing { padding: 48px 0 60px; }
+      .faq { padding: 56px 0; }
       .final-cta { padding: 52px 0; }
+      /* FAQ tighter on mobile */
+      .faq-q { padding: 18px 22px; font-size: 15px; }
+      .faq-a { padding: 0 22px 20px; font-size: 14px; }
+      /* Mobile sticky CTA: enable on phones */
+      .mobile-sticky-cta { display: flex; }
+      /* Pad page bottom so sticky CTA doesn't overlap footer copy */
+      footer { padding-bottom: 88px; }
       /* Cards */
       .feature-card { padding: 24px 22px; }
       .how-card { padding: 28px 22px; }
@@ -2107,7 +2472,7 @@
       .container { padding: 0 16px; }
       /* Hero */
       .hero { padding: 80px 0 40px; }
-      .hero-plugin-frame iframe { height: 340px; }
+      .hero-plugin-frame iframe { height: 500px; }
       .hero-stat { padding: 10px 6px; }
       .hero-stat-icon { width: 24px; height: 24px; border-radius: 6px; }
       .hero-stat-icon svg { width: 12px; height: 12px; }
@@ -2339,12 +2704,12 @@
         <ul class="nav-links">
           <li><a href="#features">Features</a></li>
           <li><a href="#demo">Demo</a></li>
-          <li><a href="#whats-inside">Mockups</a></li>
+          <li><a href="#features">Mockups</a></li>
           <li><a href="#pricing">Pricing</a></li>
         </ul>
 
         <div class="nav-cta">
-          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary" target="_blank" rel="noopener">
+          <a href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary" target="_blank" rel="noopener">
             Get MockVault
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
@@ -2376,7 +2741,7 @@
           </p>
 
           <div class="hero-actions reveal reveal-delay-3">
-            <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+            <a href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
               Get MockVault Now
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
@@ -2389,37 +2754,6 @@
             </div>
           </div>
 
-          <div class="hero-stats reveal reveal-delay-4">
-            <div class="hero-stat">
-              <div class="hero-stat-icon">
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v2M11 1v2M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <div class="hero-stat-text">
-                <span class="hero-stat-number">50+ Mockups</span>
-                <span class="hero-stat-label">New ones added weekly</span>
-              </div>
-            </div>
-            <div class="hero-stat-divider"></div>
-            <div class="hero-stat">
-              <div class="hero-stat-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-              </div>
-              <div class="hero-stat-text">
-                <span class="hero-stat-number">Cloud Library</span>
-                <span class="hero-stat-label">Nothing to download</span>
-              </div>
-            </div>
-            <div class="hero-stat-divider"></div>
-            <div class="hero-stat">
-              <div class="hero-stat-icon">
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 8l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="hero-stat-text">
-                <span class="hero-stat-number">License Key</span>
-                <span class="hero-stat-label">One-time activation</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         <!-- Right: Live Plugin UI (non-interactive showcase) -->
@@ -2465,7 +2799,7 @@
       <div class="trust-separator"></div>
       <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 5v4l2.5 2.5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>One-Time Purchase</div>
       <div class="trust-separator"></div>
-      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Professional Quality</div>
+      <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Print-Ready Quality</div>
       <div class="trust-separator"></div>
       <div class="trust-item"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 15V7M9 15V3M15 15v-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Constantly Growing</div>
       <div class="trust-separator"></div>
@@ -2480,7 +2814,7 @@
       <div class="trust-separator" aria-hidden="true"></div>
       <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="rgba(113,220,41,0.7)" stroke-width="1.5"/><path d="M9 5v4l2.5 2.5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>One-Time Purchase</div>
       <div class="trust-separator" aria-hidden="true"></div>
-      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Professional Quality</div>
+      <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M9 2l1.8 3.8L15 6.5l-3 2.9.7 4.1L9 11.4l-3.7 2.1.7-4.1-3-2.9 4.2-.7L9 2z" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linejoin="round"/></svg>Print-Ready Quality</div>
       <div class="trust-separator" aria-hidden="true"></div>
       <div class="trust-item" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 15V7M9 15V3M15 15v-5" stroke="rgba(113,220,41,0.7)" stroke-width="1.5" stroke-linecap="round"/></svg>Constantly Growing</div>
       <div class="trust-separator" aria-hidden="true"></div>
@@ -2498,21 +2832,49 @@
     <div class="container">
       <div class="section-header reveal">
         <div class="section-tag">Features</div>
-        <h2 class="section-title">Built for speed.<br>Designed for pros.</h2>
+        <h2 class="section-title">Built for speed.<br>Made for designers.</h2>
         <p class="section-subtitle">Everything you need to present your apparel designs without the friction.</p>
       </div>
 
       <div class="features-grid">
 
-        <!-- Big card with image -->
+        <!-- Big card with library breakdown -->
         <div class="feature-card feature-card-hero glass-border reveal">
           <div>
-            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
             <h3 class="feature-title">Cloud Mockup Library</h3>
-            <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — all hosted in the cloud and loaded directly into your panel. No folders, no unzipping, nothing to manage.</p>
+            <p class="feature-desc">Hoodies, tees, longsleeves, pants and more — streamed straight into your panel. No folders, no downloads, nothing to manage.</p>
           </div>
-          <div class="feature-hero-image">
-            <img src="brand_assets/mockvaultui.png" alt="MockVault library UI">
+          <div class="library-breakdown" aria-hidden="true">
+            <div class="library-breakdown-item">
+              <span class="library-breakdown-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/></svg></span>
+              <span class="library-breakdown-text">
+                <span class="library-breakdown-count">14+</span>
+                <span class="library-breakdown-label">T-Shirts</span>
+              </span>
+            </div>
+            <div class="library-breakdown-item">
+              <span class="library-breakdown-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2l-2 3.5c-.5.86-1.34 1.5-2 1.5s-1.5-.64-2-1.5L8 2 3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/><rect x="9" y="13" width="6" height="4" rx="1"/></svg></span>
+              <span class="library-breakdown-text">
+                <span class="library-breakdown-count">12+</span>
+                <span class="library-breakdown-label">Hoodies</span>
+              </span>
+            </div>
+            <div class="library-breakdown-item">
+              <span class="library-breakdown-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2a4 4 0 0 1-8 0L3 4.5v7l3-1.5V21h12V10l3 1.5v-7L16 2z"/></svg></span>
+              <span class="library-breakdown-text">
+                <span class="library-breakdown-count">10+</span>
+                <span class="library-breakdown-label">Longsleeves</span>
+              </span>
+            </div>
+            <div class="library-breakdown-item">
+              <span class="library-breakdown-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h16v5l-2.5 15H14l-2-10-2 10H6.5L4 7V2z"/><line x1="4" y1="7" x2="20" y2="7"/></svg></span>
+              <span class="library-breakdown-text">
+                <span class="library-breakdown-count">8+</span>
+                <span class="library-breakdown-label">Pants</span>
+              </span>
+            </div>
+            <div class="library-breakdown-more">+ new categories every week</div>
           </div>
         </div>
 
@@ -2535,22 +2897,28 @@
           </div>
         </div>
 
-        <div class="feature-card glass-border reveal">
+        <div class="feature-card feature-card-native glass-border reveal">
           <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
           <h3 class="feature-title">Photoshop Native</h3>
-          <p class="feature-desc">Works directly as a Photoshop plugin. No exports, no context switching — your mockup library lives right inside your workspace.</p>
+          <p class="feature-desc">Lives inside Photoshop as a UXP panel — no exports, no context switching. Open the panel, click a mockup, it lands on your canvas.</p>
         </div>
 
-        <div class="feature-card glass-border reveal reveal-delay-1">
-          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-          <h3 class="feature-title">Smart Search & Filters</h3>
-          <p class="feature-desc">Find exactly the mockup you need in seconds. Filter by category, search by name, and switch between grid and list views effortlessly.</p>
-        </div>
-
-        <div class="feature-card glass-border reveal reveal-delay-2">
-          <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
-          <h3 class="feature-title">Weekly Mockup Drops</h3>
-          <p class="feature-desc">New mockups are added to the cloud every week and appear in your panel automatically — no updates, no re-downloads, nothing to install.</p>
+        <div class="feature-card feature-card-weekly glass-border reveal reveal-delay-1">
+          <div>
+            <div class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+            <h3 class="feature-title">Weekly Mockup Drops</h3>
+            <p class="feature-desc">New mockups land in your panel automatically every week — no updates, no re-downloads, nothing to install. Pay once, grow forever.</p>
+          </div>
+          <div class="weekly-drops-preview" aria-hidden="true">
+            <div class="weekly-drop-pill is-latest">
+              <span class="weekly-drop-pill-day">This week</span>
+              <span class="weekly-drop-pill-count">+4 new</span>
+            </div>
+            <div class="weekly-drop-pill">
+              <span class="weekly-drop-pill-day">Last week</span>
+              <span class="weekly-drop-pill-count">+5 new</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -2564,7 +2932,6 @@
 
         <!-- Left: Context -->
         <div class="demo-content">
-          <div class="section-tag reveal">Try it yourself</div>
           <h2 class="section-title reveal reveal-delay-1">
             The real plugin.<br>
             <span style="background:linear-gradient(90deg,#71dc29,#a8ff5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Live in your browser.</span>
@@ -2588,15 +2955,14 @@
             </li>
           </ul>
 
-          <div class="demo-hint reveal reveal-delay-3">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M8 7v4M8 5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span>Hoodies only in this demo — the full plugin includes T-Shirts, Longsleeves, Pants, Shorts & more with weekly drops.</span>
-          </div>
-
         </div>
 
         <!-- Right: Plugin Panel + PS Canvas -->
         <div class="demo-panel-wrap reveal reveal-delay-1">
+          <div class="demo-try-callout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            <span>Click anywhere — it's the real plugin</span>
+          </div>
           <div class="demo-panel-glow"></div>
           <div class="demo-panels-row">
 
@@ -2689,7 +3055,7 @@
 
       <!-- CTA after demo — shock factor -->
       <div class="demo-post-cta reveal">
-        <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+        <a href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
           Get the Full Plugin — $74.99
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
@@ -2699,127 +3065,25 @@
     </div>
   </section>
 
-  <!-- ─── HOW IT WORKS ──────────────────────────────────────── -->
-  <section class="how" id="how-it-works">
+  <!-- ─── STAT BAND (was: testimonials — placeholder until real reviews come in) ─── -->
+  <section class="stat-band">
     <div class="container">
-      <div class="section-header centered reveal">
-        <div class="section-tag">How It Works</div>
-        <h2 class="section-title">From install to mockup<br>in under a minute.</h2>
-      </div>
-
-      <div class="how-grid">
-        <div class="how-card glass-border reveal">
-          <div class="how-number">01</div>
-          <h3 class="how-title">Install the Plugin</h3>
-          <p class="how-desc">Download MockVault and install it as a Photoshop plugin in a few clicks. Works on Windows and Mac, Photoshop 2021 and up.</p>
+      <div class="stat-band-grid reveal">
+        <div class="stat-band-item">
+          <div class="stat-band-num">50+</div>
+          <div class="stat-band-label">Apparel mockups</div>
         </div>
-        <div class="how-card glass-border reveal reveal-delay-1">
-          <div class="how-number">02</div>
-          <h3 class="how-title">Activate with License Key</h3>
-          <p class="how-desc">Enter your Gumroad license key once on first launch. MockVault activates instantly and loads your full cloud library — no setup, no folders.</p>
+        <div class="stat-band-item">
+          <div class="stat-band-num">1</div>
+          <div class="stat-band-label">Plugin, one-time price</div>
         </div>
-        <div class="how-card glass-border reveal reveal-delay-2">
-          <div class="how-number">03</div>
-          <h3 class="how-title">Browse, Pick & Apply</h3>
-          <p class="how-desc">Search your mockup library, pick a garment, choose a color if needed, and click to apply. Done — in minutes, not hours.</p>
+        <div class="stat-band-item">
+          <div class="stat-band-num">∞</div>
+          <div class="stat-band-label">Weekly drops, free</div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── WHAT'S INSIDE ─────────────────────────────────────── -->
-  <section class="whats-inside" id="whats-inside">
-    <div class="container">
-      <div class="section-header reveal">
-        <div class="section-tag">The Library</div>
-        <h2 class="section-title">Every garment<br>you present.</h2>
-        <p class="section-subtitle">50+ mockups and growing — new categories and styles are added to the cloud every week. Each style comes in black, white, and colorable variants.</p>
-      </div>
-
-      <div class="categories-grid reveal">
-        <div class="category-chip glass-border">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2l-2 3.5c-.5.86-1.34 1.5-2 1.5s-1.5-.64-2-1.5L8 2 3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/><rect x="9" y="13" width="6" height="4" rx="1"/></svg></div>
-          Hoodies
-        </div>
-        <div class="category-chip glass-border">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46A2 2 0 0 0 2.28 5.7l.58 3.57A1 1 0 0 0 4.07 10H6v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V10h1.93a1 1 0 0 0 1.21-.73l.58-3.57a2 2 0 0 0-1.34-2.24z"/></svg></div>
-          T-Shirts
-        </div>
-        <div class="category-chip glass-border">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 2a4 4 0 0 1-8 0L3 4.5v7l3-1.5V21h12V10l3 1.5v-7L16 2z"/></svg></div>
-          Longsleeves
-        </div>
-        <div class="category-chip glass-border">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2h16v5l-2.5 15H14l-2-10-2 10H6.5L4 7V2z"/><line x1="4" y1="7" x2="20" y2="7"/></svg></div>
-          Pants
-        </div>
-        <div class="category-chip glass-border" style="grid-column: span 2;">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c1.1 0 2-.9 2-2 0-.55-.22-1.05-.56-1.43a1 1 0 0 1 .76-1.66H16c3.31 0 6-2.69 6-6 0-4.42-4.48-8-10-8z"/><circle cx="6.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/><circle cx="17.5" cy="11.5" r="1.5" fill="currentColor" stroke="none"/></svg></div>
-          <div>
-            <div style="font-size:15px;font-weight:600;">Colorable Variants</div>
-            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Push designs further with recolorable garments</div>
-          </div>
-        </div>
-        <div class="category-chip glass-border" style="grid-column: span 2;">
-          <div class="category-chip-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3-3 3 3 3-3 3 3 3-3 3 3"/><path d="M3 14l3-3 3 3 3-3 3 3 3-3 3 3"/><path d="M3 20l3-3 3 3 3-3 3 3 3-3 3 3"/></svg></div>
-          <div>
-            <div style="font-size:15px;font-weight:600;">Distressed Variants</div>
-            <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">Vintage & worn-in aesthetics for streetwear brands</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─── TESTIMONIALS ──────────────────────────────────────── -->
-  <section class="testimonials">
-    <div class="container">
-      <div class="section-header centered reveal">
-        <div class="section-tag">Reviews</div>
-        <h2 class="section-title">Designers love it.</h2>
-      </div>
-
-      <div class="testimonials-grid">
-        <div class="testimonial-card glass-border reveal">
-          <div class="testimonial-stars">
-            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-          </div>
-          <p class="testimonial-text">"MockVault completely changed how I present my apparel clients. It's in Photoshop, it's fast, and the quality is insane."</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">JM</div>
-            <div>
-              <div class="author-name">Jordan M.</div>
-              <div class="author-role">Apparel Designer</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card glass-border reveal reveal-delay-1">
-          <div class="testimonial-stars">
-            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-          </div>
-          <p class="testimonial-text">"The colorable mockups are a game changer. I can show clients multiple colorways in minutes instead of hours."</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">SR</div>
-            <div>
-              <div class="author-name">Sofia R.</div>
-              <div class="author-role">Brand Identity Designer</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card glass-border reveal reveal-delay-2">
-          <div class="testimonial-stars">
-            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-          </div>
-          <p class="testimonial-text">"Finally a mockup plugin that doesn't feel like an afterthought. The UI is clean, the mockups are excellent, worth every penny."</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">DK</div>
-            <div>
-              <div class="author-name">Daniel K.</div>
-              <div class="author-role">Streetwear Designer</div>
-            </div>
-          </div>
+        <div class="stat-band-item">
+          <div class="stat-band-num">3</div>
+          <div class="stat-band-label">Devices per license</div>
         </div>
       </div>
     </div>
@@ -2877,17 +3141,17 @@
         </div>
 
         <ul class="pricing-features">
-          <li>50+ professional clothing mockups</li>
+          <li>50+ apparel mockups, new ones added weekly</li>
           <li>Hoodies, Tees, Longsleeves & Pants</li>
           <li>Black, white & colorable variants</li>
           <li>Cloud-hosted — nothing to download or manage</li>
-          <li>License key activation via Gumroad</li>
+          <li>License key activation + device dashboard</li>
           <li>Weekly mockup drops, auto-delivered to your panel</li>
           <li>Works on Windows & Mac, Photoshop 2021+</li>
         </ul>
 
         <a
-          href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});"
+          href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});"
           class="btn btn-primary pricing-cta"
           target="_blank"
           rel="noopener"
@@ -2895,7 +3159,84 @@
           Buy MockVault — $74.99
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <p class="pricing-note">Secure checkout via Gumroad · License key delivered instantly · Price returns to $124.99 after sale</p>
+        <p class="pricing-note">Secure checkout via Stripe · License key delivered instantly · Price returns to $124.99 after sale</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ ───────────────────────────────────────────────── -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-header centered reveal">
+        <div class="section-tag">Common Questions</div>
+        <h2 class="section-title">Before you buy.</h2>
+      </div>
+
+      <div class="faq-list reveal">
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>How does it work, start to finish?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            <ol class="faq-steps">
+              <li><strong>Install the plugin.</strong> Download MockVault, double-click the .ccx, Adobe Creative Cloud handles the rest.</li>
+              <li><strong>Activate with your license key.</strong> Paste the key from your purchase email — once. MockVault loads your full cloud library instantly.</li>
+              <li><strong>Browse, pick, apply.</strong> Search by name, filter by category, pick a garment color if needed, click to drop it on your canvas.</li>
+            </ol>
+            <p style="margin-top:12px">From install to first mockup is under a minute.</p>
+          </div>
+        </details>
+
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>Will it work with my Photoshop?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            MockVault works with <strong>Photoshop 2021 (version 22.0) or newer</strong>, on Windows 10/11 or macOS 11+. You'll need Adobe Creative Cloud Desktop installed. If you primarily use Photoshop Beta, the stable version still needs to be installed alongside it.
+          </div>
+        </details>
+
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>Can I install on more than one computer?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            Yes — your license activates on <strong>up to 3 devices</strong>. You can see and manage your active devices from your account dashboard, and deactivate any of them anytime to free up a slot for a new machine.
+          </div>
+        </details>
+
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>Will I get future mockups + updates?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            Yes, free for life. New mockups are added to the cloud library every week and appear in your panel automatically — no subscriptions, no extra payments, no re-downloads. Plugin updates are pushed the same way.
+          </div>
+        </details>
+
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>Is this a subscription?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            <strong>No.</strong> MockVault is a one-time purchase — pay once, use forever. Launch pricing of $74.99 ends May 6, 2026, after which it returns to $124.99. Either way, no recurring fees, no renewals.
+          </div>
+        </details>
+
+        <details class="faq-item glass-border">
+          <summary class="faq-q">
+            <span>What if I run into problems?</span>
+            <span class="faq-icon"></span>
+          </summary>
+          <div class="faq-a">
+            Email <a href="mailto:support@mockvaultps.com">support@mockvaultps.com</a> with your Photoshop version + OS and we'll get back to you. Most install issues are resolved in one reply.
+          </div>
+        </details>
       </div>
     </div>
   </section>
@@ -2905,12 +3246,12 @@
     <div class="container">
       <div class="final-cta-card glass-border reveal">
         <h2 class="final-cta-title">
-          Stop hunting for mockups.<br>
-          <span style="background: linear-gradient(90deg, #71dc29, #a8ff5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Start designing faster.</span>
+          Mockups, sorted.<br>
+          <span style="background: linear-gradient(90deg, #71dc29, #a8ff5e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Now go design.</span>
         </h2>
-        <p class="final-cta-sub">MockVault is the last mockup tool you'll ever need inside Photoshop.</p>
+        <p class="final-cta-sub">The last mockup tool you'll need inside Photoshop.</p>
         <div class="final-cta-actions">
-          <a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
+          <a href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" class="btn btn-primary btn-primary-lg" target="_blank" rel="noopener">
             Get MockVault — $74.99
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
@@ -2925,11 +3266,11 @@
     <div class="container">
       <div class="footer-inner">
         <a class="footer-logo" href="#">
-          <img src="brand_assets/mockvaultlogo.png" alt="MockVault">
+          <img src="brand_assets/mockvaultlogo.png" alt="MockVault" loading="lazy">
         </a>
 
         <ul class="footer-links">
-          <li><a href="https://mvvthw.gumroad.com/l/mockvault?wanted=true&utm_source=website&utm_medium=cta&utm_campaign=mockvault" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" target="_blank" rel="noopener">Buy Now</a></li>
+          <li><a href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" target="_blank" rel="noopener">Buy Now</a></li>
           <li><a href="#features">Features</a></li>
           <li><a href="#pricing">Pricing</a></li>
         </ul>
@@ -2939,8 +3280,36 @@
     </div>
   </footer>
 
+  <!-- ─── MOBILE STICKY CTA ─────────────────────────────────── -->
+  <a id="mobileStickyCta" class="mobile-sticky-cta" href="https://buy.stripe.com/4gMcN74Bl0T837vdJX3Ru00" onclick="fbq('track', 'InitiateCheckout', {value: 74.99, currency: 'USD'});" target="_blank" rel="noopener">
+    <div class="mobile-sticky-cta-text">
+      <span class="mobile-sticky-cta-price">MockVault — $74.99</span>
+      <span class="mobile-sticky-cta-was">One-time · was $124.99</span>
+    </div>
+    <span class="btn btn-primary">
+      Get it
+      <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </span>
+  </a>
+
+
   <!-- ─── SCRIPTS ───────────────────────────────────────────── -->
   <script>
+    // ─── MOBILE STICKY CTA ────────────────────────────────────
+    // Show after the hero's CTA scrolls out of view; hide while CTA is on-screen.
+    (function() {
+      const sticky = document.getElementById('mobileStickyCta');
+      const heroActions = document.querySelector('.hero-actions');
+      if (!sticky || !heroActions) return;
+      const obs = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) sticky.classList.remove('visible');
+          else                  sticky.classList.add('visible');
+        }
+      }, { rootMargin: '0px 0px -40% 0px' });
+      obs.observe(heroActions);
+    })();
+
     // ─── NAV SCROLL ────────────────────────────────────────────
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
@@ -2951,24 +3320,21 @@
       }
     });
 
-    // ─── CURSOR GLOW ───────────────────────────────────────────
-    const cursorGlow = document.getElementById('cursorGlow');
-    let mouseX = 0, mouseY = 0;
-    let glowX = 0, glowY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    });
-
-    function animateCursor() {
-      glowX += (mouseX - glowX) * 0.08;
-      glowY += (mouseY - glowY) * 0.08;
-      cursorGlow.style.left = glowX + 'px';
-      cursorGlow.style.top = glowY + 'px';
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
+    // ─── CURSOR GLOW (desktop only — skip on touch devices) ────
+    (function() {
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      const cursorGlow = document.getElementById('cursorGlow');
+      if (!cursorGlow) return;
+      let mouseX = 0, mouseY = 0, glowX = 0, glowY = 0;
+      document.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
+      (function animate() {
+        glowX += (mouseX - glowX) * 0.08;
+        glowY += (mouseY - glowY) * 0.08;
+        cursorGlow.style.left = glowX + 'px';
+        cursorGlow.style.top  = glowY + 'px';
+        requestAnimationFrame(animate);
+      })();
+    })();
 
 
     // ─── SCROLL REVEAL ─────────────────────────────────────────
@@ -2995,29 +3361,25 @@
       progressBar.style.width = (Math.min(pct, 1) * 100) + '%';
     }, { passive: true });
 
-    // ─── CARD CURSOR SPOTLIGHT ─────────────────────────────────
-    document.querySelectorAll('.feature-card, .how-card, .testimonial-card, .category-chip').forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    // ─── CARD CURSOR SPOTLIGHT (desktop only) ──────────────────
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      document.querySelectorAll('.feature-card, .how-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          card.style.setProperty('--my', `${e.clientY - r.top}px`);
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.setProperty('--mx', '-200px');
+          card.style.setProperty('--my', '-200px');
+        });
       });
-      card.addEventListener('mouseleave', () => {
-        card.style.setProperty('--mx', '-200px');
-        card.style.setProperty('--my', '-200px');
-      });
-    });
+    }
 
     // ─── STAGGERED GRID REVEALS ────────────────────────────────
-    // Feature cards (3 small ones — big card already has stagger)
     document.querySelectorAll('.features-grid .feature-card').forEach((el, i) => {
       el.style.transitionDelay = `${i * 0.09}s`;
     });
-    // Testimonial cards
-    document.querySelectorAll('.testimonials-grid .testimonial-card').forEach((el, i) => {
-      el.style.transitionDelay = `${i * 0.11}s`;
-    });
-    // How cards
     document.querySelectorAll('.how-grid .how-card').forEach((el, i) => {
       el.style.transitionDelay = `${i * 0.13}s`;
     });
@@ -3185,22 +3547,8 @@
     }
 
     // ─── COUNTDOWN TIMER ───────────────────────────────────────
-    // Each visitor gets a random end date (2–7 days from first visit),
-    // stored in localStorage so it stays consistent on return visits.
-    (function() {
-      const KEY = 'mv_sale_end';
-      let stored = localStorage.getItem(KEY);
-      if (!stored) {
-        // Random offset: 2 days + up to 5 extra days, randomized per visitor
-        const msPerDay = 24 * 60 * 60 * 1000;
-        const offset = (2 + Math.floor(Math.random() * 5)) * msPerDay
-                     + Math.floor(Math.random() * msPerDay); // sub-day jitter
-        stored = String(Date.now() + offset);
-        localStorage.setItem(KEY, stored);
-      }
-      window._SALE_END = new Date(parseInt(stored, 10));
-    })();
-    const SALE_END = window._SALE_END;
+    // Real launch-pricing deadline: midnight UTC on May 6, 2026.
+    const SALE_END = new Date(Date.UTC(2026, 4, 6, 23, 59, 59)); // months are 0-indexed → 4 = May
 
     function pad(n) { return String(n).padStart(2, '0'); }
 
