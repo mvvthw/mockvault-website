@@ -30,7 +30,7 @@
     (function () {
       try {
         var sid = new URLSearchParams(window.location.search).get('session_id');
-        if (!sid || !/^cs_[A-Za-z0-9_]+$/.test(sid)) return;
+        if (!sid || !/^cs_live_[A-Za-z0-9_]+$/.test(sid)) return;
         var ck = 'mv_pxfired_' + sid;
         if (document.cookie.indexOf(ck + '=1') !== -1) return;
         fbq('track', 'Purchase', {
