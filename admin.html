@@ -560,6 +560,52 @@
       box-shadow: 0 0 0 1px rgba(99,102,241,0.3) inset;
     }
 
+    /* ─── RELEASES ─────────────────────────────────────── */
+    .releases-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .release-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .release-row .release-meta { flex: 1; min-width: 0; }
+    .release-version {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .release-latest-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(113,220,41,0.16);
+      color: #71dc29;
+      border: 1px solid rgba(113,220,41,0.3);
+    }
+    .release-date { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .release-changelog {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-top: 8px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .release-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .release-actions .btn-sm { padding: 7px 14px; font-size: 12px; }
+
     /* ─── ANALYTICS ─────────────────────────────────────── */
     .range-bar {
       display: flex;
@@ -784,6 +830,7 @@
         <div class="tabs-bar" role="tablist">
           <button type="button" class="tab-btn active" data-tab="licenses" role="tab">Licenses</button>
           <button type="button" class="tab-btn" data-tab="analytics" role="tab">Analytics</button>
+          <button type="button" class="tab-btn" data-tab="releases" role="tab">Releases</button>
         </div>
 
         <!-- ─── LICENSES TAB ─── -->
@@ -1006,6 +1053,54 @@
               </div>
             </div>
             <ul class="mini-list" id="an-countries"><li class="empty-state">Loading…</li></ul>
+          </div>
+        </section>
+
+        <!-- ─── RELEASES TAB ─── -->
+        <section class="tab-panel" data-tab-panel="releases" role="tabpanel" hidden>
+          <div class="panel glass-border">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Publish a new release</div>
+                <div class="panel-sub">Upload a .ccx build, set version + changelog, optionally mark as latest.</div>
+              </div>
+            </div>
+            <form id="release-form" class="form-stack">
+              <div class="form-row">
+                <div>
+                  <label class="form-label" for="release-version">Version</label>
+                  <input class="input" id="release-version" type="text" placeholder="2.3.0" required autocomplete="off">
+                </div>
+                <div>
+                  <label class="form-label" for="release-file">Build (.ccx)</label>
+                  <input class="input" id="release-file" type="file" accept=".ccx,application/zip,application/octet-stream" required>
+                </div>
+              </div>
+              <div>
+                <label class="form-label" for="release-changelog">Changelog</label>
+                <textarea class="textarea" id="release-changelog" rows="5" placeholder="What's new in this release?"></textarea>
+                <div class="form-hint">Plain text. Visible on the public /changelog page.</div>
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" id="release-latest" checked>
+                Mark this release as the latest (used by the account download button + changelog "latest" tag)
+              </label>
+              <div class="form-row" style="align-items:center; gap:16px">
+                <button type="submit" class="btn btn-primary" id="release-submit" style="flex:0 0 auto">Publish release</button>
+                <span id="release-msg" class="form-hint" style="margin:0"></span>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel glass-border" style="margin-top:24px">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Releases</div>
+                <div class="panel-sub">All published builds.</div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="releases-refresh">Refresh</button>
+            </div>
+            <ul class="releases-list" id="releases-list"><li class="empty-state">Loading…</li></ul>
           </div>
         </section>
       </div>
@@ -1449,8 +1544,9 @@
     const tabBtns   = document.querySelectorAll(".tab-btn");
     const tabPanels = document.querySelectorAll("[data-tab-panel]");
     const pageTitle = document.getElementById("page-title");
-    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics" };
+    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics", releases: "Plugin releases" };
     let analyticsLoadedRange = null;
+    let releasesLoaded = false;
 
     function setActiveTab(name) {
       tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
@@ -1463,6 +1559,9 @@
           // Panel was just unhidden — redraw at its now-known width.
           requestAnimationFrame(() => renderAnalyticsChart(lastChartRows, lastChartDays));
         }
+      }
+      if (name === "releases" && !releasesLoaded) {
+        loadReleases();
       }
     }
     tabBtns.forEach(b => b.addEventListener("click", () => setActiveTab(b.dataset.tab)));
@@ -1685,6 +1784,138 @@
       return String.fromCodePoint(A + code.toUpperCase().charCodeAt(0) - 65) +
              String.fromCodePoint(A + code.toUpperCase().charCodeAt(1) - 65);
     }
+
+    // ─── Releases ────────────────────────────────────────
+    const RELEASES_BUCKET = "plugin-releases";
+    const releasesList    = document.getElementById("releases-list");
+    const releaseForm     = document.getElementById("release-form");
+    const releaseVersion  = document.getElementById("release-version");
+    const releaseFile     = document.getElementById("release-file");
+    const releaseChangelog= document.getElementById("release-changelog");
+    const releaseLatest   = document.getElementById("release-latest");
+    const releaseSubmit   = document.getElementById("release-submit");
+    const releaseMsg      = document.getElementById("release-msg");
+
+    document.getElementById("releases-refresh").addEventListener("click", () => loadReleases());
+
+    function setReleaseMsg(text, type) {
+      releaseMsg.textContent = text || "";
+      releaseMsg.style.color = type === "error" ? "#ff7676" : type === "success" ? "#71dc29" : "";
+    }
+
+    async function loadReleases() {
+      releasesList.innerHTML = '<li class="empty-state">Loading…</li>';
+      const { data, error } = await supabase
+        .from("plugin_releases")
+        .select("id, version, download_url, changelog, released_at, is_latest")
+        .order("released_at", { ascending: false });
+      if (error) {
+        releasesList.innerHTML = `<li class="empty-state">Couldn't load releases — ${escapeHtml(error.message)}</li>`;
+        return;
+      }
+      releasesLoaded = true;
+      if (!data || !data.length) {
+        releasesList.innerHTML = '<li class="empty-state">No releases yet. Publish your first one above.</li>';
+        return;
+      }
+      releasesList.innerHTML = data.map(r => `
+        <li class="release-row" data-release-id="${r.id}">
+          <div class="release-meta">
+            <div class="release-version">
+              v${escapeHtml(r.version)}
+              ${r.is_latest ? '<span class="release-latest-badge">Latest</span>' : ''}
+            </div>
+            <div class="release-date">${escapeHtml(formatDate(r.released_at))}</div>
+            ${r.changelog ? `<div class="release-changelog">${escapeHtml(r.changelog)}</div>` : ""}
+            <div class="release-date" style="margin-top:8px"><a href="${escapeHtml(r.download_url)}" target="_blank" rel="noopener" style="color:var(--text-muted)">${escapeHtml(r.download_url)}</a></div>
+          </div>
+          <div class="release-actions">
+            ${r.is_latest ? "" : `<button type="button" class="btn btn-ghost btn-sm" data-release-action="set-latest" data-release-id="${r.id}">Mark latest</button>`}
+            <button type="button" class="btn btn-danger-ghost btn-sm" data-release-action="delete" data-release-id="${r.id}" data-release-version="${escapeHtml(r.version)}">Delete</button>
+          </div>
+        </li>
+      `).join("");
+    }
+
+    releasesList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-release-action]");
+      if (!btn) return;
+      const id     = btn.dataset.releaseId;
+      const action = btn.dataset.releaseAction;
+      btn.disabled = true;
+
+      try {
+        if (action === "set-latest") {
+          const { error } = await supabase.rpc("admin_set_latest_release", { p_id: Number(id) });
+          if (error) throw error;
+        } else if (action === "delete") {
+          const v = btn.dataset.releaseVersion || "this release";
+          if (!confirm(`Delete v${v}? This removes the database row but leaves any uploaded file in storage.`)) {
+            btn.disabled = false;
+            return;
+          }
+          const { error } = await supabase.rpc("admin_delete_release", { p_id: Number(id) });
+          if (error) throw error;
+        }
+        await loadReleases();
+      } catch (err) {
+        alert(`Failed: ${err.message || err}`);
+        btn.disabled = false;
+      }
+    });
+
+    function slugifyVersion(v) {
+      return String(v || "").trim().replace(/^v/i, "").replace(/[^a-zA-Z0-9._-]/g, "-");
+    }
+
+    releaseForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const version = releaseVersion.value.trim();
+      const file    = releaseFile.files[0];
+      if (!version) return setReleaseMsg("Version is required.", "error");
+      if (!file)    return setReleaseMsg("Pick a .ccx file to upload.", "error");
+
+      releaseSubmit.disabled = true;
+      releaseSubmit.textContent = "Uploading…";
+      setReleaseMsg("Uploading build to storage…");
+
+      const safeVersion = slugifyVersion(version);
+      const path = `MockVault-v${safeVersion}.ccx`;
+
+      try {
+        const { error: upErr } = await supabase.storage
+          .from(RELEASES_BUCKET)
+          .upload(path, file, {
+            cacheControl: "3600",
+            upsert: true,
+            contentType: "application/octet-stream",
+          });
+        if (upErr) throw upErr;
+
+        const { data: pub } = supabase.storage.from(RELEASES_BUCKET).getPublicUrl(path);
+        const downloadUrl = pub?.publicUrl;
+        if (!downloadUrl) throw new Error("Could not resolve public URL for uploaded file.");
+
+        setReleaseMsg("Publishing release…");
+        const { error: pubErr } = await supabase.rpc("admin_publish_release", {
+          p_version:      version,
+          p_download_url: downloadUrl,
+          p_changelog:    releaseChangelog.value.trim() || null,
+          p_set_latest:   !!releaseLatest.checked,
+        });
+        if (pubErr) throw pubErr;
+
+        setReleaseMsg(`Published v${version}.`, "success");
+        releaseForm.reset();
+        releaseLatest.checked = true;
+        await loadReleases();
+      } catch (err) {
+        setReleaseMsg(`Failed: ${err.message || err}`, "error");
+      } finally {
+        releaseSubmit.disabled = false;
+        releaseSubmit.textContent = "Publish release";
+      }
+    });
 
     // ─── Init: react to auth state ──────────────────────
     let lastUserId = null;
