@@ -961,7 +961,7 @@
                 <div class="chart-sub" id="an-chart-sub">—</div>
               </div>
             </div>
-            <svg id="an-chart" class="chart-svg" viewBox="0 0 600 180" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <svg id="an-chart" class="chart-svg" aria-hidden="true"></svg>
           </div>
 
           <div class="panel glass-border" style="margin-bottom:24px">
@@ -1456,8 +1456,13 @@
       tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
       tabPanels.forEach(p => p.hidden = p.dataset.tabPanel !== name);
       if (pageTitle) pageTitle.textContent = TAB_TITLES[name] || pageTitle.textContent;
-      if (name === "analytics" && analyticsLoadedRange == null) {
-        loadAnalytics(currentRangeDays);
+      if (name === "analytics") {
+        if (analyticsLoadedRange == null) {
+          loadAnalytics(currentRangeDays);
+        } else if (lastChartRows) {
+          // Panel was just unhidden — redraw at its now-known width.
+          requestAnimationFrame(() => renderAnalyticsChart(lastChartRows, lastChartDays));
+        }
       }
     }
     tabBtns.forEach(b => b.addEventListener("click", () => setActiveTab(b.dataset.tab)));
@@ -1543,15 +1548,28 @@
       document.getElementById("an-cta-sub").textContent = `${ctr}% of pageviews`;
     }
 
+    let lastChartRows = null;
+    let lastChartDays = null;
     function renderAnalyticsChart(rows, days) {
+      lastChartRows = rows;
+      lastChartDays = days;
       const svg = document.getElementById("an-chart");
-      const W = 600, H = 180, PADL = 36, PADR = 8, PADT = 12, PADB = 22;
+
+      // Use the SVG's actual rendered pixel size so text isn't stretched.
+      const W = Math.max(320, Math.round(svg.getBoundingClientRect().width) || 600);
+      const H = 180, PADL = 38, PADR = 16, PADT = 12, PADB = 24;
       const innerW = W - PADL - PADR;
       const innerH = H - PADT - PADB;
 
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svg.setAttribute("width", W);
+      svg.setAttribute("height", H);
+
+      const sub = document.getElementById("an-chart-sub");
+
       if (!rows.length) {
         svg.innerHTML = `<text x="${W/2}" y="${H/2}" text-anchor="middle" class="chart-axis">No data yet</text>`;
-        document.getElementById("an-chart-sub").textContent = `${rangeLabel(days)} — no events`;
+        sub.textContent = `${rangeLabel(days)} — no events`;
         return;
       }
 
@@ -1567,7 +1585,7 @@
       const linePath = points.map((p, i) => (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
       const areaPath = linePath + ` L ${points[points.length-1][0].toFixed(1)},${(PADT+innerH).toFixed(1)} L ${points[0][0].toFixed(1)},${(PADT+innerH).toFixed(1)} Z`;
 
-      const yTicks = 4;
+      const yTicks = Math.min(4, Math.max(1, max));
       const gridLines = [];
       for (let i = 0; i <= yTicks; i++) {
         const v = Math.round((max * (yTicks - i)) / yTicks);
@@ -1576,13 +1594,17 @@
         gridLines.push(`<text class="chart-axis" x="${PADL-6}" y="${y+3}" text-anchor="end">${v}</text>`);
       }
 
+      // Pick label density that fits the actual width: ~70px per label minimum.
+      const maxLabels = Math.max(2, Math.floor(innerW / 70));
+      const labelEvery = Math.max(1, Math.ceil(rows.length / maxLabels));
       const xLabels = [];
-      const labelEvery = Math.max(1, Math.ceil(rows.length / 8));
       rows.forEach((r, i) => {
         if (i % labelEvery !== 0 && i !== rows.length - 1) return;
         const x = PADL + (rows.length === 1 ? innerW / 2 : i * stepX);
+        // Clamp the last label so it doesn't run off the right edge.
+        const clampedX = Math.min(x, W - PADR - 2);
         const day = String(r.day).slice(5); // "MM-DD"
-        xLabels.push(`<text class="chart-axis" x="${x}" y="${H-6}" text-anchor="middle">${day}</text>`);
+        xLabels.push(`<text class="chart-axis" x="${clampedX}" y="${H-6}" text-anchor="middle">${day}</text>`);
       });
 
       const dots = points.map(p => `<circle class="chart-dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5"/>`).join("");
@@ -1597,9 +1619,17 @@
 
       const total = rows.reduce((s, r) => s + (r.pageviews | 0), 0);
       const peak  = Math.max(0, ...rows.map(r => r.pageviews | 0));
-      document.getElementById("an-chart-sub").textContent =
+      sub.textContent =
         `${formatNumber(total)} pageviews · peak ${formatNumber(peak)}/day · ${rangeLabel(days)}`;
     }
+
+    // Redraw the chart on resize so width-dependent label spacing stays right.
+    let chartResizeTimer = null;
+    window.addEventListener("resize", () => {
+      if (!lastChartRows) return;
+      clearTimeout(chartResizeTimer);
+      chartResizeTimer = setTimeout(() => renderAnalyticsChart(lastChartRows, lastChartDays), 100);
+    });
 
     function renderFunnel(s, days) {
       const top = Math.max(s.unique_visitors | 0, 1);
