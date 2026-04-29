@@ -12,6 +12,7 @@
   <link rel="icon" type="image/png" sizes="96x96"   href="/brand_assets/icon96.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/brand_assets/icon192.png">
   <link rel="apple-touch-icon"      sizes="192x192" href="/brand_assets/icon192.png">
+  <script src="/assets/tracker.js" defer></script>
 
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -835,6 +836,7 @@
         return;
       }
 
+      window.mv && window.mv.track && window.mv.track("signin_started", { page: "account" });
       showSigninMsg("Check your email — we just sent a sign-in link. It's good for 1 hour.", "success");
     });
 
@@ -1160,7 +1162,12 @@
       if (session?.user) {
         // Avoid double-render on TOKEN_REFRESHED for the same user
         if (event === "TOKEN_REFRESHED" && lastUserId === userId) return;
+        const wasSignedIn = lastUserId !== null;
         lastUserId = userId;
+
+        if (event === "SIGNED_IN" && !wasSignedIn) {
+          window.mv && window.mv.track && window.mv.track("signin_completed", { page: "account" });
+        }
 
         showState("signedin");
 
