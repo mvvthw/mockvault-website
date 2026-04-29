@@ -15,6 +15,39 @@
   <script src="/assets/tracker.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
 
+  <!-- Meta Pixel: Purchase fires only when arriving from a Stripe success
+       redirect (?session_id=cs_...). Cookie-gated per session_id so reloads
+       and email/dashboard links to /welcome don't re-fire. eventID matches
+       the server-side Conversions API call from the stripe-webhook for dedup. -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1644331640147556');
+    fbq('track', 'PageView');
+    (function () {
+      try {
+        var sid = new URLSearchParams(window.location.search).get('session_id');
+        if (!sid || !/^cs_[A-Za-z0-9_]+$/.test(sid)) return;
+        var ck = 'mv_pxfired_' + sid;
+        if (document.cookie.indexOf(ck + '=1') !== -1) return;
+        fbq('track', 'Purchase', {
+          value: 74.99,
+          currency: 'USD',
+          content_ids: ['mockvault-pro'],
+          content_type: 'product'
+        }, { eventID: sid });
+        document.cookie = ck + '=1; max-age=' + (60 * 60 * 24 * 30) +
+          '; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+      } catch (e) {}
+    })();
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1644331640147556&ev=PageView&noscript=1"
+    alt=""/></noscript>
+
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
