@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — MockVault</title>
+  <meta name="description" content="MockVault admin panel.">
+  <meta name="robots" content="noindex,nofollow">
+
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="48x48"   href="/brand_assets/icon46.png">
+  <link rel="icon" type="image/png" sizes="96x96"   href="/brand_assets/icon96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/brand_assets/icon192.png">
+  <link rel="apple-touch-icon"      sizes="192x192" href="/brand_assets/icon192.png">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #71dc29;
+      --accent-dim: rgba(113, 220, 41, 0.18);
+      --accent-glow: rgba(113, 220, 41, 0.35);
+      --admin: #6366f1;
+      --admin-dim: rgba(99, 102, 241, 0.18);
+      --bg: #080808;
+      --surface: rgba(255, 255, 255, 0.04);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(113, 220, 41, 0.28);
+      --text: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.55);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --danger: #ef4444;
+      --danger-dim: rgba(239, 68, 68, 0.15);
+      --warning: #f59e0b;
+      --warning-dim: rgba(245, 158, 11, 0.18);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(ellipse 55% 35% at 72% 18%, rgba(99,102,241,0.045) 0%, transparent 65%), var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .bg-orb { position: absolute; border-radius: 50%; filter: blur(150px); }
+    .bg-orb-1 {
+      width: 480px; height: 480px;
+      background: radial-gradient(circle, var(--admin), transparent 70%);
+      top: -160px; right: -80px; opacity: 0.10;
+    }
+    .bg-orb-2 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, var(--accent), transparent 70%);
+      bottom: 12%; left: -80px; opacity: 0.04;
+    }
+
+    .container {
+      max-width: 1080px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 32px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 1;
+    }
+
+    .glass-border {
+      position: relative;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: var(--radius);
+    }
+    .glass-border::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.5) 0%, rgba(99,102,241,0.1) 40%, rgba(255,255,255,0.05) 70%, rgba(99,102,241,0.2) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(8, 8, 8, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .nav-logo-wrap { display: flex; align-items: center; gap: 10px; }
+    .nav-logo img { height: 32px; width: auto; display: block; }
+    .nav-tag {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--admin);
+      background: var(--admin-dim);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 4px 10px;
+      border-radius: 100px;
+    }
+    .nav-cta { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 11px 22px;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 24px var(--accent-glow), 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #82e83c;
+      transform: translateY(-1px);
+    }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: rgba(255,255,255,0.14);
+    }
+    .btn-sm { font-size: 13px; padding: 9px 18px; }
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      padding: 8px 14px;
+    }
+    .btn-danger-ghost:hover:not(:disabled) {
+      color: var(--danger);
+      border-color: rgba(239,68,68,0.4);
+      background: var(--danger-dim);
+    }
+
+    .page {
+      padding: 48px 0 96px;
+      position: relative;
+      z-index: 1;
+    }
+    .page-header {
+      margin-bottom: 32px;
+    }
+    .page-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--admin);
+      margin-bottom: 12px;
+    }
+    .page-title {
+      font-size: clamp(28px, 4vw, 38px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    .page-subtitle code {
+      background: rgba(0,0,0,0.4);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    /* ─── SIGN IN / NOT AUTHORIZED ──────────────────────── */
+    .gate-card {
+      max-width: 480px;
+      margin: 64px auto 0;
+      padding: 40px;
+    }
+    .gate-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .gate-card p.muted {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .signin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .input, .select, .textarea {
+      width: 100%;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 15px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .textarea { font-size: 14px; resize: vertical; min-height: 72px; line-height: 1.5; }
+    .input:focus, .select:focus, .textarea:focus {
+      outline: none;
+      border-color: rgba(99,102,241,0.4);
+      background: rgba(0,0,0,0.6);
+    }
+    .input::placeholder, .textarea::placeholder { color: var(--text-dim); }
+
+    .msg {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+    }
+    .msg.error {
+      background: var(--danger-dim);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+    .msg.success {
+      background: var(--accent-dim);
+      color: #c4f4a3;
+      border: 1px solid var(--border-accent);
+    }
+    .msg.info {
+      background: var(--admin-dim);
+      color: #c5cae9;
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+
+    /* ─── ADMIN GRID ────────────────────────────────────── */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 880px) {
+      .admin-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .panel {
+      padding: 28px;
+    }
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .panel-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .panel-body { }
+
+    /* ─── ISSUE FORM ────────────────────────────────────── */
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .form-row > * { flex: 1; }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+    .checkbox-row input { accent-color: var(--admin); width: 16px; height: 16px; cursor: pointer; }
+
+    /* ─── STATS ─────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      padding: 20px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ─── TABLE ─────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 -8px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .table thead th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table tbody td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      color: var(--text-muted);
+    }
+    .table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    .table tbody tr:last-child td { border-bottom: none; }
+    .table .key {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.04em;
+    }
+    .table .email { color: var(--text); font-weight: 500; }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      border: 1px solid;
+    }
+    .badge-stripe  { color: var(--accent); border-color: var(--border-accent); background: var(--accent-dim); }
+    .badge-admin   { color: var(--admin);  border-color: rgba(99,102,241,0.3); background: var(--admin-dim); }
+    .badge-active  { color: var(--accent); border-color: var(--border-accent); background: var(--accent-dim); }
+    .badge-revoked { color: var(--danger); border-color: rgba(239,68,68,0.3); background: var(--danger-dim); }
+    .badge-refunded{ color: var(--warning); border-color: rgba(245,158,11,0.3); background: var(--warning-dim); }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .empty-state small { display: block; margin-top: 6px; color: var(--text-dim); font-size: 12px; }
+
+    /* ─── ISSUED RESULT ─────────────────────────────────── */
+    .issued-result {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--admin-dim);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: var(--radius-sm);
+    }
+    .issued-result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .issued-result-key {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      user-select: all;
+    }
+    .issued-result-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ─── LOADER ────────────────────────────────────────── */
+    .loader-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 96px 0;
+    }
+    .loader-dots { display: flex; gap: 8px; }
+    .loader-dots span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--admin);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .loader-dots span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.85); }
+      50%      { opacity: 1;   transform: scale(1.1); }
+    }
+
+    /* ─── SEARCH RESULTS ────────────────────────────────── */
+    .search-results {
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    .search-result-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover { background: rgba(255,255,255,0.03); }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-email {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .search-result-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ─── CUSTOMER DETAIL ───────────────────────────────── */
+    .customer-detail {
+      padding: 24px;
+      margin-top: 16px;
+    }
+    .customer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .customer-email {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .customer-meta {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 640px) {
+      .container { padding: 0 20px; }
+      .panel { padding: 20px; }
+      .form-row { flex-direction: column; }
+      .gate-card { padding: 28px 24px; }
+      .nav-cta { display: none; }
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────── */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo img { height: 24px; opacity: 0.7; }
+    .footer-copy { font-size: 13px; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div class="bg-orbs">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <div class="nav-logo-wrap">
+          <a class="nav-logo" href="/"><img src="brand_assets/mockvaultlogo.png" alt="MockVault"></a>
+          <span class="nav-tag">Admin</span>
+        </div>
+        <div class="nav-cta">
+          <a href="/account" class="btn btn-ghost btn-sm">Account view</a>
+          <button id="nav-signout" class="btn btn-ghost btn-sm" hidden>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div class="container">
+      <!-- ─── LOADING ─── -->
+      <div id="state-loading" class="loader-wrap">
+        <div class="loader-dots"><span></span><span></span><span></span></div>
+      </div>
+
+      <!-- ─── SIGNED OUT ─── -->
+      <div id="state-signedout" hidden>
+        <div class="gate-card glass-border">
+          <h2>Admin sign-in</h2>
+          <p class="muted">Enter your admin email and we'll send a magic link.</p>
+          <form id="signin-form" class="signin-form" novalidate>
+            <input type="email" id="signin-email" class="input" placeholder="admin@mockvaultps.com" autocomplete="email" required>
+            <button type="submit" id="signin-submit" class="btn btn-primary">Email me a sign-in link</button>
+            <div id="signin-msg" class="msg" hidden></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ─── NOT AUTHORIZED ─── -->
+      <div id="state-notadmin" hidden>
+        <div class="gate-card glass-border">
+          <h2>Not authorized</h2>
+          <p class="muted">You're signed in as <span id="notadmin-email" style="color:var(--text);font-weight:600"></span>, but that email isn't on the admin list.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="/account" class="btn btn-primary btn-sm">Go to your account</a>
+            <button id="notadmin-signout" class="btn btn-ghost btn-sm">Sign out</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── ADMIN PANEL ─── -->
+      <div id="state-admin" hidden>
+        <div class="page-header">
+          <div class="page-tag">Admin Panel</div>
+          <h1 class="page-title">License control</h1>
+          <p class="page-subtitle">Signed in as <code id="admin-email"></code></p>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total licenses</div>
+            <div class="stat-value" id="stat-total">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active</div>
+            <div class="stat-value" id="stat-active">—</div>
+            <div class="stat-sub" id="stat-active-sub"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Stripe sales</div>
+            <div class="stat-value" id="stat-stripe">—</div>
+            <div class="stat-sub" id="stat-revenue"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Admin-issued</div>
+            <div class="stat-value" id="stat-admin">—</div>
+          </div>
+        </div>
+
+        <div class="admin-grid">
+          <!-- Issue license -->
+          <div class="panel glass-border">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Issue license</div>
+                <div class="panel-sub">Send a free MockVault license to any email</div>
+              </div>
+            </div>
+
+            <form id="issue-form" class="form-stack" novalidate>
+              <div>
+                <label class="form-label">Recipient email</label>
+                <input type="email" id="issue-email" class="input" placeholder="creator@example.com" required>
+              </div>
+
+              <div class="form-row">
+                <div>
+                  <label class="form-label">Product</label>
+                  <select id="issue-product" class="select">
+                    <option value="mockvault-pro" selected>MockVault Pro</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Note (optional)</label>
+                <input type="text" id="issue-note" class="input" placeholder="@creatorname IG · video collab" maxlength="500">
+                <div class="form-hint">Internal — recipient won't see this. Helps you track why each license was given.</div>
+              </div>
+
+              <label class="checkbox-row">
+                <input type="checkbox" id="issue-send-email" checked>
+                Email the recipient their license + onboarding instructions
+              </label>
+
+              <button type="submit" id="issue-submit" class="btn btn-primary">Issue license</button>
+
+              <div id="issue-msg" class="msg" hidden></div>
+              <div id="issue-result" class="issued-result" hidden>
+                <div class="issued-result-head">
+                  <div class="issued-result-key" id="issue-result-key"></div>
+                  <button type="button" id="issue-result-copy" class="btn btn-ghost btn-sm">Copy</button>
+                </div>
+                <div class="issued-result-meta" id="issue-result-meta"></div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Customer search -->
+          <div class="panel glass-border">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Find customer</div>
+                <div class="panel-sub">Search by email — see their licenses + revoke</div>
+              </div>
+            </div>
+
+            <div class="form-stack">
+              <input type="search" id="search-input" class="input" placeholder="Type email…">
+              <div id="search-results" class="search-results" hidden></div>
+              <div id="search-empty" class="empty-state" hidden>No customers match.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Selected customer detail -->
+        <div id="customer-detail" class="customer-detail glass-border" hidden>
+          <div class="customer-head">
+            <div>
+              <div class="customer-email" id="customer-email"></div>
+              <div class="customer-meta" id="customer-meta"></div>
+            </div>
+            <button id="customer-close" class="btn btn-ghost btn-sm">Close</button>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Key</th><th>Product</th><th>Source</th><th>Status</th><th>Devices</th><th>Issued</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="customer-licenses-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent issuances -->
+        <div class="panel glass-border" style="margin-top:24px">
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Recent licenses</div>
+              <div class="panel-sub">Last 50 — newest first</div>
+            </div>
+            <button id="refresh-btn" class="btn btn-ghost btn-sm">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Issued</th><th>Customer</th><th>Key</th><th>Product</th><th>Source</th><th>Status</th><th>Note</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="recent-body">
+                <tr><td colspan="8" class="empty-state">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a class="footer-logo" href="/"><img src="brand_assets/mockvaultlogo.png" alt="MockVault"></a>
+        <p class="footer-copy">© 2026 MockVault — admin</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const SUPABASE_URL = "https://mbdftnypfdhvdgdgkhjc.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_it_Px7Rhk4DHtNJ3_qYpNA_YvFMpXLP";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    // ─── DOM refs ───────────────────────────────────────
+    const stateLoading   = document.getElementById("state-loading");
+    const stateSignedOut = document.getElementById("state-signedout");
+    const stateNotAdmin  = document.getElementById("state-notadmin");
+    const stateAdmin     = document.getElementById("state-admin");
+    const navSignOut     = document.getElementById("nav-signout");
+
+    function showState(state) {
+      stateLoading.hidden    = state !== "loading";
+      stateSignedOut.hidden  = state !== "signedout";
+      stateNotAdmin.hidden   = state !== "notadmin";
+      stateAdmin.hidden      = state !== "admin";
+      navSignOut.hidden      = state !== "admin";
+    }
+
+    // ─── Sign-in form ───────────────────────────────────
+    const signinForm   = document.getElementById("signin-form");
+    const signinEmail  = document.getElementById("signin-email");
+    const signinSubmit = document.getElementById("signin-submit");
+    const signinMsg    = document.getElementById("signin-msg");
+
+    signinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = signinEmail.value.trim().toLowerCase();
+      if (!email || !email.includes("@")) return showMsg(signinMsg, "Please enter a valid email.", "error");
+
+      signinSubmit.disabled = true;
+      signinSubmit.textContent = "Sending…";
+      signinMsg.hidden = true;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+          shouldCreateUser: false,
+        },
+      });
+
+      signinSubmit.disabled = false;
+      signinSubmit.textContent = "Email me a sign-in link";
+
+      if (error) {
+        showMsg(signinMsg, `Couldn't send: ${error.message}`, "error");
+        return;
+      }
+      showMsg(signinMsg, "Check your email — link's good for 1 hour.", "success");
+    });
+
+    // ─── Sign-out ───────────────────────────────────────
+    navSignOut.addEventListener("click", signOut);
+    document.getElementById("notadmin-signout").addEventListener("click", signOut);
+    async function signOut() {
+      try { await supabase.auth.signOut({ scope: "local" }); }
+      catch (e) { console.warn("signOut error:", e); }
+    }
+
+    // ─── Admin gate check ───────────────────────────────
+    async function checkAdmin(user) {
+      // Use the SECURITY DEFINER is_admin() function — works for any caller
+      const { data, error } = await supabase.rpc("is_admin", { check_user_id: user.id });
+      if (error) {
+        console.error("[admin] is_admin rpc failed:", error);
+        return false;
+      }
+      return data === true;
+    }
+
+    // ─── Load admin data ────────────────────────────────
+    let allLicenses = [];   // cached for client-side search
+    let userMap     = new Map(); // user_id -> email
+
+    async function loadAdminData() {
+      // Pull all licenses + profiles. RLS allows admins to read all.
+      const [licResp, profResp] = await Promise.all([
+        supabase.from("licenses")
+          .select("id, key, user_id, product, status, max_activations, source, note, issued_by, amount_cents, currency, created_at, revoked_at, stripe_payment_intent")
+          .order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id"),
+      ]);
+
+      if (licResp.error) {
+        console.error("[admin] licenses fetch failed:", licResp.error);
+        showMsg(document.getElementById("issue-msg"), "Couldn't load licenses: " + licResp.error.message, "error");
+        return;
+      }
+
+      allLicenses = licResp.data || [];
+
+      // Get emails for the user_ids we have. We don't have direct access to
+      // auth.users from the client, but the licenses we receive carry user_id
+      // and we can ask the resend-license-email pattern... actually we need a
+      // different approach: enrich via a quick edge call OR via a public view.
+      // For now, use issued_by/user_id and resolve via a small admin RPC.
+      await fetchUserEmails(allLicenses);
+
+      renderStats();
+      renderRecentTable();
+    }
+
+    async function fetchUserEmails(licenses) {
+      // Collect unique user IDs (customers + admins who issued)
+      const ids = new Set();
+      for (const l of licenses) {
+        if (l.user_id) ids.add(l.user_id);
+        if (l.issued_by) ids.add(l.issued_by);
+      }
+      if (ids.size === 0) return;
+
+      // Use a dedicated admin RPC. We'll add it as a SECURITY DEFINER function
+      // that returns email only when caller is admin.
+      const { data, error } = await supabase.rpc("admin_user_emails", {
+        ids: Array.from(ids),
+      });
+      if (error) {
+        console.warn("[admin] admin_user_emails rpc failed:", error);
+        return;
+      }
+      for (const row of (data || [])) {
+        userMap.set(row.id, row.email);
+      }
+    }
+
+    // ─── Stats ──────────────────────────────────────────
+    function renderStats() {
+      const total   = allLicenses.length;
+      const active  = allLicenses.filter(l => l.status === "active").length;
+      const stripe  = allLicenses.filter(l => l.source === "stripe").length;
+      const admin   = allLicenses.filter(l => l.source === "admin").length;
+      const revenueCents = allLicenses
+        .filter(l => l.source === "stripe" && l.status === "active")
+        .reduce((s, l) => s + (l.amount_cents || 0), 0);
+
+      document.getElementById("stat-total").textContent  = total;
+      document.getElementById("stat-active").textContent = active;
+      document.getElementById("stat-active-sub").textContent = `${total - active} inactive`;
+      document.getElementById("stat-stripe").textContent = stripe;
+      document.getElementById("stat-revenue").textContent = revenueCents
+        ? `$${(revenueCents / 100).toFixed(2)} gross`
+        : "no paid sales yet";
+      document.getElementById("stat-admin").textContent = admin;
+    }
+
+    // ─── Recent table ───────────────────────────────────
+    function renderRecentTable() {
+      const tbody = document.getElementById("recent-body");
+      const rows = allLicenses.slice(0, 50);
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No licenses yet.<small>Issue one above or wait for a Stripe purchase.</small></td></tr>`;
+        return;
+      }
+      tbody.innerHTML = rows.map(l => `
+        <tr>
+          <td>${formatDate(l.created_at)}</td>
+          <td class="email">${escapeHtml(userMap.get(l.user_id) || "—")}</td>
+          <td><span class="key">${escapeHtml(l.key)}</span></td>
+          <td>${escapeHtml(formatProduct(l.product))}</td>
+          <td><span class="badge badge-${l.source}">${escapeHtml(l.source)}</span></td>
+          <td><span class="badge badge-${l.status}">${escapeHtml(l.status)}</span></td>
+          <td title="${escapeHtml(l.note || '')}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(l.note || "—")}</td>
+          <td>${l.status === "active" ? `<button class="btn btn-danger-ghost revoke-btn" data-id="${l.id}">Revoke</button>` : ""}</td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll(".revoke-btn").forEach(btn => {
+        btn.addEventListener("click", () => revokeLicense(Number(btn.dataset.id), btn));
+      });
+    }
+
+    document.getElementById("refresh-btn").addEventListener("click", () => loadAdminData());
+
+    // ─── Issue license ──────────────────────────────────
+    const issueForm     = document.getElementById("issue-form");
+    const issueMsg      = document.getElementById("issue-msg");
+    const issueResult   = document.getElementById("issue-result");
+    const issueSubmit   = document.getElementById("issue-submit");
+
+    issueForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email     = document.getElementById("issue-email").value.trim().toLowerCase();
+      const product   = document.getElementById("issue-product").value;
+      const note      = document.getElementById("issue-note").value.trim();
+      const sendEmail = document.getElementById("issue-send-email").checked;
+
+      if (!email || !email.includes("@")) return showMsg(issueMsg, "Please enter a valid email.", "error");
+
+      issueMsg.hidden = true;
+      issueResult.hidden = true;
+      issueSubmit.disabled = true;
+      issueSubmit.textContent = "Issuing…";
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Not signed in");
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-issue-license`, {
+          method: "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey":        SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ email, product, note: note || null, sendEmail }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          showMsg(issueMsg, data.error ? `${data.error}${data.detail ? ': ' + data.detail : ''}` : `HTTP ${res.status}`, "error");
+          return;
+        }
+
+        document.getElementById("issue-result-key").textContent = data.licenseKey;
+        const metaBits = [
+          `Issued to <strong style="color:var(--text)">${escapeHtml(email)}</strong>`,
+          data.emailSent ? "Email sent" : (sendEmail ? "Email failed — check Resend" : "No email sent"),
+        ];
+        document.getElementById("issue-result-meta").innerHTML = metaBits.join(" · ");
+        issueResult.hidden = false;
+
+        // Reset form for next issuance
+        document.getElementById("issue-email").value = "";
+        document.getElementById("issue-note").value = "";
+        document.getElementById("issue-send-email").checked = true;
+
+        // Refresh the data
+        await loadAdminData();
+      } catch (err) {
+        console.error("[admin] issue error:", err);
+        showMsg(issueMsg, "Network or unexpected error — try again.", "error");
+      } finally {
+        issueSubmit.disabled = false;
+        issueSubmit.textContent = "Issue license";
+      }
+    });
+
+    document.getElementById("issue-result-copy").addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      const key = document.getElementById("issue-result-key").textContent;
+      try {
+        await navigator.clipboard.writeText(key);
+        btn.textContent = "Copied ✓";
+        setTimeout(() => btn.textContent = "Copy", 1800);
+      } catch { btn.textContent = "Press ⌘C/Ctrl+C"; }
+    });
+
+    // ─── Revoke license ─────────────────────────────────
+    async function revokeLicense(licenseId, btn) {
+      const reason = prompt("Reason for revocation? (optional, recorded on the license)\n\nThis will:\n• Mark the license revoked\n• Clear all device activations\n• The plugin will stop working on next verify");
+      if (reason === null) return; // cancelled
+
+      btn.disabled = true;
+      btn.textContent = "Revoking…";
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-revoke-license`, {
+          method: "POST",
+          headers: {
+            "Content-Type":  "application/json",
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey":        SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ licenseId, reason: reason || null }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          alert(`Revoke failed: ${data.error || res.status}`);
+          btn.disabled = false;
+          btn.textContent = "Revoke";
+          return;
+        }
+        await loadAdminData();
+        // If customer detail open, refresh it too
+        if (currentCustomerId) showCustomerDetail(currentCustomerId);
+      } catch (err) {
+        alert("Network error — try again.");
+        btn.disabled = false;
+        btn.textContent = "Revoke";
+      }
+    }
+
+    // ─── Customer search ────────────────────────────────
+    const searchInput   = document.getElementById("search-input");
+    const searchResults = document.getElementById("search-results");
+    const searchEmpty   = document.getElementById("search-empty");
+    let currentCustomerId = null;
+
+    let searchTimer = null;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => doSearch(), 120);
+    });
+
+    function doSearch() {
+      const q = searchInput.value.trim().toLowerCase();
+      if (!q) {
+        searchResults.hidden = true;
+        searchEmpty.hidden = true;
+        return;
+      }
+
+      // Aggregate licenses by user_id, filter by email
+      const byUser = new Map();
+      for (const l of allLicenses) {
+        const email = userMap.get(l.user_id) || "";
+        if (!email.toLowerCase().includes(q)) continue;
+        const arr = byUser.get(l.user_id) || [];
+        arr.push(l);
+        byUser.set(l.user_id, arr);
+      }
+
+      if (byUser.size === 0) {
+        searchResults.hidden = true;
+        searchEmpty.hidden = false;
+        return;
+      }
+      searchEmpty.hidden = true;
+
+      const items = [...byUser.entries()].slice(0, 30).map(([userId, licenses]) => {
+        const email = userMap.get(userId) || "(unknown)";
+        const active = licenses.filter(l => l.status === "active").length;
+        return `
+          <div class="search-result-item" data-user-id="${escapeHtml(userId)}">
+            <div class="search-result-email">${escapeHtml(email)}</div>
+            <div class="search-result-meta">${licenses.length} license${licenses.length === 1 ? "" : "s"} · ${active} active</div>
+          </div>
+        `;
+      }).join("");
+      searchResults.innerHTML = items;
+      searchResults.hidden = false;
+
+      searchResults.querySelectorAll(".search-result-item").forEach(el => {
+        el.addEventListener("click", () => {
+          showCustomerDetail(el.dataset.userId);
+          searchInput.value = userMap.get(el.dataset.userId) || "";
+          searchResults.hidden = true;
+        });
+      });
+    }
+
+    function showCustomerDetail(userId) {
+      currentCustomerId = userId;
+      const email = userMap.get(userId) || "(unknown)";
+      const licenses = allLicenses.filter(l => l.user_id === userId);
+
+      document.getElementById("customer-email").textContent = email;
+      const active = licenses.filter(l => l.status === "active").length;
+      const totalSpent = licenses.filter(l => l.source === "stripe").reduce((s, l) => s + (l.amount_cents || 0), 0);
+      document.getElementById("customer-meta").innerHTML =
+        `${licenses.length} license${licenses.length === 1 ? "" : "s"} · ${active} active` +
+        (totalSpent > 0 ? ` · $${(totalSpent / 100).toFixed(2)} spent` : "");
+
+      const tbody = document.getElementById("customer-licenses-body");
+      tbody.innerHTML = licenses.map(l => `
+        <tr>
+          <td><span class="key">${escapeHtml(l.key)}</span></td>
+          <td>${escapeHtml(formatProduct(l.product))}</td>
+          <td><span class="badge badge-${l.source}">${escapeHtml(l.source)}</span></td>
+          <td><span class="badge badge-${l.status}">${escapeHtml(l.status)}</span></td>
+          <td>—</td>
+          <td>${formatDate(l.created_at)}</td>
+          <td>${l.status === "active" ? `<button class="btn btn-danger-ghost revoke-btn" data-id="${l.id}">Revoke</button>` : ""}</td>
+        </tr>
+      `).join("");
+
+      tbody.querySelectorAll(".revoke-btn").forEach(btn => {
+        btn.addEventListener("click", () => revokeLicense(Number(btn.dataset.id), btn));
+      });
+
+      const detail = document.getElementById("customer-detail");
+      detail.hidden = false;
+      detail.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    document.getElementById("customer-close").addEventListener("click", () => {
+      document.getElementById("customer-detail").hidden = true;
+      currentCustomerId = null;
+    });
+
+    // ─── Helpers ────────────────────────────────────────
+    function showMsg(el, text, type) {
+      el.textContent = text;
+      el.className = `msg ${type}`;
+      el.hidden = false;
+    }
+    function formatProduct(slug) {
+      if (!slug) return "MockVault";
+      return slug.replace(/^mockvault-?/i, "MockVault ").replace(/(^|\s)([a-z])/g, (_, p, c) => p + c.toUpperCase()).trim();
+    }
+    function formatDate(iso) {
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return "—";
+      const today = new Date();
+      const diffMs = today - d;
+      const sec = Math.round(diffMs / 1000);
+      if (sec < 60) return "just now";
+      if (sec < 3600) return `${Math.round(sec/60)}m ago`;
+      if (sec < 86400) return `${Math.round(sec/3600)}h ago`;
+      return d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) +
+             (d.getFullYear() !== today.getFullYear() ? ` ${d.getFullYear()}` : "");
+    }
+    function escapeHtml(s) {
+      return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
+    }
+
+    // ─── Init: react to auth state ──────────────────────
+    let lastUserId = null;
+    let initTimer = null;
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      const userId = session?.user?.id || null;
+      console.log("[admin] auth event:", event, "user:", session?.user?.email || "(none)");
+
+      if (session?.user) {
+        if (event === "TOKEN_REFRESHED" && lastUserId === userId) return;
+        lastUserId = userId;
+
+        // Strip magic-link tokens
+        if (window.location.hash || window.location.search.includes("code=")) {
+          history.replaceState(null, "", "/admin");
+        }
+
+        if (initTimer) clearTimeout(initTimer);
+        initTimer = setTimeout(async () => {
+          const isAdmin = await checkAdmin(session.user);
+          if (!isAdmin) {
+            document.getElementById("notadmin-email").textContent = session.user.email || "(no email)";
+            showState("notadmin");
+            return;
+          }
+          document.getElementById("admin-email").textContent = session.user.email;
+          showState("admin");
+          await loadAdminData();
+        }, 0);
+      } else {
+        lastUserId = null;
+        showState("signedout");
+      }
+    });
+  </script>
+</body>
+</html>
