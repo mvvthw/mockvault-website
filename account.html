@@ -865,15 +865,31 @@
       signedInEmail.textContent = user.email || "your account";
 
       try {
-        const [licResp, actResp] = await Promise.all([
-          supabase.from("licenses").select("*").order("created_at", { ascending: false }),
-          supabase.from("activations").select("*").order("first_seen_at", { ascending: false }),
-        ]);
+        // Always scope by user_id explicitly. RLS would normally enforce this
+        // for customers, but admins have a broader policy that lets them read
+        // all licenses (used by /admin). On /account we always want just the
+        // signed-in user's own licenses, regardless of admin status.
+        const licResp = await supabase
+          .from("licenses")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        const licenses = licResp.data || [];
+
+        // Pull activations only for licenses we own. Cleaner + works for admins.
+        const ownedLicenseIds = licenses.map(l => l.id);
+        const actResp = ownedLicenseIds.length > 0
+          ? await supabase
+              .from("activations")
+              .select("*")
+              .in("license_id", ownedLicenseIds)
+              .order("first_seen_at", { ascending: false })
+          : { data: [], error: null };
 
         console.log("[account] licenses:", licResp);
         console.log("[account] activations:", actResp);
 
-        const licenses    = licResp.data    || [];
         const activations = actResp.data    || [];
         const fetchError  = licResp.error || actResp.error;
 
