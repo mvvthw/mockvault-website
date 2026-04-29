@@ -584,6 +584,96 @@
     .resend-status.success { color: var(--accent); }
     .resend-status.error   { color: #fca5a5; }
 
+    /* ─── AFFILIATE ──────────────────────────────────────── */
+    .affiliate-card { padding: 32px; margin-top: 24px; }
+    .affiliate-head {
+      display: flex; align-items: start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .affiliate-title {
+      font-size: 13px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+    }
+    .affiliate-name { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+    .affiliate-sub  { font-size: 13px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; max-width: 540px; }
+    .affiliate-link-row {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .affiliate-link {
+      flex: 1; min-width: 0;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 14px; font-weight: 500; letter-spacing: 0.01em;
+      background: rgba(0,0,0,0.4); padding: 12px 14px;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+      color: var(--text); user-select: all;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .affiliate-stats {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    @media (max-width: 640px) { .affiliate-stats { grid-template-columns: repeat(2, 1fr); } }
+    .affiliate-stat {
+      background: rgba(0,0,0,0.25); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px;
+    }
+    .affiliate-stat-label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .affiliate-stat-value { font-size: 22px; font-weight: 700; margin-top: 6px; }
+    .affiliate-stat-sub   { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+    .affiliate-list {
+      margin-top: 8px; border-top: 1px solid var(--border); padding-top: 20px;
+    }
+    .affiliate-list-title {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px;
+    }
+    .affiliate-row {
+      display: grid; grid-template-columns: 1fr auto auto auto; gap: 14px;
+      align-items: center; padding: 12px 14px;
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 13px;
+    }
+    .affiliate-row:last-child { margin-bottom: 0; }
+    .affiliate-row-date   { color: var(--text-muted); }
+    .affiliate-row-amount { color: var(--text-dim);  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    .affiliate-row-comm   { color: var(--text); font-weight: 600; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    .affiliate-row-status {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 4px 8px; border-radius: 100px;
+      border: 1px solid;
+    }
+    .affiliate-row-status.pending { color: var(--warning); border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.12); }
+    .affiliate-row-status.paid    { color: var(--accent);  border-color: var(--border-accent); background: var(--accent-dim); }
+    .affiliate-row-status.reversed{ color: #fca5a5; border-color: rgba(239,68,68,0.3); background: var(--danger-dim); }
+    @media (max-width: 540px) {
+      .affiliate-row { grid-template-columns: 1fr auto; row-gap: 4px; }
+      .affiliate-row-amount, .affiliate-row-comm { grid-column: 1 / -1; font-size: 12px; }
+    }
+    .affiliate-empty {
+      padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;
+      background: rgba(0,0,0,0.2); border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .affiliate-cta {
+      background: rgba(0,0,0,0.25); border: 1px dashed var(--border);
+      border-radius: var(--radius-sm); padding: 28px 24px; text-align: center;
+    }
+    .affiliate-cta p { color: var(--text-muted); font-size: 14px; margin-bottom: 16px; line-height: 1.5; }
+    .affiliate-paused {
+      margin-bottom: 16px; padding: 10px 14px; border-radius: var(--radius-sm);
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+      color: var(--warning); font-size: 13px;
+    }
+    .affiliate-payout-note {
+      margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-dim); line-height: 1.55;
+    }
+    .affiliate-payout-note a { color: var(--accent); text-decoration: none; }
+    .affiliate-payout-note a:hover { text-decoration: underline; }
+
     /* ─── HELP NOTE ──────────────────────────────────────── */
     .help-note {
       margin-top: 48px;
@@ -720,6 +810,72 @@
               <span>What's new</span>
             </button>
             <div id="changelog-body" class="changelog-body" hidden></div>
+          </div>
+        </div>
+
+        <!-- ─── AFFILIATE PROGRAM (free-copy holders only) ─── -->
+        <div id="affiliate-card" class="affiliate-card glass-border" hidden>
+          <div class="affiliate-head">
+            <div>
+              <div class="affiliate-title">Affiliate program</div>
+              <div class="affiliate-name">Earn on referrals</div>
+              <div class="affiliate-sub">
+                Share your link with creators. We pay <span id="affiliate-pct">—</span>% on every sale that comes through it. Payouts are manual.
+              </div>
+            </div>
+            <button id="affiliate-refresh" class="btn btn-ghost btn-sm" hidden>Refresh</button>
+          </div>
+
+          <!-- State A: not yet opted in -->
+          <div id="affiliate-cta" class="affiliate-cta" hidden>
+            <p>Generate your unique link to start tracking sales.</p>
+            <button id="affiliate-generate" class="btn btn-primary">Generate your link</button>
+            <div id="affiliate-cta-msg" class="signin-msg" hidden></div>
+          </div>
+
+          <!-- State B: opted in, link + stats -->
+          <div id="affiliate-active" hidden>
+            <div id="affiliate-paused-banner" class="affiliate-paused" hidden>
+              Your link is currently <strong>paused</strong>. New clicks won't be tracked. Email
+              <a href="mailto:cursed1k@gmail.com" style="color:inherit;text-decoration:underline">support</a> to reactivate.
+            </div>
+
+            <div class="affiliate-link-row">
+              <code id="affiliate-link" class="affiliate-link"></code>
+              <button id="affiliate-link-copy" class="copy-btn">Copy link</button>
+            </div>
+
+            <div class="affiliate-stats">
+              <div class="affiliate-stat">
+                <div class="affiliate-stat-label">Clicks</div>
+                <div class="affiliate-stat-value" id="affiliate-stat-clicks">—</div>
+                <div class="affiliate-stat-sub" id="affiliate-stat-clicks-sub"></div>
+              </div>
+              <div class="affiliate-stat">
+                <div class="affiliate-stat-label">Sales</div>
+                <div class="affiliate-stat-value" id="affiliate-stat-sales">—</div>
+                <div class="affiliate-stat-sub" id="affiliate-stat-sales-sub"></div>
+              </div>
+              <div class="affiliate-stat">
+                <div class="affiliate-stat-label">Pending</div>
+                <div class="affiliate-stat-value" id="affiliate-stat-pending">—</div>
+                <div class="affiliate-stat-sub">awaiting payout</div>
+              </div>
+              <div class="affiliate-stat">
+                <div class="affiliate-stat-label">Paid out</div>
+                <div class="affiliate-stat-value" id="affiliate-stat-paid">—</div>
+                <div class="affiliate-stat-sub">lifetime</div>
+              </div>
+            </div>
+
+            <div class="affiliate-list">
+              <div class="affiliate-list-title">Recent referrals</div>
+              <div id="affiliate-recent"></div>
+            </div>
+
+            <div class="affiliate-payout-note">
+              Ready to cash out? Email <a href="mailto:cursed1k@gmail.com">cursed1k@gmail.com</a> with your preferred payout method (PayPal, bank transfer, etc.).
+            </div>
           </div>
         </div>
 
@@ -930,6 +1086,9 @@
 
         // Load latest plugin release for download section
         loadDownload().catch(err => console.error("[account] loadDownload error:", err));
+
+        // Affiliate section — only renders if user holds an active free copy
+        loadAffiliateSection(user, licenses).catch(err => console.error("[account] loadAffiliateSection error:", err));
       } catch (err) {
         console.error("[account] loadLicenses unexpected error:", err);
         showLoadError("Something went wrong", "Refresh the page. If this keeps happening, email support.");
@@ -969,6 +1128,176 @@
     changelogToggle.addEventListener("click", () => {
       const open = changelogToggle.classList.toggle("open");
       changelogBody.hidden = !open;
+    });
+
+    // ─── Affiliate program ─────────────────────────────
+    const affiliateCard      = document.getElementById("affiliate-card");
+    const affiliateCta       = document.getElementById("affiliate-cta");
+    const affiliateActive    = document.getElementById("affiliate-active");
+    const affiliateGenerate  = document.getElementById("affiliate-generate");
+    const affiliateCtaMsg    = document.getElementById("affiliate-cta-msg");
+    const affiliateLink      = document.getElementById("affiliate-link");
+    const affiliateLinkCopy  = document.getElementById("affiliate-link-copy");
+    const affiliateRefresh   = document.getElementById("affiliate-refresh");
+    const affiliatePctLabel  = document.getElementById("affiliate-pct");
+    const affiliatePaused    = document.getElementById("affiliate-paused-banner");
+    const affiliateRecent    = document.getElementById("affiliate-recent");
+    const affiliateStatClicks   = document.getElementById("affiliate-stat-clicks");
+    const affiliateStatClicksSub= document.getElementById("affiliate-stat-clicks-sub");
+    const affiliateStatSales    = document.getElementById("affiliate-stat-sales");
+    const affiliateStatSalesSub = document.getElementById("affiliate-stat-sales-sub");
+    const affiliateStatPending  = document.getElementById("affiliate-stat-pending");
+    const affiliateStatPaid     = document.getElementById("affiliate-stat-paid");
+
+    function affiliateLinkUrl(code) {
+      return `${window.location.origin}/?ref=${encodeURIComponent(code)}`;
+    }
+
+    function isEligibleForAffiliate(licenses) {
+      // Free-copy holders = anyone with an active license not bought via Stripe.
+      return Array.isArray(licenses) &&
+        licenses.some(l => l && l.status === "active" && l.source !== "stripe");
+    }
+
+    function formatMoney(cents, currency) {
+      const n = Number(cents) || 0;
+      const cur = (currency || "USD").toUpperCase();
+      try {
+        return new Intl.NumberFormat(undefined, { style: "currency", currency: cur, maximumFractionDigits: 2 }).format(n / 100);
+      } catch {
+        return `$${(n / 100).toFixed(2)}`;
+      }
+    }
+
+    function formatPct(p) {
+      const n = Number(p);
+      if (!isFinite(n)) return "—";
+      return n % 1 === 0 ? String(n) : n.toFixed(2).replace(/\.?0+$/, "");
+    }
+
+    async function loadAffiliateSection(user, licenses) {
+      if (!isEligibleForAffiliate(licenses)) {
+        affiliateCard.hidden = true;
+        return;
+      }
+      affiliateCard.hidden = false;
+      await refreshAffiliateSummary();
+    }
+
+    async function refreshAffiliateSummary() {
+      const { data, error } = await supabase.rpc("affiliate_my_summary");
+      if (error) {
+        console.error("[account] affiliate_my_summary error:", error);
+        // Fallback: assume not opted in yet so the user can still generate.
+        renderAffiliateNotOptedIn();
+        return;
+      }
+      const row = Array.isArray(data) && data.length > 0 ? data[0] : null;
+      if (!row || !row.code) {
+        renderAffiliateNotOptedIn();
+      } else {
+        renderAffiliateOptedIn(row);
+      }
+    }
+
+    function renderAffiliateNotOptedIn() {
+      affiliateCta.hidden     = false;
+      affiliateActive.hidden  = true;
+      affiliateRefresh.hidden = true;
+      affiliatePctLabel.textContent = "—";
+      affiliateCtaMsg.hidden = true;
+      affiliateGenerate.disabled = false;
+      affiliateGenerate.textContent = "Generate your link";
+    }
+
+    function renderAffiliateOptedIn(row) {
+      affiliateCta.hidden     = true;
+      affiliateActive.hidden  = false;
+      affiliateRefresh.hidden = false;
+
+      affiliatePctLabel.textContent = formatPct(row.commission_pct);
+      affiliatePaused.hidden = row.status !== "paused";
+
+      const url = affiliateLinkUrl(row.code);
+      affiliateLink.textContent = url;
+      affiliateLinkCopy.dataset.url = url;
+
+      const currency = row.currency || "usd";
+      affiliateStatClicks.textContent      = (Number(row.clicks_total) || 0).toLocaleString();
+      affiliateStatClicksSub.textContent   = `${Number(row.clicks_30d) || 0} in last 30d`;
+      affiliateStatSales.textContent       = (Number(row.sales_total) || 0).toLocaleString();
+      affiliateStatSalesSub.textContent    = `${Number(row.sales_30d) || 0} in last 30d`;
+      affiliateStatPending.textContent     = formatMoney(row.commission_pending_cents, currency);
+      affiliateStatPaid.textContent        = formatMoney(row.commission_paid_cents,    currency);
+
+      const items = Array.isArray(row.recent) ? row.recent : [];
+      if (!items.length) {
+        affiliateRecent.innerHTML = `<div class="affiliate-empty">No referrals yet — share your link and they'll show up here.</div>`;
+      } else {
+        affiliateRecent.innerHTML = items.map(it => `
+          <div class="affiliate-row">
+            <div class="affiliate-row-date">${escapeHtml(formatRelative(it.created_at))}</div>
+            <div class="affiliate-row-amount">${escapeHtml(formatMoney(it.amount_cents, it.currency))} sale</div>
+            <div class="affiliate-row-comm">+${escapeHtml(formatMoney(it.commission_cents, it.currency))}</div>
+            <span class="affiliate-row-status ${escapeHtml(it.status || "pending")}">${escapeHtml(it.status || "pending")}</span>
+          </div>
+        `).join("");
+      }
+    }
+
+    affiliateGenerate.addEventListener("click", async () => {
+      affiliateGenerate.disabled = true;
+      affiliateGenerate.textContent = "Generating…";
+      affiliateCtaMsg.hidden = true;
+      try {
+        const { error } = await supabase.rpc("affiliate_create_for_self");
+        if (error) {
+          if ((error.message || "").toLowerCase().includes("not eligible")) {
+            affiliateCtaMsg.textContent = "Only free-copy holders can generate an affiliate link. If this looks wrong, email support.";
+          } else {
+            affiliateCtaMsg.textContent = `Couldn't generate link: ${error.message}`;
+          }
+          affiliateCtaMsg.className = "signin-msg error";
+          affiliateCtaMsg.hidden = false;
+          affiliateGenerate.disabled = false;
+          affiliateGenerate.textContent = "Generate your link";
+          return;
+        }
+        await refreshAffiliateSummary();
+      } catch (err) {
+        console.error("[account] affiliate_create_for_self error:", err);
+        affiliateCtaMsg.textContent = "Network error — try again.";
+        affiliateCtaMsg.className = "signin-msg error";
+        affiliateCtaMsg.hidden = false;
+        affiliateGenerate.disabled = false;
+        affiliateGenerate.textContent = "Generate your link";
+      }
+    });
+
+    affiliateLinkCopy.addEventListener("click", async () => {
+      const url = affiliateLinkCopy.dataset.url || affiliateLink.textContent;
+      try {
+        await navigator.clipboard.writeText(url);
+        affiliateLinkCopy.textContent = "Copied!";
+        affiliateLinkCopy.classList.add("copied");
+        setTimeout(() => {
+          affiliateLinkCopy.textContent = "Copy link";
+          affiliateLinkCopy.classList.remove("copied");
+        }, 1800);
+      } catch {
+        affiliateLinkCopy.textContent = "Press ⌘C / Ctrl+C";
+      }
+    });
+
+    affiliateRefresh.addEventListener("click", async () => {
+      affiliateRefresh.disabled = true;
+      const orig = affiliateRefresh.textContent;
+      affiliateRefresh.textContent = "Refreshing…";
+      try { await refreshAffiliateSummary(); }
+      finally {
+        affiliateRefresh.disabled = false;
+        affiliateRefresh.textContent = orig;
+      }
     });
 
     // ─── Resend license email ──────────────────────────

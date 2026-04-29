@@ -831,6 +831,7 @@
           <button type="button" class="tab-btn active" data-tab="licenses" role="tab">Licenses</button>
           <button type="button" class="tab-btn" data-tab="analytics" role="tab">Analytics</button>
           <button type="button" class="tab-btn" data-tab="releases" role="tab">Releases</button>
+          <button type="button" class="tab-btn" data-tab="affiliates" role="tab">Affiliates</button>
         </div>
 
         <!-- ─── LICENSES TAB ─── -->
@@ -1101,6 +1102,83 @@
               <button type="button" class="btn btn-ghost btn-sm" id="releases-refresh">Refresh</button>
             </div>
             <ul class="releases-list" id="releases-list"><li class="empty-state">Loading…</li></ul>
+          </div>
+        </section>
+
+        <!-- ─── AFFILIATES TAB ─── -->
+        <section class="tab-panel" data-tab-panel="affiliates" role="tabpanel" hidden>
+          <!-- Default commission setting -->
+          <div class="panel glass-border">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Default commission</div>
+                <div class="panel-sub">Applies to every affiliate that doesn't have a custom rate.</div>
+              </div>
+            </div>
+            <form id="aff-default-form" class="form-stack">
+              <div class="form-row" style="align-items:flex-end;gap:14px">
+                <div style="max-width:160px">
+                  <label class="form-label" for="aff-default-pct">Commission (%)</label>
+                  <input class="input" id="aff-default-pct" type="number" min="0" max="100" step="0.01" inputmode="decimal" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="aff-default-submit" style="flex:0 0 auto">Save</button>
+                <span id="aff-default-msg" class="form-hint" style="margin:0"></span>
+              </div>
+            </form>
+          </div>
+
+          <!-- Affiliates list -->
+          <div class="panel glass-border" style="margin-top:24px">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Affiliates</div>
+                <div class="panel-sub">Free-copy holders who've generated a referral link.</div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="aff-refresh">Refresh</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Created</th><th>Email</th><th>Code</th><th>Commission</th>
+                    <th>Clicks</th><th>Sales</th><th>Pending</th><th>Paid</th>
+                    <th>Status</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="aff-tbody">
+                  <tr><td colspan="10" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Referrals / payouts -->
+          <div class="panel glass-border" style="margin-top:24px">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Referrals &amp; payouts</div>
+                <div class="panel-sub">Mark a referral as paid once you've sent the affiliate their commission.</div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="aff-ref-refresh">Refresh</button>
+            </div>
+            <div class="range-bar" id="aff-ref-filters">
+              <button type="button" class="range-chip active" data-aff-filter="pending">Pending</button>
+              <button type="button" class="range-chip" data-aff-filter="paid">Paid</button>
+              <button type="button" class="range-chip" data-aff-filter="all">All</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Date</th><th>Affiliate</th><th>Buyer</th>
+                    <th>Sale</th><th>Commission</th><th>Status</th><th></th>
+                  </tr>
+                </thead>
+                <tbody id="aff-ref-tbody">
+                  <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       </div>
@@ -1544,9 +1622,10 @@
     const tabBtns   = document.querySelectorAll(".tab-btn");
     const tabPanels = document.querySelectorAll("[data-tab-panel]");
     const pageTitle = document.getElementById("page-title");
-    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics", releases: "Plugin releases" };
+    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics", releases: "Plugin releases", affiliates: "Affiliate program" };
     let analyticsLoadedRange = null;
     let releasesLoaded = false;
+    let affiliatesLoaded = false;
 
     function setActiveTab(name) {
       tabBtns.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
@@ -1562,6 +1641,9 @@
       }
       if (name === "releases" && !releasesLoaded) {
         loadReleases();
+      }
+      if (name === "affiliates" && !affiliatesLoaded) {
+        loadAffiliatesTab();
       }
     }
     tabBtns.forEach(b => b.addEventListener("click", () => setActiveTab(b.dataset.tab)));
@@ -1915,6 +1997,223 @@
         releaseSubmit.disabled = false;
         releaseSubmit.textContent = "Publish release";
       }
+    });
+
+    // ─── Affiliates tab ─────────────────────────────────
+    const affDefaultForm   = document.getElementById("aff-default-form");
+    const affDefaultPct    = document.getElementById("aff-default-pct");
+    const affDefaultSubmit = document.getElementById("aff-default-submit");
+    const affDefaultMsg    = document.getElementById("aff-default-msg");
+    const affTbody         = document.getElementById("aff-tbody");
+    const affRefRefresh    = document.getElementById("aff-ref-refresh");
+    const affRefresh       = document.getElementById("aff-refresh");
+    const affRefTbody      = document.getElementById("aff-ref-tbody");
+    const affRefFilters    = document.getElementById("aff-ref-filters");
+    let affRefFilter       = "pending";
+
+    function setAffDefaultMsg(text, type) {
+      affDefaultMsg.textContent = text || "";
+      affDefaultMsg.style.color = type === "error" ? "#ff7676" : type === "success" ? "#71dc29" : "";
+    }
+
+    function fmtMoney(cents, currency) {
+      const n = Number(cents) || 0;
+      const cur = (currency || "usd").toUpperCase();
+      try {
+        return new Intl.NumberFormat(undefined, { style: "currency", currency: cur, maximumFractionDigits: 2 }).format(n / 100);
+      } catch {
+        return `$${(n / 100).toFixed(2)}`;
+      }
+    }
+    function fmtPct(p) {
+      const n = Number(p);
+      if (!isFinite(n)) return "—";
+      return (n % 1 === 0 ? String(n) : n.toFixed(2).replace(/\.?0+$/, "")) + "%";
+    }
+
+    async function loadAffiliatesTab() {
+      affiliatesLoaded = true;
+      await Promise.all([
+        loadDefaultCommission(),
+        loadAffiliatesTable(),
+        loadReferralsTable(),
+      ]);
+    }
+
+    async function loadDefaultCommission() {
+      const { data, error } = await supabase.rpc("admin_get_default_commission_pct");
+      if (error) {
+        setAffDefaultMsg(`Couldn't load default: ${error.message}`, "error");
+        return;
+      }
+      affDefaultPct.value = data == null ? "" : String(data);
+    }
+
+    affDefaultForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pct = Number(affDefaultPct.value);
+      if (!isFinite(pct) || pct < 0 || pct > 100) {
+        setAffDefaultMsg("Enter a number between 0 and 100.", "error");
+        return;
+      }
+      affDefaultSubmit.disabled = true;
+      affDefaultSubmit.textContent = "Saving…";
+      setAffDefaultMsg("");
+      const { error } = await supabase.rpc("admin_set_default_commission_pct", { p_pct: pct });
+      affDefaultSubmit.disabled = false;
+      affDefaultSubmit.textContent = "Save";
+      if (error) {
+        setAffDefaultMsg(`Failed: ${error.message}`, "error");
+        return;
+      }
+      setAffDefaultMsg(`Saved — new default is ${fmtPct(pct)}.`, "success");
+      // Reload affiliates table so effective % updates for fallback rows.
+      loadAffiliatesTable();
+    });
+
+    async function loadAffiliatesTable() {
+      affTbody.innerHTML = '<tr><td colspan="10" class="empty-state">Loading…</td></tr>';
+      const { data, error } = await supabase.rpc("admin_list_affiliates");
+      if (error) {
+        affTbody.innerHTML = `<tr><td colspan="10" class="empty-state">Couldn't load — ${escapeHtml(error.message)}</td></tr>`;
+        return;
+      }
+      const rows = data || [];
+      if (!rows.length) {
+        affTbody.innerHTML = '<tr><td colspan="10" class="empty-state">No affiliates yet.<small>Free-copy holders can opt in from their /account page.</small></td></tr>';
+        return;
+      }
+      affTbody.innerHTML = rows.map(a => `
+        <tr data-aff-id="${a.id}">
+          <td>${escapeHtml(formatDate(a.created_at))}</td>
+          <td class="email">${escapeHtml(a.email || "—")}</td>
+          <td><span class="key">${escapeHtml(a.code)}</span></td>
+          <td>
+            ${fmtPct(a.commission_pct_effective)}
+            ${a.commission_pct_override == null
+              ? '<small style="color:var(--text-dim);display:block">default</small>'
+              : '<small style="color:var(--admin);display:block">override</small>'}
+          </td>
+          <td>${formatNumber(a.clicks_total)}<small style="color:var(--text-dim);display:block">${formatNumber(a.clicks_30d)} in 30d</small></td>
+          <td>${formatNumber(a.sales_total)}</td>
+          <td>${escapeHtml(fmtMoney(a.commission_pending_cents))}</td>
+          <td>${escapeHtml(fmtMoney(a.commission_paid_cents))}</td>
+          <td><span class="badge badge-${a.status === "active" ? "active" : "refunded"}">${escapeHtml(a.status)}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn btn-ghost btn-sm" data-aff-action="commission" data-aff-id="${a.id}">Set %</button>
+            <button class="btn btn-ghost btn-sm" data-aff-action="status" data-aff-id="${a.id}" data-aff-status="${a.status}">${a.status === "active" ? "Pause" : "Activate"}</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    affTbody.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-aff-action]");
+      if (!btn) return;
+      const id     = Number(btn.dataset.affId);
+      const action = btn.dataset.affAction;
+      btn.disabled = true;
+
+      try {
+        if (action === "commission") {
+          const raw = prompt("Override commission % for this affiliate.\nLeave blank to use the default.\nEnter a number 0–100:");
+          if (raw === null) { btn.disabled = false; return; }
+          const trimmed = raw.trim();
+          let pct = null;
+          if (trimmed !== "") {
+            const n = Number(trimmed);
+            if (!isFinite(n) || n < 0 || n > 100) {
+              alert("Must be a number between 0 and 100, or blank.");
+              btn.disabled = false; return;
+            }
+            pct = n;
+          }
+          const { error } = await supabase.rpc("admin_set_affiliate_commission", { p_affiliate_id: id, p_pct: pct });
+          if (error) throw error;
+        } else if (action === "status") {
+          const next = btn.dataset.affStatus === "active" ? "paused" : "active";
+          if (!confirm(`${next === "paused" ? "Pause" : "Activate"} this affiliate?`)) {
+            btn.disabled = false; return;
+          }
+          const { error } = await supabase.rpc("admin_set_affiliate_status", { p_affiliate_id: id, p_status: next });
+          if (error) throw error;
+        }
+        await loadAffiliatesTable();
+      } catch (err) {
+        alert(`Failed: ${err.message || err}`);
+        btn.disabled = false;
+      }
+    });
+
+    affRefresh.addEventListener("click", () => loadAffiliatesTable());
+
+    async function loadReferralsTable() {
+      affRefTbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading…</td></tr>';
+      const args = { p_status: affRefFilter === "all" ? null : affRefFilter, p_affiliate_id: null, p_limit: 200 };
+      const { data, error } = await supabase.rpc("admin_list_referrals", args);
+      if (error) {
+        affRefTbody.innerHTML = `<tr><td colspan="7" class="empty-state">Couldn't load — ${escapeHtml(error.message)}</td></tr>`;
+        return;
+      }
+      const rows = data || [];
+      if (!rows.length) {
+        affRefTbody.innerHTML = `<tr><td colspan="7" class="empty-state">No ${affRefFilter === "all" ? "" : affRefFilter + " "}referrals yet.</td></tr>`;
+        return;
+      }
+      affRefTbody.innerHTML = rows.map(r => `
+        <tr data-ref-id="${r.id}">
+          <td>${escapeHtml(formatDate(r.created_at))}</td>
+          <td>
+            <span class="key">${escapeHtml(r.affiliate_code)}</span>
+            <small style="color:var(--text-dim);display:block">${escapeHtml(r.affiliate_email || "—")}</small>
+          </td>
+          <td class="email">${escapeHtml(r.buyer_email || "—")}</td>
+          <td>${escapeHtml(fmtMoney(r.amount_cents, r.currency))}</td>
+          <td>
+            ${escapeHtml(fmtMoney(r.commission_cents, r.currency))}
+            <small style="color:var(--text-dim);display:block">@ ${fmtPct(r.commission_pct)}</small>
+          </td>
+          <td>
+            <span class="badge badge-${r.status === "paid" ? "active" : r.status === "pending" ? "refunded" : "revoked"}">${escapeHtml(r.status)}</span>
+            ${r.payout_note ? `<small style="color:var(--text-dim);display:block;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(r.payout_note)}">${escapeHtml(r.payout_note)}</small>` : ""}
+          </td>
+          <td>
+            ${r.status === "pending" ? `<button class="btn btn-primary btn-sm" data-ref-action="paid" data-ref-id="${r.id}">Mark paid</button>` : ""}
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    affRefTbody.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-ref-action]");
+      if (!btn) return;
+      const id = Number(btn.dataset.refId);
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      try {
+        const note = prompt("Optional payout note (e.g. 'PayPal $14.99 sent 2026-04-29'):");
+        if (note === null) {
+          btn.disabled = false; btn.textContent = "Mark paid"; return;
+        }
+        const { error } = await supabase.rpc("admin_mark_referral_paid", { p_referral_id: id, p_payout_note: note || null });
+        if (error) throw error;
+        await Promise.all([loadReferralsTable(), loadAffiliatesTable()]);
+      } catch (err) {
+        alert(`Failed: ${err.message || err}`);
+        btn.disabled = false; btn.textContent = "Mark paid";
+      }
+    });
+
+    affRefRefresh.addEventListener("click", () => loadReferralsTable());
+
+    affRefFilters.addEventListener("click", (e) => {
+      const chip = e.target.closest("[data-aff-filter]");
+      if (!chip) return;
+      const next = chip.dataset.affFilter;
+      if (next === affRefFilter) return;
+      affRefFilters.querySelectorAll(".range-chip").forEach(c => c.classList.toggle("active", c === chip));
+      affRefFilter = next;
+      loadReferralsTable();
     });
 
     // ─── Init: react to auth state ──────────────────────
