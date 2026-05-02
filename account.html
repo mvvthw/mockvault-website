@@ -458,6 +458,153 @@
       color: var(--text-dim);
       margin-top: 4px;
     }
+    /* ─── MOCKUP DROPS CARD ─────────────────────────────── */
+    .drops-card {
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .drops-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .drops-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .drops-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .drops-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .drop-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .drop-item {
+      padding: 18px 20px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      position: relative;
+    }
+    .drop-item.is-pinned {
+      border-color: rgba(113,220,41,0.3);
+      background: rgba(113,220,41,0.04);
+    }
+    .drop-item-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .drop-item-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.005em;
+      color: var(--text);
+    }
+    .drop-item-pinned-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid var(--border-accent);
+    }
+    .drop-item-date {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .drop-item-notes {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-top: 6px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .drop-item-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .drop-item-category {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .drop-item-category-name {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .drop-item-category-mockups {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .drop-item-mockup {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12.5px;
+      padding: 4px 11px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .drops-show-more {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 12px 0 0;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .drops-show-more:hover { color: var(--text); }
+    .drops-empty {
+      padding: 18px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      background: rgba(0,0,0,0.2);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+    }
+
     .changelog {
       margin-top: 20px;
       padding-top: 20px;
@@ -813,6 +960,22 @@
           </div>
         </div>
 
+        <!-- ─── MOCKUP DROPS (cloud library updates) ─── -->
+        <div id="drops-card" class="drops-card glass-border" hidden>
+          <div class="drops-head">
+            <div>
+              <div class="drops-title">Cloud library</div>
+              <div class="drops-name">Latest mockup drops</div>
+              <div class="drops-sub">New mockups added to the cloud — they appear in the plugin automatically.</div>
+            </div>
+          </div>
+          <ul id="drops-list" class="drop-list"></ul>
+          <button id="drops-show-more" class="drops-show-more" type="button" hidden>
+            Show more drops
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 2l4 3-4 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(90 5 5)"/></svg>
+          </button>
+        </div>
+
         <!-- ─── AFFILIATE PROGRAM (free-copy holders only) ─── -->
         <div id="affiliate-card" class="affiliate-card glass-border" hidden>
           <div class="affiliate-head">
@@ -949,6 +1112,9 @@
     const changelogWrap   = document.getElementById("changelog-wrap");
     const changelogToggle = document.getElementById("changelog-toggle");
     const changelogBody   = document.getElementById("changelog-body");
+    const dropsCard       = document.getElementById("drops-card");
+    const dropsList       = document.getElementById("drops-list");
+    const dropsShowMore   = document.getElementById("drops-show-more");
     const resendBtn       = document.getElementById("resend-btn");
     const resendStatus    = document.getElementById("resend-status");
 
@@ -1062,6 +1228,7 @@
           licenseStack.innerHTML = "";
           noLicenses.hidden = false;
           downloadCard.hidden = true;
+          dropsCard.hidden = true;
           noLicenses.querySelector("h3").textContent = "No licenses on this account yet";
           noLicenses.querySelector("p").textContent = "If you just paid, give it a few seconds for the receipt to land — then refresh. Otherwise, you may have signed in with the wrong email.";
           return;
@@ -1086,6 +1253,9 @@
 
         // Load latest plugin release for download section
         loadDownload().catch(err => console.error("[account] loadDownload error:", err));
+
+        // Load latest cloud-library mockup drops (announcements posted from admin)
+        loadMockupDrops().catch(err => console.error("[account] loadMockupDrops error:", err));
 
         // Affiliate section — only renders if user holds an active free copy
         loadAffiliateSection(user, licenses).catch(err => console.error("[account] loadAffiliateSection error:", err));
@@ -1129,6 +1299,99 @@
       const open = changelogToggle.classList.toggle("open");
       changelogBody.hidden = !open;
     });
+
+    // ─── Mockup drops (cloud library announcements) ────
+    const DROPS_INITIAL_LIMIT = 3;
+    let allDrops      = [];
+    let dropsExpanded = false;
+
+    function escapeHtmlAcct(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function formatDropDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+      } catch { return ""; }
+    }
+
+    function renderDropsList() {
+      if (!allDrops.length) {
+        dropsList.innerHTML = `<li class="drops-empty">No mockup drops yet — new ones will show up here as they're added to the cloud.</li>`;
+        dropsShowMore.hidden = true;
+        return;
+      }
+      const visible = dropsExpanded ? allDrops : allDrops.slice(0, DROPS_INITIAL_LIMIT);
+      dropsList.innerHTML = visible.map(d => {
+        const items = (d.items && typeof d.items === "object") ? d.items : {};
+        const catEntries = Object.entries(items)
+          .filter(([, arr]) => Array.isArray(arr) && arr.length);
+        const catsHTML = catEntries.length
+          ? `<div class="drop-item-categories">${catEntries.map(([cat, arr]) => `
+              <div class="drop-item-category">
+                <div class="drop-item-category-name">${escapeHtmlAcct(cat)} <span style="color:var(--text-dim);font-weight:500">· ${arr.length}</span></div>
+                <div class="drop-item-category-mockups">${arr.map(name => `<span class="drop-item-mockup">${escapeHtmlAcct(name)}</span>`).join("")}</div>
+              </div>
+            `).join("")}</div>`
+          : "";
+        const titleText = d.title ? escapeHtmlAcct(d.title) : "New mockups added";
+        return `
+          <li class="drop-item${d.is_pinned ? ' is-pinned' : ''}">
+            <div class="drop-item-head">
+              <span class="drop-item-title">${titleText}</span>
+              ${d.is_pinned ? '<span class="drop-item-pinned-badge">Pinned</span>' : ''}
+              <span class="drop-item-date">${escapeHtmlAcct(formatDropDate(d.published_at))}</span>
+            </div>
+            ${d.notes ? `<div class="drop-item-notes">${escapeHtmlAcct(d.notes)}</div>` : ""}
+            ${catsHTML}
+          </li>
+        `;
+      }).join("");
+
+      if (allDrops.length > DROPS_INITIAL_LIMIT) {
+        dropsShowMore.hidden = false;
+        dropsShowMore.firstChild.textContent = dropsExpanded
+          ? "Show fewer drops "
+          : `Show ${allDrops.length - DROPS_INITIAL_LIMIT} more drop${allDrops.length - DROPS_INITIAL_LIMIT === 1 ? "" : "s"} `;
+      } else {
+        dropsShowMore.hidden = true;
+      }
+    }
+
+    dropsShowMore.addEventListener("click", () => {
+      dropsExpanded = !dropsExpanded;
+      renderDropsList();
+    });
+
+    async function loadMockupDrops() {
+      const { data, error } = await supabase
+        .from("mockup_updates")
+        .select("id, title, notes, items, is_pinned, published_at")
+        .order("is_pinned", { ascending: false })
+        .order("published_at", { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error("[account] mockup_updates fetch error:", error);
+        dropsCard.hidden = true;
+        return;
+      }
+
+      allDrops = data || [];
+      if (!allDrops.length) {
+        // Don't show the card at all if there's nothing to announce yet.
+        dropsCard.hidden = true;
+        return;
+      }
+      dropsExpanded = false;
+      renderDropsList();
+      dropsCard.hidden = false;
+    }
 
     // ─── Affiliate program ─────────────────────────────
     const affiliateCard      = document.getElementById("affiliate-card");

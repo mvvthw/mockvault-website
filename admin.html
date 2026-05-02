@@ -606,6 +606,158 @@
     .release-actions { display: flex; gap: 8px; flex-shrink: 0; }
     .release-actions .btn-sm { padding: 7px 14px; font-size: 12px; }
 
+    /* ─── MOCKUP UPDATES ────────────────────────────────── */
+    .mockup-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mockup-category {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .mockup-category-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .mockup-category-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+    .mockup-category-count {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .mockup-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+      min-height: 4px;
+    }
+    .mockup-chips:empty { margin-bottom: 0; }
+    .mockup-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 6px 5px 12px;
+      font-size: 13px;
+      background: var(--admin-dim);
+      border: 1px solid rgba(99,102,241,0.3);
+      color: var(--text);
+      border-radius: 100px;
+    }
+    .mockup-chip-remove {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0;
+      font-size: 16px;
+      line-height: 1;
+      transition: var(--transition);
+    }
+    .mockup-chip-remove:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+    .mockup-chip-input {
+      flex: 1;
+      min-width: 100px;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text);
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      outline: none;
+      transition: var(--transition);
+    }
+    .mockup-chip-input:focus {
+      border-color: rgba(99,102,241,0.5);
+      background: rgba(0,0,0,0.4);
+    }
+
+    .mockup-updates-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .mockup-update-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .mockup-update-row .mockup-update-meta { flex: 1; min-width: 0; }
+    .mockup-update-title-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .mockup-update-pinned-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(99,102,241,0.16);
+      color: #a5a8f5;
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+    .mockup-update-date { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+    .mockup-update-notes {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+    .mockup-update-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .mockup-update-cat-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .mockup-update-cat-chip strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .mockup-update-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .mockup-update-actions .btn-sm { padding: 7px 14px; font-size: 12px; }
+
     /* ─── ANALYTICS ─────────────────────────────────────── */
     .range-bar {
       display: flex;
@@ -831,6 +983,7 @@
           <button type="button" class="tab-btn active" data-tab="licenses" role="tab">Licenses</button>
           <button type="button" class="tab-btn" data-tab="analytics" role="tab">Analytics</button>
           <button type="button" class="tab-btn" data-tab="releases" role="tab">Releases</button>
+          <button type="button" class="tab-btn" data-tab="mockups" role="tab">Mockup Updates</button>
           <button type="button" class="tab-btn" data-tab="affiliates" role="tab">Affiliates</button>
         </div>
 
@@ -1102,6 +1255,58 @@
               <button type="button" class="btn btn-ghost btn-sm" id="releases-refresh">Refresh</button>
             </div>
             <ul class="releases-list" id="releases-list"><li class="empty-state">Loading…</li></ul>
+          </div>
+        </section>
+
+        <!-- ─── MOCKUP UPDATES TAB ─── -->
+        <section class="tab-panel" data-tab-panel="mockups" role="tabpanel" hidden>
+          <div class="panel glass-border">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Post a mockup update</div>
+                <div class="panel-sub">Announce new mockups added to the cloud library. Customers see this on their dashboard.</div>
+              </div>
+            </div>
+
+            <form id="mockup-form" class="form-stack">
+              <div>
+                <label class="form-label" for="mockup-title">Title <span style="color:var(--text-dim);font-weight:400;">(optional)</span></label>
+                <input class="input" id="mockup-title" type="text" placeholder='e.g. "Spring drop" or leave blank for auto title' maxlength="80" autocomplete="off">
+                <div class="form-hint">If empty, customers will see "New mockups added" with the date.</div>
+              </div>
+
+              <div>
+                <label class="form-label" for="mockup-notes">Notes <span style="color:var(--text-dim);font-weight:400;">(optional)</span></label>
+                <textarea class="textarea" id="mockup-notes" rows="3" placeholder="Anything else worth mentioning…" maxlength="500"></textarea>
+              </div>
+
+              <div>
+                <label class="form-label">Mockups added</label>
+                <div class="form-hint" style="margin-bottom:10px">Type a mockup name and press Enter to add it as a chip. Add to as many categories as you want.</div>
+                <div class="mockup-categories" id="mockup-categories"></div>
+              </div>
+
+              <label class="checkbox-row">
+                <input type="checkbox" id="mockup-pinned">
+                Pin this update — keeps it at the top of customer dashboards until a new pinned update replaces it
+              </label>
+
+              <div class="form-row" style="align-items:center; gap:16px">
+                <button type="submit" class="btn btn-primary" id="mockup-submit" style="flex:0 0 auto">Publish update</button>
+                <span id="mockup-msg" class="form-hint" style="margin:0"></span>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel glass-border" style="margin-top:24px">
+            <div class="panel-head">
+              <div>
+                <div class="panel-title">Recent mockup updates</div>
+                <div class="panel-sub">All published drops, newest first.</div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm" id="mockups-refresh">Refresh</button>
+            </div>
+            <ul class="mockup-updates-list" id="mockup-updates-list"><li class="empty-state">Loading…</li></ul>
           </div>
         </section>
 
@@ -1622,9 +1827,10 @@
     const tabBtns   = document.querySelectorAll(".tab-btn");
     const tabPanels = document.querySelectorAll("[data-tab-panel]");
     const pageTitle = document.getElementById("page-title");
-    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics", releases: "Plugin releases", affiliates: "Affiliate program" };
+    const TAB_TITLES = { licenses: "License control", analytics: "Site analytics", releases: "Plugin releases", mockups: "Mockup updates", affiliates: "Affiliate program" };
     let analyticsLoadedRange = null;
     let releasesLoaded = false;
+    let mockupsLoaded = false;
     let affiliatesLoaded = false;
 
     function setActiveTab(name) {
@@ -1641,6 +1847,9 @@
       }
       if (name === "releases" && !releasesLoaded) {
         loadReleases();
+      }
+      if (name === "mockups" && !mockupsLoaded) {
+        loadMockupUpdates();
       }
       if (name === "affiliates" && !affiliatesLoaded) {
         loadAffiliatesTab();
@@ -1998,6 +2207,252 @@
         releaseSubmit.textContent = "Publish release";
       }
     });
+
+    // ─── Mockup Updates ─────────────────────────────────
+    const MOCKUP_CATEGORIES = ["Hoodies", "T-Shirts", "Longsleeves", "Pants", "Shorts"];
+    const mockupCatsContainer = document.getElementById("mockup-categories");
+    const mockupForm          = document.getElementById("mockup-form");
+    const mockupTitle         = document.getElementById("mockup-title");
+    const mockupNotes         = document.getElementById("mockup-notes");
+    const mockupPinned        = document.getElementById("mockup-pinned");
+    const mockupSubmit        = document.getElementById("mockup-submit");
+    const mockupMsg           = document.getElementById("mockup-msg");
+    const mockupUpdatesList   = document.getElementById("mockup-updates-list");
+    document.getElementById("mockups-refresh").addEventListener("click", () => loadMockupUpdates());
+
+    // chipState: { Hoodies: ["Hoodie A", "Hoodie B"], "T-Shirts": [...], ... }
+    const chipState = Object.fromEntries(MOCKUP_CATEGORIES.map(c => [c, []]));
+
+    function renderMockupCategories() {
+      mockupCatsContainer.innerHTML = MOCKUP_CATEGORIES.map(cat => `
+        <div class="mockup-category" data-category="${escapeHtml(cat)}">
+          <div class="mockup-category-head">
+            <span class="mockup-category-name">${escapeHtml(cat)}</span>
+            <span class="mockup-category-count" data-count="${escapeHtml(cat)}">0 added</span>
+          </div>
+          <div class="mockup-chips" data-chips="${escapeHtml(cat)}"></div>
+          <input
+            class="mockup-chip-input"
+            type="text"
+            data-input="${escapeHtml(cat)}"
+            placeholder="Type a mockup name + Enter…"
+            autocomplete="off"
+            maxlength="80"
+          >
+        </div>
+      `).join("");
+      MOCKUP_CATEGORIES.forEach(syncChips);
+    }
+
+    function syncChips(cat) {
+      const chipsEl = mockupCatsContainer.querySelector(`[data-chips="${CSS.escape(cat)}"]`);
+      const countEl = mockupCatsContainer.querySelector(`[data-count="${CSS.escape(cat)}"]`);
+      const items   = chipState[cat] || [];
+      chipsEl.innerHTML = items.map((name, idx) => `
+        <span class="mockup-chip">
+          ${escapeHtml(name)}
+          <button type="button" class="mockup-chip-remove" data-cat="${escapeHtml(cat)}" data-idx="${idx}" aria-label="Remove ${escapeHtml(name)}">×</button>
+        </span>
+      `).join("");
+      countEl.textContent = items.length === 1 ? "1 added" : `${items.length} added`;
+    }
+
+    function addChip(cat, raw) {
+      const name = String(raw || "").trim();
+      if (!name) return;
+      const list = chipState[cat] || (chipState[cat] = []);
+      // Prevent dupes within the same category (case-insensitive).
+      if (list.some(n => n.toLowerCase() === name.toLowerCase())) return;
+      list.push(name);
+      syncChips(cat);
+    }
+
+    function removeChip(cat, idx) {
+      const list = chipState[cat];
+      if (!list) return;
+      list.splice(Number(idx), 1);
+      syncChips(cat);
+    }
+
+    function clearChipState() {
+      MOCKUP_CATEGORIES.forEach(c => { chipState[c] = []; });
+      MOCKUP_CATEGORIES.forEach(syncChips);
+    }
+
+    mockupCatsContainer.addEventListener("keydown", (e) => {
+      const input = e.target.closest("[data-input]");
+      if (!input) return;
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const cat = input.dataset.input;
+        addChip(cat, input.value);
+        input.value = "";
+      } else if (e.key === "Backspace" && input.value === "") {
+        const cat = input.dataset.input;
+        const list = chipState[cat] || [];
+        if (list.length) {
+          list.pop();
+          syncChips(cat);
+        }
+      }
+    });
+
+    mockupCatsContainer.addEventListener("blur", (e) => {
+      // Commit any pending text on blur so it isn't silently lost.
+      const input = e.target.closest("[data-input]");
+      if (!input) return;
+      const cat = input.dataset.input;
+      if (input.value.trim()) {
+        addChip(cat, input.value);
+        input.value = "";
+      }
+    }, true);
+
+    mockupCatsContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest(".mockup-chip-remove");
+      if (!btn) return;
+      removeChip(btn.dataset.cat, btn.dataset.idx);
+    });
+
+    function setMockupMsg(text, type) {
+      mockupMsg.textContent = text || "";
+      mockupMsg.style.color = type === "error" ? "#ff7676" : type === "success" ? "#71dc29" : "";
+    }
+
+    function buildItemsPayload() {
+      const out = {};
+      for (const cat of MOCKUP_CATEGORIES) {
+        const list = chipState[cat] || [];
+        if (list.length) out[cat] = [...list];
+      }
+      return out;
+    }
+
+    function totalChipCount() {
+      return MOCKUP_CATEGORIES.reduce((n, c) => n + (chipState[c]?.length || 0), 0);
+    }
+
+    function summariseItems(items) {
+      if (!items || typeof items !== "object") return [];
+      return Object.entries(items)
+        .filter(([, arr]) => Array.isArray(arr) && arr.length)
+        .map(([cat, arr]) => ({ cat, count: arr.length }));
+    }
+
+    async function loadMockupUpdates() {
+      mockupUpdatesList.innerHTML = '<li class="empty-state">Loading…</li>';
+      const { data, error } = await supabase
+        .from("mockup_updates")
+        .select("id, title, notes, items, is_pinned, published_at")
+        .order("is_pinned", { ascending: false })
+        .order("published_at", { ascending: false });
+      if (error) {
+        mockupUpdatesList.innerHTML = `<li class="empty-state">Couldn't load updates — ${escapeHtml(error.message)}</li>`;
+        return;
+      }
+      mockupsLoaded = true;
+      if (!data || !data.length) {
+        mockupUpdatesList.innerHTML = '<li class="empty-state">No mockup updates yet. Post your first one above.</li>';
+        return;
+      }
+      mockupUpdatesList.innerHTML = data.map(u => {
+        const summary = summariseItems(u.items);
+        const summaryHTML = summary.length
+          ? `<div class="mockup-update-summary">${summary.map(s => `<span class="mockup-update-cat-chip"><strong>${s.count}</strong> ${escapeHtml(s.cat)}</span>`).join("")}</div>`
+          : "";
+        const titleText = u.title ? escapeHtml(u.title) : `New mockups · ${escapeHtml(formatDate(u.published_at))}`;
+        return `
+          <li class="mockup-update-row" data-update-id="${u.id}">
+            <div class="mockup-update-meta">
+              <div class="mockup-update-title-row">
+                ${titleText}
+                ${u.is_pinned ? '<span class="mockup-update-pinned-badge">Pinned</span>' : ''}
+              </div>
+              <div class="mockup-update-date">${escapeHtml(formatDate(u.published_at))}</div>
+              ${u.notes ? `<div class="mockup-update-notes">${escapeHtml(u.notes)}</div>` : ""}
+              ${summaryHTML}
+            </div>
+            <div class="mockup-update-actions">
+              ${u.is_pinned
+                ? `<button type="button" class="btn btn-ghost btn-sm" data-mockup-action="unpin" data-id="${u.id}">Unpin</button>`
+                : `<button type="button" class="btn btn-ghost btn-sm" data-mockup-action="pin" data-id="${u.id}">Pin</button>`}
+              <button type="button" class="btn btn-danger-ghost btn-sm" data-mockup-action="delete" data-id="${u.id}">Delete</button>
+            </div>
+          </li>
+        `;
+      }).join("");
+    }
+
+    mockupUpdatesList.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-mockup-action]");
+      if (!btn) return;
+      const id     = Number(btn.dataset.id);
+      const action = btn.dataset.mockupAction;
+      btn.disabled = true;
+      try {
+        if (action === "pin") {
+          const { error } = await supabase.rpc("admin_pin_mockup_update", { p_id: id });
+          if (error) throw error;
+        } else if (action === "unpin") {
+          const { error } = await supabase.rpc("admin_unpin_mockup_update", { p_id: id });
+          if (error) throw error;
+        } else if (action === "delete") {
+          if (!confirm("Delete this mockup update? This cannot be undone.")) {
+            btn.disabled = false;
+            return;
+          }
+          const { error } = await supabase.rpc("admin_delete_mockup_update", { p_id: id });
+          if (error) throw error;
+        }
+        await loadMockupUpdates();
+      } catch (err) {
+        alert(`Failed: ${err.message || err}`);
+        btn.disabled = false;
+      }
+    });
+
+    mockupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      // Commit any pending input first.
+      mockupCatsContainer.querySelectorAll("[data-input]").forEach(inp => {
+        if (inp.value.trim()) {
+          addChip(inp.dataset.input, inp.value);
+          inp.value = "";
+        }
+      });
+
+      const items = buildItemsPayload();
+      const title = mockupTitle.value.trim();
+      const notes = mockupNotes.value.trim();
+      if (totalChipCount() === 0 && !title) {
+        return setMockupMsg("Add at least one mockup or a title before publishing.", "error");
+      }
+
+      mockupSubmit.disabled = true;
+      mockupSubmit.textContent = "Publishing…";
+      setMockupMsg("Publishing update…");
+
+      try {
+        const { error } = await supabase.rpc("admin_publish_mockup_update", {
+          p_title:  title || null,
+          p_notes:  notes || null,
+          p_items:  items,
+          p_pinned: !!mockupPinned.checked,
+        });
+        if (error) throw error;
+        setMockupMsg("Published.", "success");
+        mockupForm.reset();
+        clearChipState();
+        await loadMockupUpdates();
+      } catch (err) {
+        setMockupMsg(`Failed: ${err.message || err}`, "error");
+      } finally {
+        mockupSubmit.disabled = false;
+        mockupSubmit.textContent = "Publish update";
+      }
+    });
+
+    renderMockupCategories();
 
     // ─── Affiliates tab ─────────────────────────────────
     const affDefaultForm   = document.getElementById("aff-default-form");
