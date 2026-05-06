@@ -2168,33 +2168,27 @@
 
       releaseSubmit.disabled = true;
       releaseSubmit.textContent = "Uploading…";
-      setReleaseMsg("Uploading build to storage…");
-
-      const safeVersion = slugifyVersion(version);
-      const path = `MockVault-v${safeVersion}.ccx`;
+      setReleaseMsg("Uploading build…");
 
       try {
-        const { error: upErr } = await supabase.storage
-          .from(RELEASES_BUCKET)
-          .upload(path, file, {
-            cacheControl: "3600",
-            upsert: true,
-            contentType: "application/octet-stream",
-          });
-        if (upErr) throw upErr;
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) throw new Error("Not signed in");
 
-        const { data: pub } = supabase.storage.from(RELEASES_BUCKET).getPublicUrl(path);
-        const downloadUrl = pub?.publicUrl;
-        if (!downloadUrl) throw new Error("Could not resolve public URL for uploaded file.");
+        const form = new FormData();
+        form.append("file", file);
+        form.append("version", version);
+        form.append("changelog", releaseChangelog.value.trim() || "");
+        form.append("setLatest", releaseLatest.checked ? "true" : "false");
 
-        setReleaseMsg("Publishing release…");
-        const { error: pubErr } = await supabase.rpc("admin_publish_release", {
-          p_version:      version,
-          p_download_url: downloadUrl,
-          p_changelog:    releaseChangelog.value.trim() || null,
-          p_set_latest:   !!releaseLatest.checked,
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-publish-release`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: form,
         });
-        if (pubErr) throw pubErr;
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok || !json.ok) {
+          throw new Error(json.detail || json.error || `HTTP ${res.status}`);
+        }
 
         setReleaseMsg(`Published v${version}.`, "success");
         releaseForm.reset();
