@@ -919,21 +919,24 @@
     $paywallOut.addEventListener("click", signOut);
 
     // ─── Bootstrap on auth state ───────────────────────
-    let bootstrapped = false;
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        if (!bootstrapped) {
-          bootstrapped = true;
-          await bootstrap(session.user);
-        }
+    // CRITICAL: do NOT `await` async work inside onAuthStateChange. The
+    // Supabase SDK holds an internal lock while the callback runs; awaiting
+    // an SDK call (like a query) inside it deadlocks the loader.
+    // We escape to a setTimeout so the SDK can release its lock before
+    // queries run. Same pattern as /account.
+    let lastUserId = null;
+    let bootTimer  = null;
+    supabase.auth.onAuthStateChange((_event, session) => {
+      const userId = session?.user?.id || null;
+      if (userId) {
+        if (userId === lastUserId) return; // skip TOKEN_REFRESHED for same user
+        lastUserId = userId;
+        if (bootTimer) clearTimeout(bootTimer);
+        bootTimer = setTimeout(() => bootstrap(session.user), 0);
       } else {
-        bootstrapped = false;
+        lastUserId = null;
         showState("signedout");
       }
-    });
-    // Initial state — onAuthStateChange may fire late on first load
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) showState("signedout");
     });
 
     async function bootstrap(user) {
@@ -971,6 +974,13 @@
         window.mv && window.mv.track && window.mv.track("library_open", { count: state.mockups.length });
       } catch (e) {
         console.error("[library] bootstrap failed:", e);
+        // Don't leave the user stuck on loading dots — render an error in the
+        // library shell so they can at least retry.
+        showState("library");
+        $grid.innerHTML = "";
+        $empty.hidden = false;
+        $empty.querySelector("h3").textContent = "Couldn't load the library";
+        $empty.querySelector("p").textContent = `${e.message || "unknown error"} — try refreshing the page.`;
         toast("Couldn't load the library. Try refreshing.", true);
       }
     }
