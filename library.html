@@ -439,6 +439,7 @@
       transition: var(--transition);
       aspect-ratio: 1 / 1.05;
       display: flex; flex-direction: column;
+      cursor: pointer;
     }
     .card:hover {
       border-color: var(--border-accent);
@@ -475,12 +476,12 @@
     .card-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
       opacity: 0;
       transition: opacity 0.3s;
       display: flex;
-      align-items: flex-end;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: center;
       padding: 14px;
       gap: 8px;
       pointer-events: none;
@@ -489,21 +490,22 @@
     .card:focus-within .card-overlay { opacity: 1; pointer-events: auto; }
 
     .card-action {
-      min-width: 38px; height: 38px;
-      padding: 0 12px;
+      min-width: 42px; height: 42px;
+      padding: 0 18px;
       border-radius: 100px;
       background: rgba(255,255,255,0.95);
       color: #000;
       border: none;
       display: inline-flex; align-items: center; justify-content: center;
-      gap: 6px;
+      gap: 7px;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
       transition: var(--transition);
       backdrop-filter: blur(8px);
       letter-spacing: 0.02em;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     }
     .card-action:hover { transform: scale(1.05); background: #fff; }
     .card-action:disabled { opacity: 0.5; cursor: wait; }
@@ -516,11 +518,10 @@
     .card-action.is-customize:hover { background: #82e83c; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* On touch / no-hover devices, hide the hover buttons entirely.
+    /* On touch / no-hover devices, hide the hover overlay entirely.
        Tapping the card opens the modal instead. */
     @media (hover: none) {
       .card-overlay { display: none; }
-      .card { cursor: pointer; }
     }
 
     .card-foot {
@@ -1338,9 +1339,6 @@
       $grid.appendChild(frag);
     }
 
-    // Touch-only devices skip the hover overlay and use whole-card tap.
-    const isTouchOnly = window.matchMedia("(hover: none)").matches;
-
     function buildCard(m) {
       const card = document.createElement("div");
       card.className = "card";
@@ -1432,14 +1430,14 @@
         });
       }
 
-      // Mobile/touch: tap card body → open modal (any mockup type).
-      // Skips when the user actually tapped a button (favorite, etc.).
-      if (isTouchOnly) {
-        card.addEventListener("click", (e) => {
-          if (e.target.closest("button")) return;
-          openMockupModal(m);
-        });
-      }
+      // Tap-anywhere on the card body opens the modal. Works on touch
+      // (where the hover overlay is hidden) and on desktop too — clicking
+      // the card image is a natural alternative to the hover button.
+      // We skip when the user actually tapped a button (favorite, action).
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("button")) return;
+        openMockupModal(m);
+      });
 
       return card;
     }
