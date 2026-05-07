@@ -489,20 +489,41 @@
     .card:focus-within .card-overlay { opacity: 1; pointer-events: auto; }
 
     .card-action {
-      width: 38px; height: 38px;
-      border-radius: 50%;
+      min-width: 38px; height: 38px;
+      padding: 0 12px;
+      border-radius: 100px;
       background: rgba(255,255,255,0.95);
       color: #000;
       border: none;
-      display: flex; align-items: center; justify-content: center;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
       transition: var(--transition);
       backdrop-filter: blur(8px);
+      letter-spacing: 0.02em;
     }
-    .card-action:hover { transform: scale(1.08); background: #fff; }
+    .card-action:hover { transform: scale(1.05); background: #fff; }
     .card-action:disabled { opacity: 0.5; cursor: wait; }
     .card-action.is-busy svg { animation: spin 0.7s linear infinite; }
+    .card-action.is-customize {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+    .card-action.is-customize:hover { background: #82e83c; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* On touch / no-hover devices, surface action buttons by default */
+    @media (hover: none) {
+      .card-overlay {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+      }
+    }
 
     .card-foot {
       padding: 12px 14px 14px;
@@ -597,6 +618,153 @@
       font-size: 14px;
       margin-bottom: 20px;
       line-height: 1.5;
+    }
+
+    /* ─── CUSTOMIZE MODAL (color picker) ─────────────────── */
+    .modal {
+      position: fixed; inset: 0;
+      z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-backdrop {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .modal-card {
+      position: relative;
+      width: min(720px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      padding: 0;
+      background: #0d0d0d;
+      border-radius: var(--radius-lg);
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      line-height: 1;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: var(--transition);
+    }
+    .modal-close:hover { color: var(--text); background: var(--surface); }
+    .modal-body { padding: 24px; }
+    .modal-foot {
+      display: flex;
+      gap: 10px;
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .picker-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+    .picker-native {
+      width: 56px; height: 44px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .picker-native::-webkit-color-swatch { border: none; border-radius: 6px; }
+    .picker-native::-moz-color-swatch     { border: none; border-radius: 6px; }
+    .picker-hex {
+      width: 130px;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      text-transform: uppercase;
+      padding: 12px 14px;
+    }
+    .swatch-row {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    .swatch {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: var(--transition);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .swatch:hover { transform: scale(1.1); }
+    .swatch.is-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(113,220,41,0.2), inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .preview-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .preview-row.has-back { grid-template-columns: 1fr 1fr; }
+    .preview {
+      background: #050505;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      align-items: center;
+      min-height: 220px;
+      position: relative;
+    }
+    .preview-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      align-self: flex-start;
+    }
+    .preview-canvas {
+      max-width: 100%;
+      max-height: 280px;
+      width: auto; height: auto;
+      object-fit: contain;
+      transition: opacity 0.2s;
+    }
+    .preview-canvas.is-loading { opacity: 0.3; }
+    .preview-loader {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .preview-canvas.is-loading + .preview-loader { opacity: 1; }
+
+    @media (max-width: 540px) {
+      .preview-row.has-back { grid-template-columns: 1fr; }
+      .modal-foot { padding: 14px 16px; }
+      .modal-body { padding: 18px; }
+      .modal-head { padding: 16px 18px; }
     }
 
     /* ─── TOAST ──────────────────────────────────────────── */
@@ -803,6 +971,58 @@
       </div>
     </div>
   </footer>
+
+  <!-- ─── CUSTOMIZE MODAL (color overlay for colorable mockups) ─── -->
+  <div id="customize-modal" class="modal" hidden>
+    <div class="modal-backdrop" id="customize-backdrop"></div>
+    <div class="modal-card glass-border">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="customize-title">Customize</div>
+        </div>
+        <button class="modal-close" id="customize-close" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="picker-row">
+          <input type="color" id="picker-native" class="picker-native" value="#71dc29">
+          <input type="text" id="picker-hex" class="input picker-hex" value="#71DC29" maxlength="7" autocomplete="off" spellcheck="false">
+          <div class="swatch-row" id="swatch-row">
+            <button class="swatch" type="button" data-hex="#000000" style="background:#000000" aria-label="Black"></button>
+            <button class="swatch" type="button" data-hex="#ffffff" style="background:#ffffff" aria-label="White"></button>
+            <button class="swatch" type="button" data-hex="#ef4444" style="background:#ef4444" aria-label="Red"></button>
+            <button class="swatch" type="button" data-hex="#f59e0b" style="background:#f59e0b" aria-label="Orange"></button>
+            <button class="swatch" type="button" data-hex="#71dc29" style="background:#71dc29" aria-label="Green"></button>
+            <button class="swatch" type="button" data-hex="#3b82f6" style="background:#3b82f6" aria-label="Blue"></button>
+            <button class="swatch" type="button" data-hex="#a855f7" style="background:#a855f7" aria-label="Purple"></button>
+            <button class="swatch" type="button" data-hex="#ec4899" style="background:#ec4899" aria-label="Pink"></button>
+          </div>
+        </div>
+
+        <div class="preview-row" id="preview-row">
+          <div class="preview">
+            <div class="preview-label">Front</div>
+            <canvas id="preview-front" class="preview-canvas is-loading"></canvas>
+            <div class="preview-loader">
+              <div class="loader-dots"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div class="preview" id="preview-back-wrap" hidden>
+            <div class="preview-label">Back</div>
+            <canvas id="preview-back" class="preview-canvas is-loading"></canvas>
+            <div class="preview-loader">
+              <div class="loader-dots"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-ghost btn-sm" id="customize-cancel" type="button">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="customize-dl-front" type="button">Download front</button>
+        <button class="btn btn-primary btn-sm" id="customize-dl-back" type="button" hidden>Download back</button>
+        <button class="btn btn-primary btn-sm" id="customize-dl-both" type="button" hidden>Download both</button>
+      </div>
+    </div>
+  </div>
 
   <div id="toast" class="toast"></div>
 
@@ -1121,12 +1341,54 @@
 
       const side = state.cardSide.get(m.id) || "front";
       const hasBack = !!m.backFile;
+      const isColorable = m.colorType === "colorable";
       const filePath = side === "back" ? m.backFile : m.file;
       const imgUrl = `${CDN_BASE}/${filePath}`;
       const isFav = state.favoriteIds.has(m.id);
-      const colorBadge = m.colorType === "colorable"
+      const colorBadge = isColorable
         ? `<span class="card-color-badge is-colorable" title="Colorable">⬢ Color</span>`
         : "";
+
+      // Overlay buttons depend on mockup type:
+      //  - colorable → single "Customize" CTA (opens color modal that handles download)
+      //  - two-sided → "Front" + "Back" pill buttons
+      //  - single-sided → one icon download button
+      let overlayHtml;
+      if (isColorable) {
+        overlayHtml = `
+          <button class="card-action is-customize js-customize" type="button" title="Customize color">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Customize
+          </button>
+        `;
+      } else if (hasBack) {
+        overlayHtml = `
+          <button class="card-action js-dl" data-side="front" type="button" title="Download front">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2v8m0 0L4 6m4 4l4-4M2.5 13h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Front
+          </button>
+          <button class="card-action js-dl" data-side="back" type="button" title="Download back">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2v8m0 0L4 6m4 4l4-4M2.5 13h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back
+          </button>
+        `;
+      } else {
+        overlayHtml = `
+          <button class="card-action js-dl" data-side="front" type="button" title="Download" aria-label="Download mockup">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2v8m0 0L4 6m4 4l4-4M2.5 13h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Download
+          </button>
+        `;
+      }
 
       card.innerHTML = `
         <button class="card-favorite ${isFav ? "is-on" : ""}" type="button" aria-label="${isFav ? "Remove from saved" : "Save mockup"}" aria-pressed="${isFav}">
@@ -1139,16 +1401,10 @@
           <img class="card-img" src="${escapeAttr(imgUrl)}" alt="${escapeAttr(m.name)}" loading="lazy">
           <div class="card-img-fallback">image unavailable</div>
         </div>
-        <div class="card-overlay">
-          <button class="card-action js-download" type="button" title="Download" aria-label="Download mockup">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M8 2v8m0 0L4 6m4 4l4-4M2.5 13h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
+        <div class="card-overlay">${overlayHtml}</div>
         <div class="card-foot">
           <div class="card-name" title="${escapeAttr(m.name)}">${escapeHtml(m.name)}</div>
-          ${hasBack ? `<button class="card-side-toggle ${side === "back" ? "is-back" : ""}" type="button">${side === "back" ? "Back" : "Front"}</button>` : ""}
+          ${hasBack ? `<button class="card-side-toggle ${side === "back" ? "is-back" : ""}" type="button" title="Toggle preview side">${side === "back" ? "Back" : "Front"}</button>` : ""}
         </div>
       `;
 
@@ -1167,17 +1423,28 @@
           e.stopPropagation();
           const next = side === "back" ? "front" : "back";
           state.cardSide.set(m.id, next);
-          // Replace just this card in place
           const fresh = buildCard(m);
           card.replaceWith(fresh);
         });
       }
 
-      card.querySelector(".js-download").addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const btn = e.currentTarget;
-        downloadMockup(m, side, btn);
+      // Download buttons (non-colorable)
+      card.querySelectorAll(".js-dl").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const dlSide = btn.dataset.side === "back" ? "back" : "front";
+          downloadMockup(m, dlSide, btn);
+        });
       });
+
+      // Customize button (colorable)
+      const customizeBtn = card.querySelector(".js-customize");
+      if (customizeBtn) {
+        customizeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openCustomize(m);
+        });
+      }
 
       return card;
     }
@@ -1231,61 +1498,263 @@
       if (svg) svg.setAttribute("fill", isOn ? "currentColor" : "none");
     }
 
-    // ─── Download (license-gated) ───────────────────────
+    // ─── Download (license-gated, streams through edge function) ────
+    async function getAccessToken() {
+      const { data } = await supabase.auth.getSession();
+      return data?.session?.access_token || null;
+    }
+
+    // Hits library-download which streams the PNG bytes back as the
+    // response body (with Content-Disposition: attachment).
+    async function fetchMockupBlob(mockupId, side) {
+      const token = await getAccessToken();
+      if (!token) throw new Error("session_expired");
+      const r = await fetch(DOWNLOAD_FN_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ mockup_id: mockupId, side }),
+      });
+      if (!r.ok) {
+        let err = `http_${r.status}`;
+        try { err = (await r.json())?.error || err; } catch {}
+        throw new Error(err);
+      }
+      const blob = await r.blob();
+      const cd = r.headers.get("Content-Disposition") || "";
+      const match = cd.match(/filename="?([^"]+)"?/i);
+      const filename = match ? match[1] : `${mockupId}-${side}.png`;
+      return { blob, filename };
+    }
+
     async function downloadMockup(m, side, btn) {
-      const { data: sessionResp } = await supabase.auth.getSession();
-      const accessToken = sessionResp?.session?.access_token;
-      if (!accessToken) { toast("Sign in expired — refresh the page.", true); return; }
-
-      btn.classList.add("is-busy");
-      btn.disabled = true;
-
+      btn?.classList.add("is-busy");
+      if (btn) btn.disabled = true;
       try {
-        const r = await fetch(DOWNLOAD_FN_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({ mockup_id: m.id, side }),
-        });
-        const data = await r.json().catch(() => ({}));
-        if (!r.ok || !data?.ok) {
-          throw new Error(data?.error || `http_${r.status}`);
-        }
-        await triggerDownload(data.url, data.filename);
-        toast(`Downloaded ${data.filename}`);
-        window.mv && window.mv.track && window.mv.track("library_download", {
-          mockup_id: m.id, side,
-        });
+        const { blob, filename } = await fetchMockupBlob(m.id, side);
+        saveBlob(blob, filename);
+        toast(`Downloaded ${filename}`);
+        window.mv && window.mv.track && window.mv.track("library_download", { mockup_id: m.id, side });
       } catch (e) {
         console.error("[library] download failed:", e);
-        if (String(e.message).includes("no_active_license")) {
+        if (e.message === "session_expired") {
+          toast("Sign in expired — refresh the page.", true);
+        } else if (e.message === "no_active_license") {
           toast("Your license is no longer active.", true);
         } else {
           toast("Download failed — try again.", true);
         }
       } finally {
-        btn.classList.remove("is-busy");
-        btn.disabled = false;
+        btn?.classList.remove("is-busy");
+        if (btn) btn.disabled = false;
       }
     }
 
-    async function triggerDownload(url, filename) {
-      // Fetch the file as a blob so the browser saves it directly
-      // instead of navigating to the CDN URL (better UX, no tab flash).
-      const r = await fetch(url, { mode: "cors" });
-      if (!r.ok) throw new Error(`cdn_${r.status}`);
-      const blob = await r.blob();
-      const objUrl = URL.createObjectURL(blob);
+    function saveBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = objUrl;
+      a.href = url;
       a.download = filename || "mockup.png";
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(() => URL.revokeObjectURL(objUrl), 4000);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
     }
+
+    // ─── Customize modal (color overlay for colorable mockups) ──────
+    // Multiply blend matches Photoshop's "Color Overlay" layer style with
+    // multiply mode: white pixels take the picked color, black stays black,
+    // mid-greys preserve the mockup's shading and folds.
+    const $customize        = document.getElementById("customize-modal");
+    const $customizeTitle   = document.getElementById("customize-title");
+    const $customizeBackdrop= document.getElementById("customize-backdrop");
+    const $customizeClose   = document.getElementById("customize-close");
+    const $customizeCancel  = document.getElementById("customize-cancel");
+    const $pickerNative     = document.getElementById("picker-native");
+    const $pickerHex        = document.getElementById("picker-hex");
+    const $previewFront     = document.getElementById("preview-front");
+    const $previewBack      = document.getElementById("preview-back");
+    const $previewBackWrap  = document.getElementById("preview-back-wrap");
+    const $previewRow       = document.getElementById("preview-row");
+    const $dlFrontBtn       = document.getElementById("customize-dl-front");
+    const $dlBackBtn        = document.getElementById("customize-dl-back");
+    const $dlBothBtn        = document.getElementById("customize-dl-both");
+
+    const customize = {
+      mockup: null,
+      frontImg: null,
+      backImg: null,
+      hex: "#71DC29",
+    };
+
+    async function openCustomize(m) {
+      customize.mockup = m;
+      customize.frontImg = null;
+      customize.backImg = null;
+      customize.hex = "#71DC29";
+
+      $customizeTitle.textContent = `Customize — ${m.name}`;
+      $pickerHex.value = customize.hex;
+      $pickerNative.value = customize.hex.toLowerCase();
+      reflectActiveSwatch(customize.hex);
+
+      const hasBack = !!m.backFile;
+      $previewBackWrap.hidden = !hasBack;
+      $dlBackBtn.hidden = !hasBack;
+      $dlBothBtn.hidden = !hasBack;
+      $previewRow.classList.toggle("has-back", hasBack);
+
+      $previewFront.classList.add("is-loading");
+      $previewBack.classList.add("is-loading");
+
+      $customize.hidden = false;
+      document.body.style.overflow = "hidden";
+
+      // Fetch image bytes via edge function so we can read pixels
+      // (CDN doesn't send CORS headers, so we can't use crossorigin=anonymous).
+      try {
+        const [front, back] = await Promise.all([
+          fetchMockupBlob(m.id, "front"),
+          hasBack ? fetchMockupBlob(m.id, "back") : Promise.resolve(null),
+        ]);
+        customize.frontImg = await loadImageFromBlob(front.blob);
+        if (back) customize.backImg = await loadImageFromBlob(back.blob);
+        applyTint();
+        $previewFront.classList.remove("is-loading");
+        $previewBack.classList.remove("is-loading");
+      } catch (e) {
+        console.error("[library] customize load failed:", e);
+        toast("Couldn't load mockup for customizing.", true);
+        closeCustomize();
+      }
+    }
+
+    function closeCustomize() {
+      $customize.hidden = true;
+      document.body.style.overflow = "";
+      // Release Image element URLs (created via URL.createObjectURL inside loadImageFromBlob)
+      releaseImage(customize.frontImg);
+      releaseImage(customize.backImg);
+      customize.frontImg = null;
+      customize.backImg = null;
+    }
+
+    function loadImageFromBlob(blob) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img._objUrl = url;
+        img.onload = () => resolve(img);
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image_load_failed")); };
+        img.src = url;
+      });
+    }
+    function releaseImage(img) {
+      if (img && img._objUrl) { URL.revokeObjectURL(img._objUrl); img._objUrl = null; }
+    }
+
+    function tintCanvas(canvas, img, hex) {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillStyle = hex;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // destination-in masks the result to the original alpha channel,
+      // so transparent pixels stay transparent (instead of filling with hex).
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.drawImage(img, 0, 0);
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    function applyTint() {
+      if (customize.frontImg) tintCanvas($previewFront, customize.frontImg, customize.hex);
+      if (customize.backImg)  tintCanvas($previewBack,  customize.backImg,  customize.hex);
+    }
+
+    function reflectActiveSwatch(hex) {
+      const lower = hex.toLowerCase();
+      document.querySelectorAll(".swatch").forEach(el => {
+        el.classList.toggle("is-active", el.dataset.hex.toLowerCase() === lower);
+      });
+    }
+
+    function setHex(raw, source) {
+      let hex = String(raw || "").trim();
+      if (!hex.startsWith("#")) hex = "#" + hex;
+      if (!/^#[0-9a-f]{6}$/i.test(hex)) return false;
+      customize.hex = hex.toUpperCase();
+      if (source !== "native") $pickerNative.value = hex.toLowerCase();
+      if (source !== "hex")    $pickerHex.value    = customize.hex;
+      reflectActiveSwatch(hex);
+      applyTint();
+      return true;
+    }
+
+    $pickerNative.addEventListener("input", (e) => setHex(e.target.value, "native"));
+    $pickerHex.addEventListener("input", (e) => {
+      const v = e.target.value.toUpperCase();
+      e.target.value = v;
+      setHex(v, "hex");
+    });
+    document.querySelectorAll(".swatch").forEach(el => {
+      el.addEventListener("click", () => setHex(el.dataset.hex, "swatch"));
+    });
+
+    $customizeClose.addEventListener("click", closeCustomize);
+    $customizeCancel.addEventListener("click", closeCustomize);
+    $customizeBackdrop.addEventListener("click", closeCustomize);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$customize.hidden) closeCustomize();
+    });
+
+    async function downloadTinted(side, btn) {
+      const m = customize.mockup;
+      const img = side === "back" ? customize.backImg : customize.frontImg;
+      if (!m || !img) return;
+
+      btn?.classList.add("is-busy");
+      if (btn) btn.disabled = true;
+      try {
+        const canvas = document.createElement("canvas");
+        tintCanvas(canvas, img, customize.hex);
+        const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
+        if (!blob) throw new Error("canvas_export_failed");
+        const baseName = String(m.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+        const colorTag = customize.hex.replace("#", "").toLowerCase();
+        const filename = `${baseName}-${side}-${colorTag}.png`;
+        saveBlob(blob, filename);
+        toast(`Downloaded ${filename}`);
+        window.mv && window.mv.track && window.mv.track("library_download_tinted", {
+          mockup_id: m.id, side, hex: customize.hex,
+        });
+      } catch (e) {
+        console.error("[library] tinted download failed:", e);
+        toast("Download failed — try again.", true);
+      } finally {
+        btn?.classList.remove("is-busy");
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    $dlFrontBtn.addEventListener("click", (e) => downloadTinted("front", e.currentTarget));
+    $dlBackBtn .addEventListener("click", (e) => downloadTinted("back",  e.currentTarget));
+    $dlBothBtn .addEventListener("click", async (e) => {
+      const btn = e.currentTarget;
+      btn.classList.add("is-busy");
+      btn.disabled = true;
+      await downloadTinted("front");
+      // Tiny delay between two downloads so some browsers don't suppress
+      // the second download as "popup-like behavior".
+      await new Promise(r => setTimeout(r, 250));
+      await downloadTinted("back");
+      btn.classList.remove("is-busy");
+      btn.disabled = false;
+    });
 
     // ─── Toast ──────────────────────────────────────────
     let toastTimer = null;
