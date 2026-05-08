@@ -369,6 +369,14 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
       margin-bottom: 28px;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+    .hero-badge-short { display: none; }
+    @media (max-width: 540px) {
+      .hero-badge { font-size: 11px; padding: 6px 12px; letter-spacing: 0.02em; }
+      .hero-badge-full  { display: none; }
+      .hero-badge-short { display: inline; }
     }
 
     .hero-badge-dot {
@@ -2951,7 +2959,8 @@
         <div class="hero-content">
           <div class="hero-badge reveal">
             <span class="hero-badge-dot"></span>
-            Photoshop Plugin + Web Library — Available Now
+            <span class="hero-badge-full">Photoshop Plugin + Web Library — Available Now</span>
+            <span class="hero-badge-short">Plugin + Web Library — Live</span>
           </div>
 
           <h1 class="hero-title reveal reveal-delay-1">
